@@ -56,7 +56,7 @@ function App() {
           </Route>
           
           {/* Default Redirects */}
-          <Route path="/" element={<Navigate to="/menu/4" replace />} />
+          <Route path="/" element={<Navigate to="/admin" replace />} />
           <Route path="*" element={<div className="min-h-screen flex items-center justify-center font-bold text-slate-200 text-6xl">404</div>} />
         </Routes>
       </Router>
