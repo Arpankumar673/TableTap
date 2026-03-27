@@ -58,16 +58,10 @@ const Success = () => {
 
     const whatsappUrl = useMemo(() => {
         if (!order || !recipient) return null;
-        
         const itemsList = order.order_items.map(i => `${i.menu_items?.name || 'Dish'} x${i.quantity}`).join('\n');
-        
         const message = `New Order 🧾\nTable: ${order.tables?.table_number || '??'}\n\n${itemsList}\n\nTotal: ₹${order.total_amount}`;
-        
-        // Strip non-numeric and format for wa.me
         const cleanPhone = recipient.replace(/\D/g, '');
-        // Ensure starting with 91 if it's 10 digit
         const finalPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
-        
         return `https://wa.me/${finalPhone}?text=${encodeURIComponent(message)}`;
     }, [order, recipient]);
 
@@ -115,7 +109,6 @@ const Success = () => {
                             <h3 className="text-3xl md:text-4xl font-black text-[#1C1C1C] tracking-tighter italic">Table #{order?.tables?.table_number || '??'}</h3>
                         </div>
 
-                        {/* WhatsApp Broadcast Button - Exact UX Requirements */}
                         {whatsappUrl && (
                             <a 
                                 href={whatsappUrl}
@@ -132,8 +125,10 @@ const Success = () => {
                         <button onClick={generateInvoice} className="h-16 bg-gray-50 text-[#1C1C1C] rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 transition-all active:scale-[0.98]">
                             <Download className="w-4 h-4" /> GET RECEIPT
                         </button>
-                        <Link to={`/admin/dashboard`} className="h-16 bg-[#1C1C1C] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 transition-all active:scale-[0.98]">
-                            <ShoppingBag className="w-4 h-4" /> BACK TO HQ
+                        
+                        {/* Final Optimized "See Menu" Redirect */}
+                        <Link to={`/menu/${order?.tables?.table_number}`} className="h-16 bg-[#E23744] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-xl shadow-[#E23744]/20">
+                            <ShoppingBag className="w-4 h-4" /> SEE MENU <ChevronRight className="w-4 h-4" />
                         </Link>
                     </div>
                 </div>
