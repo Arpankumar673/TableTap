@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../services/supabaseClient';
 import { 
@@ -8,9 +8,8 @@ import {
   Star, 
   Clock, 
   ChevronRight,
-  Bell,
-  FileText,
-  AlertCircle
+  MessageCircle,
+  ShieldCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
@@ -22,6 +21,7 @@ import Footer from '../components/Footer';
 const Success = () => {
     const { orderId } = useParams();
     const [order, setOrder] = useState(null);
+    const [recipient, setRecipient] = useState(null);
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
     const [loading, setLoading] = useState(true);
@@ -30,6 +30,7 @@ const Success = () => {
 
     useEffect(() => {
         fetchOrder();
+        fetchRecipient();
         const interval = setInterval(fetchOrder, 10000);
         return () => clearInterval(interval);
     }, [orderId]);
@@ -44,6 +45,28 @@ const Success = () => {
         if (data) setOrder(data);
         setLoading(false);
     };
+
+    const fetchRecipient = async () => {
+        const { data } = await supabase
+            .from('sms_recipients')
+            .select('phone_number')
+            .eq('is_active', true)
+            .limit(1)
+            .single();
+        
+        if (data) setRecipient(data.phone_number);
+    };
+
+    const whatsappUrl = useMemo(() => {
+        if (!order || !recipient) return null;
+        
+        const items = order.order_items.map(i => `${i.menu_items?.name || 'Dish'} x${i.quantity}`).join('\n');
+        const message = `*SIDHU PUNJABI - NEW ORDER!*\n\n*Table:* ${order.tables?.table_number || '??'}\n\n*Items:*\n${items}\n\n*Total:* ₹${order.total_amount}\n\n_Sent via TableTap Digital POS_`;
+        
+        // Format recipient: strip any + or non-numeric
+        const cleanPhone = recipient.replace(/\D/g, '');
+        return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    }, [order, recipient]);
 
     const generateInvoice = () => {
         if (!order) return;
@@ -105,34 +128,44 @@ const Success = () => {
 
             {/* Content Flow Hub */}
             <main className="px-4 md:px-10 -mt-32 max-w-4xl mx-auto space-y-6 relative z-20 mb-20">
-                <div className="bg-white rounded-[3rem] p-10 md:p-14 shadow-3xl shadow-[#E23744]/10 border border-gray-100 flex flex-col md:flex-row gap-12 items-center md:items-start transition-all">
+                <div className="bg-white rounded-[4rem] p-10 md:p-14 shadow-3xl shadow-[#E23744]/10 border border-gray-100 flex flex-col gap-10">
                     
                     {/* Primary Info */}
-                    <div className="flex-grow space-y-8 w-full">
-                        <div className="flex justify-between items-center border-b border-gray-50 pb-8">
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest leading-none italic">Allocation Matrix</p>
-                                <h3 className="text-3xl md:text-4xl font-black text-[#1C1C1C] tracking-tighter italic">Table #{order?.tables?.table_number || '??'}</h3>
-                            </div>
-                            <div className="text-right space-y-1">
-                                <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest leading-none italic">Arrival Flux</p>
-                                <h3 className="text-2xl md:text-3xl font-black text-[#E23744] tracking-tighter italic">15-20 Min</h3>
+                    <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-10 border-b border-gray-50 pb-10">
+                        <div className="space-y-4 text-center md:text-left">
+                            <h3 className="text-3xl md:text-5xl font-black text-[#1C1C1C] tracking-tighter italic">Table #{order?.tables?.table_number || '??'}</h3>
+                            <div className="flex items-center gap-2 justify-center md:justify-start">
+                                <Clock className="w-4 h-4 text-[#E23744]" />
+                                <p className="text-sm font-black text-[#E23744] uppercase tracking-widest italic">Arrival in 15-20 Min</p>
                             </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row gap-4">
-                             <button 
-                                onClick={generateInvoice}
-                                disabled={generating}
-                                className="flex-grow h-16 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-4 transition-all shadow-xl shadow-emerald-500/10 active:scale-95 disabled:opacity-50"
+                        {/* WhatsApp Broadcast Button */}
+                        {whatsappUrl && (
+                            <a 
+                                href={whatsappUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full md:w-auto h-20 bg-[#25D366] hover:bg-[#128C7E] text-white px-10 rounded-3xl font-black text-[12px] uppercase tracking-widest flex items-center justify-center gap-4 transition-all shadow-2xl shadow-[#25D366]/20 active:scale-[0.98] animate-pulse"
                             >
-                                {generating ? <Clock className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />} 
-                                {generating ? 'PROCESSING...' : 'DOWNLOAD INVOICE'}
-                            </button>
-                            <Link to={`/menu/table-${order?.tables?.table_number}`} className="flex-grow h-16 bg-[#1C1C1C] hover:bg-[#E23744] text-white rounded-2xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-4 shadow-xl active:scale-[0.98] transition-all">
-                                <ShoppingBag className="w-5 h-5" /> RE-ENTER MENU <ChevronRight className="w-5 h-5" />
-                            </Link>
-                        </div>
+                                <MessageCircle className="w-7 h-7" /> SEND ORDER TO KITCHEN
+                            </a>
+                        )}
+                    </div>
+
+                    {/* Secondary Actions */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <button 
+                            onClick={generateInvoice}
+                            disabled={generating}
+                            className="h-16 bg-gray-50 hover:bg-gray-100 text-[#1C1C1C] rounded-2xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-4 transition-all border-2 border-gray-100 disabled:opacity-50"
+                        >
+                            {generating ? <Clock className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />} 
+                            {generating ? 'PROCESSING...' : 'GET DIGITAL RECEIPT'}
+                        </button>
+                        <Link to={`/menu/table-${order?.tables?.table_number}`} className="h-16 bg-[#1C1C1C] hover:bg-[#E23744] text-white rounded-2xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-4 transition-all shadow-xl active:scale-[0.98]">
+                            <ShoppingBag className="w-5 h-5" /> RE-ENTER MENU <ChevronRight className="w-5 h-5" />
+                        </Link>
                     </div>
                 </div>
 
