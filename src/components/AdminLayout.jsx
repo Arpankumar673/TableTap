@@ -11,7 +11,6 @@ import {
   User,
   Table as TableIcon,
   Settings,
-  Bell,
   PhoneCall
 } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
