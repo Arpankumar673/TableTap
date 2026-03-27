@@ -9,12 +9,18 @@ const DEFAULT_ADMIN = Deno.env.get("ADMIN_PHONE_NUMBER")
 
 serve(async (req) => {
   const requestId = crypto.randomUUID().slice(0, 8)
-  console.log(`[${requestId}] 🚀 Multi-Broadcast Initiated`)
+  console.log(`[${requestId}] 🚀 Broadcast Channel Established`)
 
   try {
     const payload = await req.json()
+    console.log(`[${requestId}] 📦 Entry Received:`, JSON.stringify(payload))
+    
+    // Support all Supabase Trigger formats (record, data, or direct body)
     const record = payload.record || payload.data || payload
-    if (!record?.id) throw new Error("Missing order record")
+    if (!record || !record.id) {
+       console.error(`[${requestId}] ⚠️ Critical: No record ID found in payload. Skipping.`)
+       return new Response(JSON.stringify({ error: "Missing ID" }), { status: 400 })
+    }
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -22,65 +28,82 @@ serve(async (req) => {
       { auth: { persistSession: false, autoRefreshToken: false } }
     )
 
-    // 1. Fetch order details for the message body
+    // 1. Fetch Itemized Order Details
     const { data: order, error: orderErr } = await supabase
       .from("orders")
       .select(`id, total_amount, tables(table_number), order_items(quantity, menu_items(name))`)
       .eq("id", record.id)
       .single()
 
-    if (orderErr) throw new Error(`Database Error: ${orderErr.message}`)
+    if (orderErr) {
+       throw new Error(`Order Lookup Fail: ${orderErr.message}`)
+    }
 
-    // 2. Fetch all ACTIVE dynamic recipients
-    const { data: recipients, error: recipErr } = await supabase
+    // 2. Fetch Active Dynamic Recipients
+    const { data: dbRecipients, error: recipErr } = await supabase
       .from("sms_recipients")
       .select("phone_number")
       .eq("is_active", true)
 
-    // 3. Prepare the notification list
-    const notificationList = new Set<string>()
-    if (DEFAULT_ADMIN) notificationList.add(DEFAULT_ADMIN)
-    recipients?.forEach(r => notificationList.add(r.phone_number))
-
-    if (notificationList.size === 0) {
-      console.warn(`[${requestId}] 🛑 No recipients found. Process terminated.`)
-      return new Response(JSON.stringify({ sent: false, reason: "No Recipients" }), { status: 200 })
+    if (recipErr) {
+       console.warn(`[${requestId}] ⚠️ SMS Table Lookup Issue: ${recipErr.message}. Checking defaults.`)
     }
 
-    // 4. Draft the itemized alert message
-    const items = order.order_items.map((i: any) => `${i.menu_items?.name || 'Dish'} x${i.quantity}`).join(", ")
-    const message = `Sidhu Punjabi Order! Table ${order.tables?.table_number || '??'}: ${items}. Subtotal ₹${order.total_amount}.`
+    // 3. Assemble Authorized Broadcast List
+    const deliveryMatrix = new Set<string>()
+    if (DEFAULT_ADMIN) deliveryMatrix.add(DEFAULT_ADMIN)
+    dbRecipients?.forEach(r => deliveryMatrix.add(r.phone_number))
 
-    console.log(`[${requestId}] 📡 Ready to broadcast to ${notificationList.size} numbers.`)
+    if (deliveryMatrix.size === 0) {
+      console.warn(`[${requestId}] 🛑 Zero Authorized Terminals detected. SMS Broadcast Cancelled.`)
+      return new Response(JSON.stringify({ success: false, reason: "No active numbers found" }), { status: 200 })
+    }
 
-    // 5. Mass Broadcast via Twilio API
-    const authHeader = "Basic " + btoa(`${TWILIO_SID}:${TWILIO_AUTH_TOKEN}`)
+    // 4. Draft Itemized Signal
+    const dishSummary = order.order_items?.map((i: any) => 
+       `${i.menu_items?.name || 'Dish'} x${i.quantity}`
+    ).join(", ") || "No items detected"
+    
+    const message = `Sidhu Punjabi Alert! Order Received from Table ${order.tables?.table_number || '??'}. Items: ${dishSummary}. Total: ₹${order.total_amount}.`
+
+    // 5. Final Gateway Activation
+    if (!TWILIO_SID || !TWILIO_AUTH_TOKEN || !TWILIO_FROM) {
+       console.error(`[${requestId}] 🛑 Gateway Interrupted: Missing Twilio Credentials!`)
+       return new Response(JSON.stringify({ error: "Gateway Missing" }), { status: 500 })
+    }
+
+    console.log(`[${requestId}] 📡 Transmitting Signal to ${deliveryMatrix.size} authorized stations...`)
+
     const endpoint = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_SID}/Messages.json`
+    const gatewayAuth = btoa(`${TWILIO_SID}:${TWILIO_AUTH_TOKEN}`)
 
-    const results = await Promise.all(
-      Array.from(notificationList).map(async (to) => {
+    const transmissions = await Promise.all(
+      Array.from(deliveryMatrix).map(async (to) => {
         try {
           const res = await fetch(endpoint, {
             method: "POST",
-            headers: { "Authorization": authHeader, "Content-Type": "application/x-www-form-urlencoded" },
-            body: new URLSearchParams({ Body: message, From: TWILIO_FROM!, To: to })
+            headers: { 
+               "Authorization": `Basic ${gatewayAuth}`, 
+               "Content-Type": "application/x-www-form-urlencoded" 
+            },
+            body: new URLSearchParams({ Body: message, From: TWILIO_FROM, To: to })
           })
-          const data = await res.json()
-          console.log(`[${requestId}] 🛰️ Result for ${to}: ${res.ok ? 'Success' : 'Failed (' + data.message + ')'}`)
-          return { to, success: res.ok, sid: data.sid, error: data.message }
+          const details = await res.json()
+          console.log(`[${requestId}] 🛰️ Response for ${to}: ${res.ok ? 'Success ✅' : 'Fail ❌ (' + details.message + ')'}`)
+          return { to, success: res.ok, sid: details.sid, error: details.message }
         } catch (e) {
-          console.error(`[${requestId}] ❌ Transmission Error for ${to}:`, e.message)
+          console.error(`[${requestId}] ❌ Hardware Error for ${to}:`, e.message)
           return { to, success: false, error: e.message }
         }
       })
     )
 
-    return new Response(JSON.stringify({ broadcast_count: results.length, signals: results }), { 
+    return new Response(JSON.stringify({ broadcast: true, signals: transmissions }), { 
       status: 200, headers: { "Content-Type": "application/json" }
     })
 
   } catch (err) {
-    console.error(`[${requestId}] 🆘 System Failure:`, err.message)
+    console.error(`[${requestId}] 🆘 Fatal Transmission Failure:`, err.message)
     return new Response(JSON.stringify({ error: err.message }), { status: 500 })
   }
 })
