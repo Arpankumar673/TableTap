@@ -9,14 +9,11 @@ import {
   Clock, 
   ChevronRight,
   MessageSquare,
-  FileText,
-  Printer
+  FileText
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { jsPDF } from 'jspdf';
-
-// Components
 import Footer from '../components/Footer';
 
 const Success = () => {
@@ -73,82 +70,94 @@ const Success = () => {
         try {
             const doc = new jsPDF({ unit: 'mm', format: [80, 180] });
             let y = 10;
-            const margin = 5;
-            const width = 70;
+            const left = 5;
+            const right = 75;
 
-            doc.setFont("courier", "bold");
-            doc.setFontSize(10);
+            // Header Section
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(11);
             doc.text("SIDHU PUNJABI RESTAURANT", 40, y, { align: "center" });
             y += 6;
             
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(8);
+            doc.text("──────────────────────────────", 40, y, { align: "center" });
+            y += 5;
+
+            // Metadata Signal
             doc.setFontSize(7);
-            doc.setFont("courier", "normal");
-            doc.text("------------------------------------------", 40, y, { align: "center" });
-            y += 5;
-
-            doc.text(`Table: #${order.tables?.table_number || '??'}`, margin, y);
-            doc.text(`ID: ${order.id.slice(0, 8).toUpperCase()}`, 40, y);
+            doc.text(`TABLE #: ${order.tables?.table_number || '??'}`, left, y);
+            doc.text(`ID: ${order.id.slice(0, 8).toUpperCase()}`, 45, y);
             y += 4;
-            doc.text(`Date: ${new Date(order.created_at).toLocaleString()}`, margin, y);
+            doc.text(`DATE: ${new Date(order.created_at).toLocaleString()}`, left, y);
             y += 5;
-            doc.text("------------------------------------------", 40, y, { align: "center" });
-            y += 5;
+            doc.text("──────────────────────────────", 40, y, { align: "center" });
+            y += 6;
 
-            // Headers
-            doc.setFont("courier", "bold");
-            doc.text("ITEM", margin, y);
+            // High-Definition Table Headers
+            doc.setFont("helvetica", "bold");
+            doc.text("ITEM DESCRIPTION", left, y);
             doc.text("QTY", 45, y);
-            doc.text("PRICE", 75, y, { align: "right" });
+            doc.text("PRICE", right, y, { align: "right" });
             y += 4;
-            doc.setFont("courier", "normal");
+            doc.setFont("helvetica", "normal");
 
+            // Item Loop with Accurate Formatting
             order.order_items.forEach((item) => {
-                const name = (item.menu_items?.name || 'Dish').toUpperCase().slice(0, 20);
-                doc.text(name, margin, y);
+                const name = (item.menu_items?.name || 'DISH').toUpperCase().slice(0, 22);
+                const price = Number(item.quantity * (item.menu_items?.price || 0)).toFixed(2);
+                
+                doc.text(name, left, y);
                 doc.text(item.quantity.toString(), 45, y);
-                const price = (item.quantity * (item.menu_items?.price || 0)).toFixed(2);
-                doc.text(price, 75, y, { align: "right" });
+                doc.text(price, right, y, { align: "right" });
                 y += 4;
             });
 
             y += 2;
-            doc.text("------------------------------------------", 40, y, { align: "center" });
+            doc.text("──────────────────────────────", 40, y, { align: "center" });
             y += 6;
 
-            // Summary
-            const subtotal = (order.subtotal || order.total_amount).toFixed(2);
+            // Financial Summary Section
+            doc.setFontSize(8);
+            const subtotal = Number(order.subtotal || order.total_amount).toFixed(2);
             doc.text("SUBTOTAL:", 45, y, { align: "right" });
-            doc.text(subtotal, 75, y, { align: "right" });
+            doc.text(subtotal, right, y, { align: "right" });
             y += 4;
 
             if (order.discount_amount > 0) {
                 doc.text("DISCOUNT:", 45, y, { align: "right" });
-                doc.text(`-${parseFloat(order.discount_amount).toFixed(2)}`, 75, y, { align: "right" });
+                doc.text(`-${Number(order.discount_amount).toFixed(2)}`, right, y, { align: "right" });
                 y += 4;
             }
 
             if (order.tax_amount > 0) {
                 doc.text("GST:", 45, y, { align: "right" });
-                doc.text(parseFloat(order.tax_amount).toFixed(2), 75, y, { align: "right" });
+                doc.text(Number(order.tax_amount).toFixed(2), right, y, { align: "right" });
                 y += 4;
             }
 
-            doc.setFont("courier", "bold");
-            doc.setFontSize(9);
-            doc.text("TOTAL (RS):", 45, y, { align: "right" });
-            doc.text(parseFloat(order.total_amount).toFixed(2), 75, y, { align: "right" });
-            y += 10;
+            // High-Impact Final Result
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(10);
+            doc.text("TOTAL BILL (RS):", 45, y, { align: "right" });
+            doc.text(Number(order.total_amount).toFixed(2), right, y, { align: "right" });
+            y += 12;
 
+            // Established Footer
             doc.setFontSize(7);
-            doc.setFont("courier", "normal");
-            doc.text("THANK YOU FOR VISITING ❤️", 40, y, { align: "center" });
+            doc.setFont("helvetica", "normal");
+            doc.text("THANK YOU FOR VISITING SIDHU PUNJABI ❤️", 40, y, { align: "center" });
             y += 4;
-            doc.text("Serving happiness on every plate", 40, y, { align: "center" });
+            doc.text("Serving excellence on every plate.", 40, y, { align: "center" });
 
-            doc.save(`Sidhu_Bill_${order.id.slice(0, 8)}.pdf`);
-            toast.success("Bill ready!");
+            // File Broadcast
+            doc.save(`Sidhu_Punjabi_Bill_HQ_${order.id.slice(0, 8)}.pdf`);
+            toast.success("Professional Bill Downloaded!", {
+                style: { borderRadius: '1rem', background: '#1c1c1c', color: '#fff' }
+            });
         } catch (err) {
-            toast.error("Format error: " + err.message);
+            console.error(err);
+            toast.error("Format Synchronization Fail.");
         } finally {
             setGenerating(false);
         }
@@ -161,7 +170,7 @@ const Success = () => {
     };
 
     if (loading) return (
-        <div className="min-h-screen bg-white flex items-center justify-center p-10 italic">
+        <div className="min-h-screen bg-white flex items-center justify-center italic">
             <Clock className="w-8 h-8 text-[#E23744] animate-spin" />
         </div>
     );
@@ -178,10 +187,9 @@ const Success = () => {
             </div>
 
             <main className="px-4 md:px-10 -mt-32 max-w-4xl mx-auto space-y-8 relative z-20">
-                
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                     
-                    {/* UI Receipt View */}
+                    {/* UI Receipt Matrix */}
                     <div className="bg-white rounded-[2rem] p-8 md:p-12 shadow-3xl shadow-[#E23744]/10 border border-gray-100 flex flex-col gap-8">
                         <div className="flex flex-col items-center text-center space-y-4 border-b-2 border-dashed border-gray-100 pb-8">
                             <FileText className="w-10 h-10 text-gray-200" />
@@ -190,27 +198,27 @@ const Success = () => {
 
                         <div className="space-y-6">
                             <div className="flex justify-between text-[11px] font-black text-gray-300 uppercase tracking-widest border-b border-gray-50 pb-2">
-                                <span>Table Station</span>
+                                <span>Station Table</span>
                                 <span>#{order?.tables?.table_number || '??'}</span>
                             </div>
 
                             <div className="space-y-4">
                                 {order?.order_items?.map((item) => (
                                     <div key={item.id} className="flex justify-between items-start">
-                                        <p className="text-[13px] font-black text-[#1C1C1C] tracking-tighter uppercase italic">{item.menu_items?.name} × {item.quantity}</p>
-                                        <p className="text-[13px] font-black text-[#1C1C1C] italic">₹{(item.quantity * (item.menu_items?.price || 0)).toFixed(2)}</p>
+                                        <p className="text-[13px] font-black text-[#1C1C1C] uppercase italic">{item.menu_items?.name} × {item.quantity}</p>
+                                        <p className="text-[13px] font-black text-[#1C1C1C] italic">₹{Number(item.quantity * (item.menu_items?.price || 0)).toFixed(2)}</p>
                                     </div>
                                 ))}
                             </div>
 
                             <div className="border-t-2 border-dashed border-gray-100 pt-6 space-y-3">
                                 <div className="flex justify-between text-[11px] font-bold text-gray-400 italic">
-                                    <span>SUBTOTAL</span>
-                                    <span>₹{parseFloat(order?.subtotal || order?.total_amount).toFixed(2)}</span>
+                                    <span>SUBTOTAL Matrix</span>
+                                    <span>₹{Number(order?.subtotal || order?.total_amount).toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-2xl font-black text-[#1C1C1C] tracking-tighter pt-2 italic">
                                     <span>TOTAL BILL</span>
-                                    <span className="text-[#E23744]">₹{parseFloat(order?.total_amount).toFixed(2)}</span>
+                                    <span className="text-[#E23744]">₹{Number(order?.total_amount).toFixed(2)}</span>
                                 </div>
                             </div>
                         </div>
@@ -224,7 +232,7 @@ const Success = () => {
                         )}
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <button onClick={generateInvoice} className="h-16 bg-white border-2 border-gray-100 hover:border-[#E23744] text-[#1C1C1C] rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 transition-all active:scale-95">
+                            <button onClick={generateInvoice} className="h-16 bg-white border-2 border-gray-100 hover:border-[#E23744] text-[#1C1C1C] rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 transition-all active:scale-95 shadow-sm">
                                 <Download className="w-5 h-5" /> DOWNLOAD BILL
                             </button>
                             <Link to={`/menu/${order?.tables?.table_number}`} className="h-16 bg-[#1C1C1C] hover:bg-[#E23744] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 transition-all shadow-xl active:scale-[0.98]">
