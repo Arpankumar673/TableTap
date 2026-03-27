@@ -9,7 +9,7 @@ import Cart from './pages/Cart';
 import Success from './pages/Success';
 
 // Admin Pages
-import AdminLogin from './pages/AdminLogin';
+import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminOrders from './pages/AdminOrders';
 import AdminMenu from './pages/AdminMenu';
@@ -34,7 +34,7 @@ function App() {
           
           {/* Admin Auth */}
           <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/login" element={<Login />} />
           
           {/* Protected Admin Routes */}
           <Route element={<ProtectedRoute />}>
@@ -45,7 +45,7 @@ function App() {
               <Route path="/admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
               <Route path="/admin/sms" element={<AdminLayout><AdminSMS /></AdminLayout>} />
               <Route path="/admin/waiter-calls" element={<AdminLayout>
-                  <div className="p-10 text-center font-bold text-slate-300">Waiters management screen coming soon!</div>
+                  <div className="p-10 text-center font-bold text-slate-300 italic">Waiters management screen coming soon!</div>
               </AdminLayout>} />
           </Route>
           
