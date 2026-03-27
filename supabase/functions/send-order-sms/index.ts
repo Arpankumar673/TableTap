@@ -2,25 +2,19 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
-const TWILIO_SID = Deno.env.get("TWILIO_ACCOUNT_SID")
-const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN")
-const TWILIO_FROM = Deno.env.get("TWILIO_PHONE_NUMBER")
-const DEFAULT_ADMIN = Deno.env.get("ADMIN_PHONE_NUMBER")
+const FAST2SMS_API_KEY = Deno.env.get("FAST2SMS_API_KEY")
+const DEFAULT_ADMIN = Deno.env.get("ADMIN_PHONE_NUMBER") // e.g., +919999999999
 
 serve(async (req) => {
   const requestId = crypto.randomUUID().slice(0, 8)
-  console.log(`[${requestId}] 🚀 Broadcast Channel Established`)
+  console.log(`[${requestId}] 🚀 Fast2SMS Broadcast Channel Established`)
 
   try {
     const payload = await req.json()
     console.log(`[${requestId}] 📦 Entry Received:`, JSON.stringify(payload))
     
-    // Support all Supabase Trigger formats (record, data, or direct body)
     const record = payload.record || payload.data || payload
-    if (!record || !record.id) {
-       console.error(`[${requestId}] ⚠️ Critical: No record ID found in payload. Skipping.`)
-       return new Response(JSON.stringify({ error: "Missing ID" }), { status: 400 })
-    }
+    if (!record?.id) throw new Error("Missing order record ID")
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -35,9 +29,7 @@ serve(async (req) => {
       .eq("id", record.id)
       .single()
 
-    if (orderErr) {
-       throw new Error(`Order Lookup Fail: ${orderErr.message}`)
-    }
+    if (orderErr) throw new Error(`Order Lookup Fail: ${orderErr.message}`)
 
     // 2. Fetch Active Dynamic Recipients
     const { data: dbRecipients, error: recipErr } = await supabase
@@ -45,18 +37,19 @@ serve(async (req) => {
       .select("phone_number")
       .eq("is_active", true)
 
-    if (recipErr) {
-       console.warn(`[${requestId}] ⚠️ SMS Table Lookup Issue: ${recipErr.message}. Checking defaults.`)
-    }
+    // 3. Assemble and Format Numbers (Strip +91 or + for Fast2SMS)
+    const rawNumbers = new Set<string>()
+    if (DEFAULT_ADMIN) rawNumbers.add(DEFAULT_ADMIN)
+    dbRecipients?.forEach(r => rawNumbers.add(r.phone_number))
 
-    // 3. Assemble Authorized Broadcast List
-    const deliveryMatrix = new Set<string>()
-    if (DEFAULT_ADMIN) deliveryMatrix.add(DEFAULT_ADMIN)
-    dbRecipients?.forEach(r => deliveryMatrix.add(r.phone_number))
+    const formattedNumbers = Array.from(rawNumbers)
+      .map(num => num.replace(/^\+91/, "").replace(/^\+/, "").trim())
+      .filter(num => num.length === 10) // Only 10-digit Indian numbers
+      .join(",")
 
-    if (deliveryMatrix.size === 0) {
-      console.warn(`[${requestId}] 🛑 Zero Authorized Terminals detected. SMS Broadcast Cancelled.`)
-      return new Response(JSON.stringify({ success: false, reason: "No active numbers found" }), { status: 200 })
+    if (!formattedNumbers) {
+      console.warn(`[${requestId}] 🛑 Zero Authorized Terminals detected. SMS Cancelled.`)
+      return new Response(JSON.stringify({ success: false, reason: "No active 10-digit numbers found" }), { status: 200 })
     }
 
     // 4. Draft Itemized Signal
@@ -66,40 +59,40 @@ serve(async (req) => {
     
     const message = `Sidhu Punjabi Alert! Order Received from Table ${order.tables?.table_number || '??'}. Items: ${dishSummary}. Total: ₹${order.total_amount}.`
 
-    // 5. Final Gateway Activation
-    if (!TWILIO_SID || !TWILIO_AUTH_TOKEN || !TWILIO_FROM) {
-       console.error(`[${requestId}] 🛑 Gateway Interrupted: Missing Twilio Credentials!`)
-       return new Response(JSON.stringify({ error: "Gateway Missing" }), { status: 500 })
+    // 5. Final Gateway Activation (Fast2SMS)
+    if (!FAST2SMS_API_KEY) {
+       console.error(`[${requestId}] 🛑 Gateway Interrupted: Missing FAST2SMS_API_KEY!`)
+       return new Response(JSON.stringify({ error: "API Key Missing" }), { status: 200 })
     }
 
-    console.log(`[${requestId}] 📡 Transmitting Signal to ${deliveryMatrix.size} authorized stations...`)
+    console.log(`[${requestId}] 📡 Transmitting to Fast2SMS: [${formattedNumbers}]`)
 
-    const endpoint = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_SID}/Messages.json`
-    const gatewayAuth = btoa(`${TWILIO_SID}:${TWILIO_AUTH_TOKEN}`)
-
-    const transmissions = await Promise.all(
-      Array.from(deliveryMatrix).map(async (to) => {
-        try {
-          const res = await fetch(endpoint, {
-            method: "POST",
-            headers: { 
-               "Authorization": `Basic ${gatewayAuth}`, 
-               "Content-Type": "application/x-www-form-urlencoded" 
-            },
-            body: new URLSearchParams({ Body: message, From: TWILIO_FROM, To: to })
-          })
-          const details = await res.json()
-          console.log(`[${requestId}] 🛰️ Response for ${to}: ${res.ok ? 'Success ✅' : 'Fail ❌ (' + details.message + ')'}`)
-          return { to, success: res.ok, sid: details.sid, error: details.message }
-        } catch (e) {
-          console.error(`[${requestId}] ❌ Hardware Error for ${to}:`, e.message)
-          return { to, success: false, error: e.message }
-        }
+    const endpoint = "https://www.fast2sms.com/dev/bulkV2"
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { 
+         "authorization": FAST2SMS_API_KEY, 
+         "Content-Type": "application/json" 
+      },
+      body: JSON.stringify({
+        route: "q",
+        message: message,
+        language: "english",
+        flash: 0,
+        numbers: formattedNumbers
       })
-    )
+    })
 
-    return new Response(JSON.stringify({ broadcast: true, signals: transmissions }), { 
-      status: 200, headers: { "Content-Type": "application/json" }
+    const result = await response.json()
+    console.log(`[${requestId}] 🛰️ Fast2SMS Response (${response.status}):`, JSON.stringify(result))
+
+    return new Response(JSON.stringify({ 
+      success: response.ok && result.return === true, 
+      status: response.status,
+      result: result 
+    }), { 
+      status: 200, 
+      headers: { "Content-Type": "application/json" } 
     })
 
   } catch (err) {
