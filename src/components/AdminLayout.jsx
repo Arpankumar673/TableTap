@@ -10,7 +10,9 @@ import {
   X,
   User,
   Table as TableIcon,
-  Settings
+  Settings,
+  Bell,
+  PhoneCall
 } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import { toast } from 'react-hot-toast';
@@ -57,6 +59,8 @@ const AdminLayout = ({ children }) => {
     { label: 'Food Menu', icon: <UtensilsCrossed className="w-5 h-5" />, path: '/admin/menu' },
     { label: 'Tables & QR', icon: <TableIcon className="w-5 h-5" />, path: '/admin/tables' },
     { label: 'Store Settings', icon: <Settings className="w-5 h-5" />, path: '/admin/settings' },
+    { label: 'Notification Hub', icon: <PhoneCall className="w-5 h-5" />, path: '/admin/sms' },
+    { label: 'Exit HQ', icon: <LogOut className="w-5 h-4" />, path: '/', action: handleLogout },
   ];
 
   return (

@@ -17,6 +17,7 @@ import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminOrders from './pages/AdminOrders';
 import AdminSettings from './pages/AdminSettings';
+import AdminSMS from './pages/AdminSMS';
 
 function App() {
   return (
