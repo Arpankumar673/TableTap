@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 33% 98%; /* Warm cream #FCFBF7 */
+    --foreground: 155 35% 10%; /* Deep dark charcoal/forest #111A15 */
+
+    --card: 0 0% 100%;
+    --card-foreground: 155 35% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 155 35% 10%;
+
+    --primary: 151 55% 24%; /* Forest green #1B5E3A */
+    --primary-foreground: 40 33% 98%;
+
+    --secondary: 38 45% 92%; /* Warm sand cream #F4EEDF */
+    --secondary-foreground: 151 55% 20%;
+
+    --muted: 38 25% 94%;
+    --muted-foreground: 150 10% 40%;
+
+    --accent: 38 45% 92%;
+    --accent-foreground: 151 55% 20%;
+
+    --destructive: 6 78% 52%; /* Tomato red #DC3522 */
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 38 20% 88%;
+    --input: 38 20% 88%;
+    --ring: 151 55% 24%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 160 20% 7%; /* Kitchen/dark surface #0E1411 */
+    --foreground: 40 30% 96%;
+
+    --card: 160 16% 11%;
+    --card-foreground: 40 30% 96%;
+
+    --popover: 160 16% 11%;
+    --popover-foreground: 40 30% 96%;
+
+    --primary: 142 70% 45%; /* Vivid emerald #22C55E */
+    --primary-foreground: 160 20% 7%;
+
+    --secondary: 160 14% 18%;
+    --secondary-foreground: 40 30% 96%;
+
+    --muted: 160 14% 18%;
+    --muted-foreground: 160 10% 65%;
+
+    --accent: 160 14% 18%;
+    --accent-foreground: 40 30% 96%;
+
+    --destructive: 6 78% 52%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 160 14% 20%;
+    --input: 160 14% 20%;
+    --ring: 142 70% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-forest-100 selection:text-forest-900;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Dietary Indicator Primitives */
+.badge-veg {
+  @apply inline-flex items-center justify-center w-4 h-4 border-2 border-emerald-600 p-[2px] rounded-sm bg-white;
+}
+.badge-veg::after {
+  content: "";
+  @apply w-2 h-2 rounded-full bg-emerald-600;
+}
+
+.badge-nonveg {
+  @apply inline-flex items-center justify-center w-4 h-4 border-2 border-rose-600 p-[2px] rounded-sm bg-white;
+}
+.badge-nonveg::after {
+  content: "";
+  @apply w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[7px] border-b-rose-600;
+}
+
+/* Subtle glassmorphism */
+.glass-panel {
+  @apply bg-white/80 backdrop-blur-md border border-cream-200/60 shadow-sm;
+}
