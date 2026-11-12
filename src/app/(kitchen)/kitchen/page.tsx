@@ -1,4 +1,4 @@
-import { requireRestaurantRole } from "@/lib/auth/session";
+import { requireStaffRole } from "@/lib/auth/session";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { KitchenBoard, KitchenOrder } from "@/components/kitchen/kitchen-board";
 import { OrderItemStatus, OrderStatus } from "@/types/orders";
@@ -10,14 +10,13 @@ export const metadata = {
 };
 
 export default async function KitchenPage() {
-  const ctx = await requireRestaurantRole(["owner", "admin", "kitchen"]);
+  const ctx = await requireStaffRole(["admin", "kitchen"]);
   const supabase = await createServerSupabaseClient();
 
   const [{ data: stationRows }, { data: orderRows }] = await Promise.all([
     supabase
       .from("preparation_stations")
       .select("id, name, color_hex")
-      .eq("restaurant_id", ctx.restaurant.id)
       .eq("active", true)
       .order("sort_order", { ascending: true }),
     supabase
@@ -32,7 +31,6 @@ export default async function KitchenPage() {
         )
       `
       )
-      .eq("restaurant_id", ctx.restaurant.id)
       .order("created_at", { ascending: true })
       .limit(100),
   ]);
@@ -72,8 +70,7 @@ export default async function KitchenPage() {
 
   return (
     <KitchenBoard
-      restaurantId={ctx.restaurant.id}
-      restaurantName={ctx.restaurant.name}
+      restaurantName={ctx.settings.name}
       userRole={ctx.role}
       stations={stationRows ?? []}
       initialOrders={initialOrders}

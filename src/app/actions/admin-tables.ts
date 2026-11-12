@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireRestaurantRole } from "@/lib/auth/session";
+import { requireStaffRole } from "@/lib/auth/session";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { generateSecureToken, hashToken } from "@/lib/security/tokens";
 import { tableSchema } from "@/lib/validation/table";
@@ -11,7 +11,7 @@ export async function createTableWithQrAction(input: {
   label?: string | null;
   capacity: number;
 }) {
-  const ctx = await requireRestaurantRole(["owner", "admin"]);
+  await requireStaffRole(["admin"]);
   const parsed = tableSchema.safeParse({ ...input, active: true });
   if (!parsed.success) {
     return { error: parsed.error.errors[0]?.message ?? "Invalid table details" };
@@ -19,9 +19,8 @@ export async function createTableWithQrAction(input: {
 
   const supabase = await createServerSupabaseClient();
   const { data: table, error: tableErr } = await supabase
-    .from("restaurant_tables")
+    .from("tables")
     .insert({
-      restaurant_id: ctx.restaurant.id,
       table_number: parsed.data.table_number.trim(),
       label: parsed.data.label?.trim() || null,
       capacity: parsed.data.capacity,
@@ -38,7 +37,6 @@ export async function createTableWithQrAction(input: {
   const tokenHash = hashToken(rawToken);
 
   const { error: qrErr } = await supabase.from("table_qr_tokens").insert({
-    restaurant_id: ctx.restaurant.id,
     table_id: table.id,
     token_hash: tokenHash,
     token_prefix: rawToken.slice(0, 8),
@@ -55,22 +53,19 @@ export async function createTableWithQrAction(input: {
 }
 
 export async function regenerateTableQrAction(tableId: string) {
-  const ctx = await requireRestaurantRole(["owner", "admin"]);
+  await requireStaffRole(["admin"]);
   const supabase = await createServerSupabaseClient();
 
-  // Verify table belongs to tenant
   const { data: table } = await supabase
-    .from("restaurant_tables")
+    .from("tables")
     .select("id")
     .eq("id", tableId)
-    .eq("restaurant_id", ctx.restaurant.id)
     .single();
 
   if (!table) {
-    return { error: "Table not found in your restaurant workspace." };
+    return { error: "Table not found." };
   }
 
-  // Revoke any currently active tokens for this table
   await supabase
     .from("table_qr_tokens")
     .update({ active: false, revoked_at: new Date().toISOString() })
@@ -81,7 +76,6 @@ export async function regenerateTableQrAction(tableId: string) {
   const tokenHash = hashToken(rawToken);
 
   const { error: insertErr } = await supabase.from("table_qr_tokens").insert({
-    restaurant_id: ctx.restaurant.id,
     table_id: tableId,
     token_hash: tokenHash,
     token_prefix: rawToken.slice(0, 8),
@@ -98,14 +92,13 @@ export async function regenerateTableQrAction(tableId: string) {
 }
 
 export async function revokeTableQrAction(tableId: string) {
-  const ctx = await requireRestaurantRole(["owner", "admin"]);
+  await requireStaffRole(["admin"]);
   const supabase = await createServerSupabaseClient();
 
   const { data: table } = await supabase
-    .from("restaurant_tables")
+    .from("tables")
     .select("id")
     .eq("id", tableId)
-    .eq("restaurant_id", ctx.restaurant.id)
     .single();
 
   if (!table) {
@@ -125,14 +118,13 @@ export async function revokeTableQrAction(tableId: string) {
 }
 
 export async function toggleTableActiveAction(tableId: string, active: boolean) {
-  const ctx = await requireRestaurantRole(["owner", "admin"]);
+  await requireStaffRole(["admin"]);
   const supabase = await createServerSupabaseClient();
 
   const { error } = await supabase
-    .from("restaurant_tables")
+    .from("tables")
     .update({ active })
-    .eq("id", tableId)
-    .eq("restaurant_id", ctx.restaurant.id);
+    .eq("id", tableId);
 
   if (error) return { error: error.message };
 
@@ -146,18 +138,17 @@ export async function updateTableDetailsAction(
   label: string | null,
   capacity: number
 ) {
-  const ctx = await requireRestaurantRole(["owner", "admin"]);
+  await requireStaffRole(["admin"]);
   const supabase = await createServerSupabaseClient();
 
   const { error } = await supabase
-    .from("restaurant_tables")
+    .from("tables")
     .update({
       table_number: table_number.trim(),
       label: label?.trim() || null,
       capacity,
     })
-    .eq("id", tableId)
-    .eq("restaurant_id", ctx.restaurant.id);
+    .eq("id", tableId);
 
   if (error) return { error: error.message };
 
@@ -166,7 +157,7 @@ export async function updateTableDetailsAction(
 }
 
 export async function closeTableSessionAction(sessionId: string) {
-  const ctx = await requireRestaurantRole(["owner", "admin"]);
+  await requireStaffRole(["admin"]);
   const supabase = await createServerSupabaseClient();
 
   const { error } = await supabase
@@ -175,8 +166,7 @@ export async function closeTableSessionAction(sessionId: string) {
       status: "closed",
       closed_at: new Date().toISOString(),
     })
-    .eq("id", sessionId)
-    .eq("restaurant_id", ctx.restaurant.id);
+    .eq("id", sessionId);
 
   if (error) return { error: error.message };
 

@@ -15,9 +15,9 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "TableTap — Premium QR Restaurant Ordering & Operations SaaS",
+  title: "TableTap — QR Table Ordering & Restaurant Operations",
   description:
-    "Digitize your dine-in experience. Multi-tenant QR ordering, real-time kitchen routing, and intuitive restaurant management.",
+    "Digitize your dine-in experience with table-specific QR ordering, real-time kitchen ticket routing, and unified restaurant administration.",
   icons: {
     icon: "/favicon.ico",
   },

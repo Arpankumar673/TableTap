@@ -2,11 +2,6 @@ import { z } from "zod";
 
 export const restaurantSettingsSchema = z.object({
   name: z.string().min(2, "Restaurant name must be at least 2 characters").max(150),
-  slug: z
-    .string()
-    .min(3, "Slug must be at least 3 characters")
-    .max(80)
-    .regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
   description: z.string().max(500).optional().nullable(),
   currency: z.string().min(3).max(10).default("INR"),
   timezone: z.string().min(2).max(60).default("Asia/Kolkata"),
@@ -16,7 +11,6 @@ export const restaurantSettingsSchema = z.object({
   email: z.string().email("Invalid email").optional().or(z.literal("")).nullable(),
   address: z.string().max(300).optional().nullable(),
   is_accepting_orders: z.boolean().default(true),
-  active: z.boolean().default(true),
 });
 
 export const stationSchema = z.object({

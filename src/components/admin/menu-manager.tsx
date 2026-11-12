@@ -41,7 +41,6 @@ interface StationRow {
 }
 
 interface MenuManagerProps {
-  restaurantId: string;
   currency: string;
   initialCategories: Category[];
   initialProducts: Product[];
@@ -60,7 +59,6 @@ function slugify(val: string): string {
 }
 
 export function MenuManager({
-  restaurantId,
   currency,
   initialCategories,
   initialProducts,
@@ -120,26 +118,22 @@ export function MenuManager({
         supabase
           .from("categories")
           .select("*")
-          .eq("restaurant_id", restaurantId)
           .order("sort_order", { ascending: true }),
         supabase
           .from("products")
           .select("*")
-          .eq("restaurant_id", restaurantId)
           .order("sort_order", { ascending: true }),
         supabase
           .from("product_variants")
           .select("*")
-          .eq("restaurant_id", restaurantId)
           .order("sort_order", { ascending: true }),
-        supabase.from("option_groups").select("*").eq("restaurant_id", restaurantId),
+        supabase.from("option_groups").select("*"),
         supabase.from("option_values").select("*").order("sort_order", { ascending: true }),
         supabase.from("product_option_groups").select("*"),
       ]);
 
     const mappedOgs: OptionGroup[] = (ogs ?? []).map((g) => ({
       id: g.id,
-      restaurant_id: g.restaurant_id,
       name: g.name,
       description: g.description,
       required: g.required,
@@ -216,7 +210,6 @@ export function MenuManager({
         if (error) throw error;
       } else {
         const { error } = await supabase.from("categories").insert({
-          restaurant_id: restaurantId,
           name: catName.trim(),
           slug: `${slugify(catName)}-${Date.now().toString().slice(-4)}`,
           description: catDesc.trim() || null,
@@ -250,7 +243,7 @@ export function MenuManager({
     try {
       const supabase = createClient();
       const ext = file.name.split(".").pop() || "jpg";
-      const filePath = `${restaurantId}/products/${Date.now()}-${Math.random()
+      const filePath = `products/${Date.now()}-${Math.random()
         .toString(36)
         .slice(2, 8)}.${ext}`;
 
@@ -335,7 +328,6 @@ export function MenuManager({
         const { data: created, error } = await supabase
           .from("products")
           .insert({
-            restaurant_id: restaurantId,
             name: prodName.trim(),
             slug: `${slugify(prodName)}-${Date.now().toString().slice(-4)}`,
             description: prodDesc.trim() || null,
@@ -363,7 +355,6 @@ export function MenuManager({
         if (validVariants.length > 0) {
           await supabase.from("product_variants").insert(
             validVariants.map((v, idx) => ({
-              restaurant_id: restaurantId,
               product_id: productId!,
               name: v.name.trim(),
               price: Math.max(0, Number(v.price) || basePrice),
@@ -429,7 +420,6 @@ export function MenuManager({
       const { data: group, error } = await supabase
         .from("option_groups")
         .insert({
-          restaurant_id: restaurantId,
           name: ogName.trim(),
           required: ogRequired,
           min_select: ogRequired ? Math.max(1, minSel) : minSel,
@@ -445,7 +435,6 @@ export function MenuManager({
       if (validVals.length > 0) {
         await supabase.from("option_values").insert(
           validVals.map((v, idx) => ({
-            restaurant_id: restaurantId,
             option_group_id: group.id,
             name: v.name.trim(),
             price_delta: Math.max(0, Number(v.price_delta) || 0),

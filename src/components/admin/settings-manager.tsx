@@ -27,38 +27,37 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-type RestaurantRow = Database["public"]["Tables"]["restaurants"]["Row"];
+type RestaurantSettingsRow = Database["public"]["Tables"]["restaurant_settings"]["Row"];
 type StationRow = Database["public"]["Tables"]["preparation_stations"]["Row"];
 
 interface SettingsManagerProps {
-  restaurant: RestaurantRow;
+  settings: RestaurantSettingsRow;
   stations: StationRow[];
   userRole: UserRole;
 }
 
 export function SettingsManager({
-  restaurant,
+  settings,
   stations,
   userRole,
 }: SettingsManagerProps) {
   const router = useRouter();
 
-  const [name, setName] = useState(restaurant.name);
-  const [slug, setSlug] = useState(restaurant.slug);
-  const [description, setDescription] = useState(restaurant.description ?? "");
-  const [currency, setCurrency] = useState(restaurant.currency);
-  const [timezone, setTimezone] = useState(restaurant.timezone);
-  const [taxRate, setTaxRate] = useState(String(restaurant.tax_rate));
+  const [name, setName] = useState(settings.name);
+  const [description, setDescription] = useState(settings.description ?? "");
+  const [currency, setCurrency] = useState(settings.currency);
+  const [timezone, setTimezone] = useState(settings.timezone);
+  const [taxRate, setTaxRate] = useState(String(settings.tax_rate));
   const [serviceRate, setServiceRate] = useState(
-    String(restaurant.service_charge_rate)
+    String(settings.service_charge_rate)
   );
-  const [phone, setPhone] = useState(restaurant.phone ?? "");
-  const [email, setEmail] = useState(restaurant.email ?? "");
-  const [address, setAddress] = useState(restaurant.address ?? "");
-  const [logoUrl, setLogoUrl] = useState(restaurant.logo_url ?? "");
-  const [coverUrl, setCoverUrl] = useState(restaurant.cover_image_url ?? "");
+  const [phone, setPhone] = useState(settings.phone ?? "");
+  const [email, setEmail] = useState(settings.email ?? "");
+  const [address, setAddress] = useState(settings.address ?? "");
+  const [logoUrl, setLogoUrl] = useState(settings.logo_url ?? "");
+  const [coverUrl, setCoverUrl] = useState(settings.cover_image_url ?? "");
   const [acceptingOrders, setAcceptingOrders] = useState(
-    restaurant.is_accepting_orders
+    settings.is_accepting_orders
   );
   const [saving, setSaving] = useState(false);
   const [uploadingAsset, setUploadingAsset] = useState<string | null>(null);
@@ -68,7 +67,7 @@ export function SettingsManager({
   const [stationColor, setStationColor] = useState("#1B5E3A");
   const [addingStation, setAddingStation] = useState(false);
 
-  // Kitchen Login Provisioning (Owner only)
+  // Kitchen Login Provisioning (Admin)
   const [kitchenEmail, setKitchenEmail] = useState("");
   const [kitchenPassword, setKitchenPassword] = useState("");
   const [provisioning, setProvisioning] = useState(false);
@@ -85,7 +84,6 @@ export function SettingsManager({
     try {
       const res = await updateRestaurantSettingsAction({
         name,
-        slug,
         description,
         currency,
         timezone,
@@ -121,7 +119,7 @@ export function SettingsManager({
     try {
       const supabase = createClient();
       const ext = file.name.split(".").pop() || "png";
-      const path = `${restaurant.id}/branding/${kind}-${Date.now()}.${ext}`;
+      const path = `branding/${kind}-${Date.now()}.${ext}`;
       const { error: uploadErr } = await supabase.storage
         .from("restaurant-assets")
         .upload(path, file, { upsert: true });
@@ -238,23 +236,13 @@ export function SettingsManager({
               />
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label>Restaurant Name</Label>
-                <Input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Public Menu Slug</Label>
-                <Input
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
-                  required
-                />
-              </div>
+            <div className="space-y-1.5">
+              <Label>Restaurant Name</Label>
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
             </div>
 
             <div className="space-y-1.5">
@@ -434,7 +422,7 @@ export function SettingsManager({
           </CardContent>
         </Card>
 
-        {userRole === "owner" && (
+        {userRole === "admin" && (
           <Card>
             <CardHeader>
               <CardTitle className="font-serif text-xl flex items-center gap-2">

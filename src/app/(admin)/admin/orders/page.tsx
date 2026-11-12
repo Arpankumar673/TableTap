@@ -1,4 +1,4 @@
-import { requireRestaurantRole } from "@/lib/auth/session";
+import { requireStaffRole } from "@/lib/auth/session";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { AdminOrderRow, OrdersManager } from "@/components/admin/orders-manager";
 
@@ -9,7 +9,7 @@ export const metadata = {
 };
 
 export default async function AdminOrdersPage() {
-  const ctx = await requireRestaurantRole(["owner", "admin"]);
+  const ctx = await requireStaffRole(["admin"]);
   const supabase = await createServerSupabaseClient();
 
   const { data } = await supabase
@@ -25,7 +25,6 @@ export default async function AdminOrdersPage() {
       order_status_events ( from_status, to_status, reason, created_at )
     `
     )
-    .eq("restaurant_id", ctx.restaurant.id)
     .order("created_at", { ascending: false })
     .limit(150);
 
@@ -65,7 +64,7 @@ export default async function AdminOrdersPage() {
 
   return (
     <OrdersManager
-      currency={ctx.restaurant.currency || "INR"}
+      currency={ctx.settings.currency || "INR"}
       initialOrders={orders}
     />
   );

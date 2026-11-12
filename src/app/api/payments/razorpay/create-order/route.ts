@@ -99,14 +99,8 @@ export async function POST(request: NextRequest) {
     const serverEnv = getSupabaseServerEnv();
     if (serverEnv.hasServiceRole) {
       const admin = createAdminClient();
-      const { data: existingOrder } = await admin
-        .from("orders")
-        .select("restaurant_id")
-        .eq("id", order.id)
-        .single();
 
       await admin.from("payments").insert({
-        restaurant_id: existingOrder?.restaurant_id ?? null,
         order_id: order.id,
         amount: order.total,
         currency: order.currency || "INR",

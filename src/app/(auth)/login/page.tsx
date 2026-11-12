@@ -49,17 +49,21 @@ export default function LoginPage() {
         return;
       }
 
-      // Check role membership to route seamlessly to Admin or Kitchen
-      const { data: memberships } = await supabase
-        .from("restaurant_memberships")
-        .select("role")
-        .eq("user_id", data.user.id)
-        .eq("active", true)
-        .limit(1);
+      // Check role in profiles to route seamlessly to Admin or Kitchen
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role, active")
+        .eq("id", data.user.id)
+        .maybeSingle();
 
-      if (!memberships || memberships.length === 0) {
-        router.push("/onboarding");
-      } else if (memberships[0].role === "kitchen") {
+      if (!profile || !profile.active) {
+        await supabase.auth.signOut();
+        setError("This account does not have active staff access.");
+        setLoading(false);
+        return;
+      }
+
+      if (profile.role === "kitchen") {
         router.push("/kitchen");
       } else {
         router.push("/admin");
@@ -110,7 +114,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="owner@restaurant.com"
+                placeholder="admin@restaurant.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -155,12 +159,12 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 border-t border-cream-200 pt-5 text-center text-sm text-forest-800/80">
-            New restaurant partner?{" "}
+            Looking to dine with us?{" "}
             <Link
-              href="/register"
+              href="/menu"
               className="font-semibold text-forest-800 hover:text-forest-950 underline underline-offset-4"
             >
-              Register your restaurant
+              Browse Digital Menu
             </Link>
           </div>
         </CardContent>

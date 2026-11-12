@@ -87,8 +87,8 @@ export function CustomerMenuView({
     categories[0]?.id ?? ""
   );
 
-  // Cart State (persisted per restaurant + table session in localStorage)
-  const storageKey = `tabletap_cart_${restaurant.id}_${tableContext?.tableId ?? "browse"}`;
+  // Cart State (persisted per table session in localStorage)
+  const storageKey = `tabletap_cart_${tableContext?.tableId ?? "browse"}`;
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [customerNotes, setCustomerNotes] = useState("");

@@ -40,7 +40,7 @@ export default function SetupRequiredPage() {
                 <li>Log into your Supabase Dashboard and open your project.</li>
                 <li>In the left sidebar, click <strong>SQL Editor</strong> and create a <strong>New query</strong>.</li>
                 <li>
-                  Open the file <code className="rounded bg-cream-200 px-1.5 py-0.5 font-mono text-xs">supabase/SQL_SETUP_COMPLETE.sql</code> from your workspace.
+                  Open the file <code className="rounded bg-cream-200 px-1.5 py-0.5 font-mono text-xs">SINGLE_RESTAURANT_MIGRATION.sql</code> from your workspace root.
                 </li>
                 <li>Copy the entire SQL script, paste it into the Supabase SQL Editor, and click <strong>Run</strong>.</li>
               </ol>

@@ -1,4 +1,4 @@
-import { requireRestaurantRole } from "@/lib/auth/session";
+import { requireStaffRole } from "@/lib/auth/session";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { SettingsManager } from "@/components/admin/settings-manager";
 
@@ -9,18 +9,17 @@ export const metadata = {
 };
 
 export default async function AdminSettingsPage() {
-  const ctx = await requireRestaurantRole(["owner", "admin"]);
+  const ctx = await requireStaffRole(["admin"]);
   const supabase = await createServerSupabaseClient();
 
   const { data: stationRows } = await supabase
     .from("preparation_stations")
     .select("*")
-    .eq("restaurant_id", ctx.restaurant.id)
     .order("sort_order", { ascending: true });
 
   return (
     <SettingsManager
-      restaurant={ctx.restaurant}
+      settings={ctx.settings}
       stations={stationRows ?? []}
       userRole={ctx.role}
     />

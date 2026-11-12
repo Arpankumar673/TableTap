@@ -56,7 +56,6 @@ export interface KitchenOrder {
 }
 
 interface KitchenBoardProps {
-  restaurantId: string;
   restaurantName: string;
   userRole: UserRole;
   stations: Array<{ id: string; name: string; color_hex: string }>;
@@ -92,7 +91,6 @@ function playNotificationChime() {
 }
 
 export function KitchenBoard({
-  restaurantId,
   restaurantName,
   userRole,
   stations,
@@ -133,7 +131,6 @@ export function KitchenBoard({
         )
       `
       )
-      .eq("restaurant_id", restaurantId)
       .order("created_at", { ascending: true })
       .limit(100);
 
@@ -172,36 +169,35 @@ export function KitchenBoard({
       })),
     }));
 
-    // Trigger notification sound if any new pending order appeared
-    let hasNewPending = false;
+    // Trigger notification sound if any new order appeared
+    let hasNewOrder = false;
     for (const ord of formatted) {
       if (!knownOrderIdsRef.current.has(ord.id)) {
         knownOrderIdsRef.current.add(ord.id);
-        if (ord.status === "pending") {
-          hasNewPending = true;
+        if (ord.status === "new") {
+          hasNewOrder = true;
         }
       }
     }
-    if (hasNewPending && !muted) {
+    if (hasNewOrder && !muted) {
       playNotificationChime();
     }
 
     setOrders(formatted);
-  }, [restaurantId, muted]);
+  }, [muted]);
 
   // Supabase Realtime Subscription + Reconnect Recovery + Fallback Polling
   useEffect(() => {
     const supabase = createClient();
 
     const channel = supabase
-      .channel(`kitchen-orders-${restaurantId}`)
+      .channel("kitchen-orders-stream")
       .on(
         "postgres_changes",
         {
           event: "*",
           schema: "public",
           table: "orders",
-          filter: `restaurant_id=eq.${restaurantId}`,
         },
         () => {
           fetchLatestOrders();
@@ -213,7 +209,6 @@ export function KitchenBoard({
           event: "UPDATE",
           schema: "public",
           table: "order_items",
-          filter: `restaurant_id=eq.${restaurantId}`,
         },
         () => {
           fetchLatestOrders();
@@ -239,7 +234,7 @@ export function KitchenBoard({
       supabase.removeChannel(channel);
       clearInterval(fallbackPoll);
     };
-  }, [restaurantId, fetchLatestOrders]);
+  }, [fetchLatestOrders]);
 
   async function handleOrderStatusChange(
     orderId: string,
@@ -295,10 +290,10 @@ export function KitchenBoard({
     let delayed = 0;
 
     for (const o of orders) {
-      if (o.status === "pending") pending++;
+      if (o.status === "new") pending++;
       if (o.status === "accepted" || o.status === "preparing") preparing++;
       if (o.status === "ready") ready++;
-      if (o.status === "served" || o.status === "completed") completed++;
+      if (o.status === "completed") completed++;
       if (getOrderUrgency(o.status, o.created_at, nowMs) === "delayed") {
         delayed++;
       }
@@ -309,17 +304,17 @@ export function KitchenBoard({
   const visibleOrders = useMemo(() => {
     return orders.filter((order) => {
       if (statusFilter === "active") {
-        if (!["pending", "accepted", "preparing", "ready"].includes(order.status)) {
+        if (!["new", "accepted", "preparing", "ready"].includes(order.status)) {
           return false;
         }
       } else if (statusFilter === "pending") {
-        if (order.status !== "pending") return false;
+        if (order.status !== "new") return false;
       } else if (statusFilter === "preparing") {
         if (!["accepted", "preparing"].includes(order.status)) return false;
       } else if (statusFilter === "ready") {
         if (order.status !== "ready") return false;
       } else if (statusFilter === "completed") {
-        if (!["served", "completed", "cancelled"].includes(order.status)) {
+        if (!["completed", "cancelled"].includes(order.status)) {
           return false;
         }
       }
@@ -411,7 +406,7 @@ export function KitchenBoard({
               <span>Sync</span>
             </button>
 
-            {(userRole === "owner" || userRole === "admin") && (
+            {userRole === "admin" && (
               <Link
                 href="/admin"
                 className="inline-flex items-center gap-1.5 rounded-lg border border-kitchen-border bg-kitchen-card px-3 py-2 text-xs font-semibold text-zinc-200 hover:bg-zinc-800"
@@ -538,7 +533,7 @@ export function KitchenBoard({
                       ? "border-rose-500 shadow-rose-950/30"
                       : urgency === "warning"
                       ? "border-amber-500/80"
-                      : order.status === "pending"
+                      : order.status === "new"
                       ? "border-emerald-500"
                       : "border-kitchen-border"
                   )}
@@ -550,7 +545,7 @@ export function KitchenBoard({
                         "flex items-center justify-between border-b px-4 py-3",
                         urgency === "delayed"
                           ? "border-rose-500/40 bg-rose-950/50"
-                          : order.status === "pending"
+                          : order.status === "new"
                           ? "border-emerald-500/40 bg-emerald-950/40"
                           : "border-kitchen-border bg-black/20"
                       )}
@@ -674,7 +669,7 @@ export function KitchenBoard({
                         }
                         className={cn(
                           "flex-1 h-12 text-sm font-extrabold",
-                          order.status === "pending"
+                          order.status === "new"
                             ? "bg-emerald-600 hover:bg-emerald-500 text-white"
                             : order.status === "preparing"
                             ? "bg-amber-500 hover:bg-amber-400 text-black"
@@ -686,7 +681,7 @@ export function KitchenBoard({
                       </Button>
                     )}
 
-                    {(order.status === "pending" ||
+                    {(order.status === "new" ||
                       order.status === "accepted") && (
                       <Button
                         variant="destructive"

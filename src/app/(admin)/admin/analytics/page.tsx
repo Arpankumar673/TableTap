@@ -1,4 +1,4 @@
-import { requireRestaurantRole } from "@/lib/auth/session";
+import { requireStaffRole } from "@/lib/auth/session";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { AnalyticsOrderData, AnalyticsView } from "@/components/admin/analytics-view";
 
@@ -9,9 +9,8 @@ export const metadata = {
 };
 
 export default async function AdminAnalyticsPage() {
-  const ctx = await requireRestaurantRole(["owner", "admin"]);
+  const ctx = await requireStaffRole(["admin"]);
   const supabase = await createServerSupabaseClient();
-  const restaurantId = ctx.restaurant.id;
 
   const [{ data: ordersData }, { data: productsData }, { data: categoriesData }, { count: tableCount }] =
     await Promise.all([
@@ -24,21 +23,17 @@ export default async function AdminAnalyticsPage() {
           order_items ( product_id, product_name_snapshot, quantity, total_price_snapshot, status )
         `
         )
-        .eq("restaurant_id", restaurantId)
         .order("created_at", { ascending: false })
         .limit(500),
       supabase
         .from("products")
-        .select("id, category_id")
-        .eq("restaurant_id", restaurantId),
+        .select("id, category_id"),
       supabase
         .from("categories")
-        .select("id, name")
-        .eq("restaurant_id", restaurantId),
+        .select("id, name"),
       supabase
-        .from("restaurant_tables")
+        .from("tables")
         .select("id", { count: "exact", head: true })
-        .eq("restaurant_id", restaurantId)
         .eq("active", true),
     ]);
 
@@ -84,8 +79,8 @@ export default async function AdminAnalyticsPage() {
 
   return (
     <AnalyticsView
-      restaurantName={ctx.restaurant.name}
-      currency={ctx.restaurant.currency || "INR"}
+      restaurantName={ctx.settings.name}
+      currency={ctx.settings.currency || "INR"}
       totalTables={tableCount ?? 0}
       orders={orders}
     />

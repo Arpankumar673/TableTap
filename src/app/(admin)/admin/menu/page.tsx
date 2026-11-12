@@ -1,4 +1,4 @@
-import { requireRestaurantRole } from "@/lib/auth/session";
+import { requireStaffRole } from "@/lib/auth/session";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { MenuManager } from "@/components/admin/menu-manager";
 import { Category, OptionGroup, OptionValue, Product, ProductVariant } from "@/types/menu";
@@ -10,9 +10,8 @@ export const metadata = {
 };
 
 export default async function AdminMenuPage() {
-  const ctx = await requireRestaurantRole(["owner", "admin"]);
+  const ctx = await requireStaffRole(["admin"]);
   const supabase = await createServerSupabaseClient();
-  const restaurantId = ctx.restaurant.id;
 
   const [
     { data: catRows },
@@ -26,22 +25,16 @@ export default async function AdminMenuPage() {
     supabase
       .from("categories")
       .select("*")
-      .eq("restaurant_id", restaurantId)
       .order("sort_order", { ascending: true }),
     supabase
       .from("products")
       .select("*")
-      .eq("restaurant_id", restaurantId)
       .order("sort_order", { ascending: true }),
     supabase
       .from("product_variants")
       .select("*")
-      .eq("restaurant_id", restaurantId)
       .order("sort_order", { ascending: true }),
-    supabase
-      .from("option_groups")
-      .select("*")
-      .eq("restaurant_id", restaurantId),
+    supabase.from("option_groups").select("*"),
     supabase
       .from("option_values")
       .select("*")
@@ -50,14 +43,12 @@ export default async function AdminMenuPage() {
     supabase
       .from("preparation_stations")
       .select("id, name")
-      .eq("restaurant_id", restaurantId)
       .eq("active", true)
       .order("sort_order", { ascending: true }),
   ]);
 
   const optionGroups: OptionGroup[] = (ogRows ?? []).map((g) => ({
     id: g.id,
-    restaurant_id: g.restaurant_id,
     name: g.name,
     description: g.description,
     required: g.required,
@@ -83,8 +74,7 @@ export default async function AdminMenuPage() {
 
   return (
     <MenuManager
-      restaurantId={restaurantId}
-      currency={ctx.restaurant.currency || "INR"}
+      currency={ctx.settings.currency || "INR"}
       initialCategories={(catRows ?? []) as Category[]}
       initialProducts={products}
       initialOptionGroups={optionGroups}

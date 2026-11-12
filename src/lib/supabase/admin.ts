@@ -8,7 +8,7 @@ import { getSupabaseServerEnv } from "./env";
  * CRITICAL SECURITY NOTICE:
  * - This client BYPASSES Row Level Security (RLS).
  * - NEVER import or call this function from client-side components.
- * - Restrict use strictly to background webhooks, tenant provisioning, or trusted server actions.
+ * - Restrict use strictly to background webhooks, account provisioning, or trusted server actions.
  */
 export function createAdminClient() {
   const env = getSupabaseServerEnv();

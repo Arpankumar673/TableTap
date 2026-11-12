@@ -4,32 +4,46 @@ import { getSupabasePublicEnv } from "@/lib/supabase/env";
 import { UserRole } from "@/types/roles";
 import { Database } from "@/types/database";
 
-type RestaurantRow = Database["public"]["Tables"]["restaurants"]["Row"];
+type RestaurantSettingsRow = Database["public"]["Tables"]["restaurant_settings"]["Row"];
 
-export interface AuthenticatedRestaurantContext {
+export interface AuthenticatedStaffContext {
   user: {
     id: string;
     email: string;
     fullName: string | null;
   };
   role: UserRole;
-  restaurant: RestaurantRow;
-  allRestaurants: Array<{
-    restaurant: RestaurantRow;
-    role: UserRole;
-  }>;
+  settings: RestaurantSettingsRow;
 }
 
+const FALLBACK_SETTINGS: RestaurantSettingsRow = {
+  id: "singleton",
+  singleton_key: true,
+  name: "TableTap Kitchen & Bistro",
+  description: "Artisan dine-in ordering powered by TableTap",
+  logo_url: null,
+  cover_image_url: null,
+  currency: "INR",
+  timezone: "Asia/Kolkata",
+  tax_rate: 5,
+  service_charge_rate: 0,
+  phone: null,
+  email: null,
+  address: null,
+  opening_hours: {},
+  is_accepting_orders: true,
+  settings: {},
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+};
+
 /**
- * Fetches the authenticated user's active restaurant workspace and role.
- * Returns null if unauthenticated, unconfigured, or user has no memberships.
+ * Fetches the authenticated staff profile (admin or kitchen) and singleton restaurant settings.
  */
-export async function getOptionalMemberContext(
-  preferredRestaurantId?: string
-): Promise<{
+export async function getOptionalStaffContext(): Promise<{
   isConfigured: boolean;
   user: { id: string; email: string; fullName: string | null } | null;
-  context: AuthenticatedRestaurantContext | null;
+  context: AuthenticatedStaffContext | null;
 }> {
   const { isConfigured } = getSupabasePublicEnv();
   if (!isConfigured) {
@@ -46,72 +60,52 @@ export async function getOptionalMemberContext(
     return { isConfigured: true, user: null, context: null };
   }
 
-  const { data: profileData } = await supabase
-    .from("profiles")
-    .select("full_name")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  const fullName =
-    (profileData as { full_name?: string | null } | null)?.full_name ??
-    (user.user_metadata?.full_name as string | undefined) ??
-    null;
+  const [{ data: profileData }, { data: settingsData }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("full_name, role, active")
+      .eq("id", user.id)
+      .maybeSingle(),
+    supabase.from("restaurant_settings").select("*").limit(1).maybeSingle(),
+  ]);
 
   const userSummary = {
     id: user.id,
     email: user.email ?? "",
-    fullName,
+    fullName:
+      profileData?.full_name ??
+      (user.user_metadata?.full_name as string | undefined) ??
+      null,
   };
 
-  const { data: memberships, error: memberError } = await supabase
-    .from("restaurant_memberships")
-    .select("role, active, restaurants(*)")
-    .eq("user_id", user.id)
-    .eq("active", true);
-
-  if (memberError || !memberships || memberships.length === 0) {
+  if (!profileData || !profileData.active) {
     return { isConfigured: true, user: userSummary, context: null };
   }
 
-  const validMemberships = memberships
-    .map((m) => {
-      const rest = m.restaurants as unknown as RestaurantRow | null;
-      if (!rest) return null;
-      return {
-        role: m.role as UserRole,
-        restaurant: rest,
-      };
-    })
-    .filter((item): item is { role: UserRole; restaurant: RestaurantRow } => item !== null);
-
-  if (validMemberships.length === 0) {
+  const role = profileData.role as UserRole;
+  if (role !== "admin" && role !== "kitchen") {
     return { isConfigured: true, user: userSummary, context: null };
   }
-
-  const selected =
-    (preferredRestaurantId
-      ? validMemberships.find((m) => m.restaurant.id === preferredRestaurantId)
-      : undefined) ?? validMemberships[0];
 
   return {
     isConfigured: true,
     user: userSummary,
     context: {
       user: userSummary,
-      role: selected.role,
-      restaurant: selected.restaurant,
-      allRestaurants: validMemberships,
+      role,
+      settings: (settingsData as RestaurantSettingsRow | null) ?? FALLBACK_SETTINGS,
     },
   };
 }
 
 /**
- * Enforces authentication and role-based access for Server Components & Pages.
+ * Enforces authentication and role-based authorization ('admin' or 'kitchen')
+ * for Server Components, Layouts, and Server Actions.
  */
-export async function requireRestaurantRole(
+export async function requireStaffRole(
   allowedRoles: UserRole[]
-): Promise<AuthenticatedRestaurantContext> {
-  const { isConfigured, user, context } = await getOptionalMemberContext();
+): Promise<AuthenticatedStaffContext> {
+  const { isConfigured, user, context } = await getOptionalStaffContext();
 
   if (!isConfigured) {
     redirect("/setup-required");
@@ -122,7 +116,7 @@ export async function requireRestaurantRole(
   }
 
   if (!context) {
-    redirect("/onboarding");
+    redirect("/login?error=unauthorized");
   }
 
   if (!allowedRoles.includes(context.role)) {

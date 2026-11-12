@@ -100,22 +100,16 @@ export default function LandingPage() {
           {/* Action Buttons */}
           <div className="flex items-center gap-2.5">
             <Link
-              href="/demo"
+              href="/menu"
               className="hidden sm:inline-flex items-center justify-center rounded-lg border border-cream-300 bg-white px-3.5 py-2 text-xs font-semibold text-forest-900 hover:bg-cream-100 transition-colors"
             >
-              Customer Menu Preview
+              Live Menu
             </Link>
             <Link
               href="/login"
-              className="inline-flex items-center justify-center rounded-lg border border-cream-300 bg-white px-3.5 py-2 text-xs font-semibold text-forest-900 hover:bg-cream-100 transition-colors"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/register"
               className="inline-flex items-center justify-center rounded-lg bg-forest-800 px-4 py-2 text-xs sm:text-sm font-medium text-cream-50 shadow-sm transition-all hover:bg-forest-900 active:scale-[0.98]"
             >
-              <span>Launch Restaurant</span>
+              <span>Staff Sign In</span>
               <ArrowRight className="ml-1.5 h-4 w-4" />
             </Link>
           </div>
@@ -133,7 +127,7 @@ export default function LandingPage() {
             <div className="mx-auto max-w-3xl text-center">
               <div className="inline-flex items-center gap-2 rounded-full border border-forest-700/20 bg-forest-50/80 px-4 py-1.5 text-xs font-semibold text-forest-800 backdrop-blur-sm">
                 <Sparkles className="h-3.5 w-3.5 text-forest-700" />
-                <span>Multi-Tenant Restaurant Operating System</span>
+                <span>QR Dine-In Restaurant Operating System</span>
               </div>
 
               <h1 className="mt-6 font-serif text-4xl font-extrabold tracking-tight text-forest-950 sm:text-5xl lg:text-6xl">
@@ -160,11 +154,11 @@ export default function LandingPage() {
                   </Link>
                 </Button>
                 <Link
-                  href="/register"
+                  href="/admin"
                   className="inline-flex h-11 items-center justify-center rounded-lg border border-cream-300 bg-white/80 px-8 text-base font-medium text-forest-900 shadow-sm backdrop-blur-sm hover:bg-cream-100 transition-colors"
                 >
                   <LayoutDashboard className="mr-2 h-5 w-5 text-forest-700" />
-                  <span>Create Restaurant Workspace</span>
+                  <span>Open Admin Dashboard</span>
                 </Link>
               </div>
 
@@ -180,7 +174,7 @@ export default function LandingPage() {
                 </div>
                 <div className="flex flex-col items-center">
                   <span className="font-serif text-2xl font-bold text-forest-900">100%</span>
-                  <span className="text-xs text-forest-700/80">Multi-Tenant Isolation</span>
+                  <span className="text-xs text-forest-700/80">QR Token Verified</span>
                 </div>
                 <div className="flex flex-col items-center">
                   <span className="font-serif text-2xl font-bold text-forest-900">35%</span>
@@ -596,7 +590,7 @@ export default function LandingPage() {
                             The Truffle Bistro • Admin Overview
                           </div>
                           <div className="text-xs text-forest-700/70">
-                            Logged in as Restaurant Owner (Tenant ID: TT-8821)
+                            Logged in as Restaurant Administrator
                           </div>
                         </div>
                         <Badge variant="default" className="text-xs">
@@ -689,9 +683,9 @@ export default function LandingPage() {
                 Built for Scalability, Security, & High Concurrency
               </h2>
               <p className="mt-4 text-base text-forest-800/80">
-                TableTap is designed from day one as a true multi-tenant SaaS.
-                Data isolation, transactional safety, and uncompromised client security
-                are enforced at the database level.
+                TableTap is architected specifically for seamless single-restaurant operations.
+                Transactional safety, cryptographic QR table binding, and server-side pricing
+                are enforced directly inside PostgreSQL.
               </p>
             </div>
 
@@ -702,11 +696,11 @@ export default function LandingPage() {
                     <ShieldCheck className="h-5 w-5" />
                   </div>
                   <h3 className="mt-4 font-serif text-lg font-bold text-forest-950">
-                    PostgreSQL RLS Isolation
+                    Role &amp; QR Security (RLS)
                   </h3>
                   <p className="mt-2 text-xs leading-relaxed text-forest-800/80">
-                    Zero cross-tenant leakage. Strict Row Level Security policies ensure
-                    that Restaurant A can never access or modify Restaurant B&apos;s data.
+                    Strict PostgreSQL Row Level Security separates Admin, Kitchen, and
+                    anonymous Guest QR access—no unauthenticated reads on private tables or orders.
                   </p>
                 </CardContent>
               </Card>
@@ -766,13 +760,13 @@ export default function LandingPage() {
               <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
                 <div>
                   <Badge variant="veg" className="text-xs font-semibold">
-                    Full Multi-Tenant Platform Ready
+                    Single-Restaurant Platform Ready
                   </Badge>
                   <h2 className="mt-3 font-serif text-3xl font-bold text-forest-950">
-                    Launch Your Restaurant in Minutes
+                    Launch Your Digital Menu in Minutes
                   </h2>
                   <p className="mt-3 max-w-2xl text-sm leading-relaxed text-forest-800/80">
-                    TableTap ships with isolated customer menus, customizable variants and add-ons,
+                    TableTap ships with an editorial customer menu, customizable variants and add-ons,
                     cryptographic table QR codes with ZIP export, real-time Kitchen Display System,
                     Razorpay checkout integration, and live business analytics.
                   </p>
@@ -780,7 +774,7 @@ export default function LandingPage() {
                   <div className="mt-6 flex flex-wrap gap-4 text-xs font-medium text-forest-900">
                     <span className="flex items-center gap-1.5">
                       <FileText className="h-4 w-4 text-forest-700" />
-                      <span>18-Table Multi-Tenant PostgreSQL Schema</span>
+                      <span>Clean Single-Restaurant PostgreSQL Schema</span>
                     </span>
                     <span className="flex items-center gap-1.5">
                       <ShieldCheck className="h-4 w-4 text-forest-700" />

@@ -33,11 +33,10 @@ export const orderSubmissionSchema = z.object({
 export const orderStatusUpdateSchema = z.object({
   orderId: z.string().uuid("Invalid order ID"),
   newStatus: z.enum([
-    "pending",
+    "new",
     "accepted",
     "preparing",
     "ready",
-    "served",
     "completed",
     "cancelled",
   ]),

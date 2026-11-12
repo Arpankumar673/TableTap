@@ -1,6 +1,6 @@
 /**
- * TableTap Database Schema TypeScript Definitions
- * Aligned strictly with supabase/SQL_SETUP_COMPLETE.sql and @supabase/postgrest-js GenericSchema
+ * TableTap Database Schema TypeScript Definitions (Single-Restaurant Architecture)
+ * Aligned strictly with SINGLE_RESTAURANT_MIGRATION.sql and @supabase/postgrest-js GenericSchema
  */
 
 export type Json =
@@ -14,11 +14,11 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      restaurants: {
+      restaurant_settings: {
         Row: {
           id: string;
+          singleton_key: boolean;
           name: string;
-          slug: string;
           description: string | null;
           logo_url: string | null;
           cover_image_url: string | null;
@@ -31,15 +31,14 @@ export interface Database {
           address: string | null;
           opening_hours: Json;
           is_accepting_orders: boolean;
-          active: boolean;
           settings: Json;
           created_at: string;
           updated_at: string;
         };
         Insert: {
           id?: string;
-          name: string;
-          slug: string;
+          singleton_key?: boolean;
+          name?: string;
           description?: string | null;
           logo_url?: string | null;
           cover_image_url?: string | null;
@@ -52,14 +51,12 @@ export interface Database {
           address?: string | null;
           opening_hours?: Json;
           is_accepting_orders?: boolean;
-          active?: boolean;
           settings?: Json;
           created_at?: string;
           updated_at?: string;
         };
         Update: {
           name?: string;
-          slug?: string;
           description?: string | null;
           logo_url?: string | null;
           cover_image_url?: string | null;
@@ -72,7 +69,6 @@ export interface Database {
           address?: string | null;
           opening_hours?: Json;
           is_accepting_orders?: boolean;
-          active?: boolean;
           settings?: Json;
           updated_at?: string;
         };
@@ -84,6 +80,8 @@ export interface Database {
           email: string;
           full_name: string | null;
           avatar_url: string | null;
+          role: "admin" | "kitchen";
+          active: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -92,6 +90,8 @@ export interface Database {
           email: string;
           full_name?: string | null;
           avatar_url?: string | null;
+          role?: "admin" | "kitchen";
+          active?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -99,138 +99,15 @@ export interface Database {
           email?: string;
           full_name?: string | null;
           avatar_url?: string | null;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
-      restaurant_memberships: {
-        Row: {
-          id: string;
-          restaurant_id: string;
-          user_id: string;
-          role: "owner" | "admin" | "kitchen";
-          active: boolean;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          restaurant_id: string;
-          user_id: string;
-          role?: "owner" | "admin" | "kitchen";
-          active?: boolean;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          role?: "owner" | "admin" | "kitchen";
+          role?: "admin" | "kitchen";
           active?: boolean;
           updated_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "restaurant_memberships_restaurant_id_fkey";
-            columns: ["restaurant_id"];
-            isOneToOne: false;
-            referencedRelation: "restaurants";
-            referencedColumns: ["id"];
-          }
-        ];
-      };
-      restaurant_tables: {
-        Row: {
-          id: string;
-          restaurant_id: string;
-          table_number: string;
-          label: string | null;
-          capacity: number;
-          active: boolean;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          restaurant_id: string;
-          table_number: string;
-          label?: string | null;
-          capacity?: number;
-          active?: boolean;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          table_number?: string;
-          label?: string | null;
-          capacity?: number;
-          active?: boolean;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
-      table_qr_tokens: {
-        Row: {
-          id: string;
-          restaurant_id: string | null;
-          table_id: string;
-          token_hash: string;
-          token_prefix: string | null;
-          qr_token_secret: string | null;
-          active: boolean;
-          created_at: string;
-          revoked_at: string | null;
-        };
-        Insert: {
-          id?: string;
-          restaurant_id?: string | null;
-          table_id: string;
-          token_hash: string;
-          token_prefix?: string | null;
-          qr_token_secret?: string | null;
-          active?: boolean;
-          created_at?: string;
-          revoked_at?: string | null;
-        };
-        Update: {
-          active?: boolean;
-          revoked_at?: string | null;
-        };
-        Relationships: [];
-      };
-      table_sessions: {
-        Row: {
-          id: string;
-          restaurant_id: string;
-          table_id: string;
-          session_token: string;
-          status: "open" | "closed";
-          bill_requested: boolean;
-          bill_requested_at: string | null;
-          opened_at: string;
-          closed_at: string | null;
-        };
-        Insert: {
-          id?: string;
-          restaurant_id: string;
-          table_id: string;
-          session_token: string;
-          status?: "open" | "closed";
-          bill_requested?: boolean;
-          bill_requested_at?: string | null;
-          opened_at?: string;
-          closed_at?: string | null;
-        };
-        Update: {
-          status?: "open" | "closed";
-          bill_requested?: boolean;
-          bill_requested_at?: string | null;
-          closed_at?: string | null;
         };
         Relationships: [];
       };
       categories: {
         Row: {
           id: string;
-          restaurant_id: string;
           name: string;
           slug: string;
           description: string | null;
@@ -242,7 +119,6 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          restaurant_id: string;
           name: string;
           slug: string;
           description?: string | null;
@@ -266,7 +142,6 @@ export interface Database {
       preparation_stations: {
         Row: {
           id: string;
-          restaurant_id: string;
           name: string;
           description: string | null;
           color_hex: string;
@@ -276,7 +151,6 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          restaurant_id: string;
           name: string;
           description?: string | null;
           color_hex?: string;
@@ -296,7 +170,6 @@ export interface Database {
       products: {
         Row: {
           id: string;
-          restaurant_id: string;
           category_id: string;
           station_id: string | null;
           name: string;
@@ -317,7 +190,6 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          restaurant_id: string;
           category_id: string;
           station_id?: string | null;
           name: string;
@@ -359,7 +231,6 @@ export interface Database {
       product_variants: {
         Row: {
           id: string;
-          restaurant_id: string;
           product_id: string;
           name: string;
           sku: string | null;
@@ -373,7 +244,6 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          restaurant_id: string;
           product_id: string;
           name: string;
           sku?: string | null;
@@ -400,7 +270,6 @@ export interface Database {
       option_groups: {
         Row: {
           id: string;
-          restaurant_id: string;
           name: string;
           description: string | null;
           required: boolean;
@@ -412,7 +281,6 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          restaurant_id: string;
           name: string;
           description?: string | null;
           required?: boolean;
@@ -436,7 +304,6 @@ export interface Database {
       option_values: {
         Row: {
           id: string;
-          restaurant_id: string | null;
           option_group_id: string;
           name: string;
           price_delta: number;
@@ -447,7 +314,6 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          restaurant_id?: string | null;
           option_group_id: string;
           name: string;
           price_delta?: number;
@@ -481,16 +347,99 @@ export interface Database {
         };
         Relationships: [];
       };
+      tables: {
+        Row: {
+          id: string;
+          table_number: string;
+          label: string | null;
+          capacity: number;
+          active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          table_number: string;
+          label?: string | null;
+          capacity?: number;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          table_number?: string;
+          label?: string | null;
+          capacity?: number;
+          active?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      table_qr_tokens: {
+        Row: {
+          id: string;
+          table_id: string;
+          token_hash: string;
+          token_prefix: string | null;
+          qr_token_secret: string | null;
+          active: boolean;
+          created_at: string;
+          revoked_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          table_id: string;
+          token_hash: string;
+          token_prefix?: string | null;
+          qr_token_secret?: string | null;
+          active?: boolean;
+          created_at?: string;
+          revoked_at?: string | null;
+        };
+        Update: {
+          active?: boolean;
+          revoked_at?: string | null;
+        };
+        Relationships: [];
+      };
+      table_sessions: {
+        Row: {
+          id: string;
+          table_id: string;
+          session_token: string;
+          status: "open" | "closed";
+          bill_requested: boolean;
+          bill_requested_at: string | null;
+          opened_at: string;
+          closed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          table_id: string;
+          session_token: string;
+          status?: "open" | "closed";
+          bill_requested?: boolean;
+          bill_requested_at?: string | null;
+          opened_at?: string;
+          closed_at?: string | null;
+        };
+        Update: {
+          status?: "open" | "closed";
+          bill_requested?: boolean;
+          bill_requested_at?: string | null;
+          closed_at?: string | null;
+        };
+        Relationships: [];
+      };
       orders: {
         Row: {
           id: string;
-          restaurant_id: string;
           table_session_id: string;
           table_id: string | null;
           table_number_snapshot: string | null;
           order_number: string;
           public_token: string;
-          status: "pending" | "accepted" | "preparing" | "ready" | "served" | "completed" | "cancelled";
+          status: "new" | "accepted" | "preparing" | "ready" | "completed" | "cancelled";
           subtotal: number;
           discount: number;
           tax: number;
@@ -502,7 +451,6 @@ export interface Database {
           accepted_at: string | null;
           preparing_at: string | null;
           ready_at: string | null;
-          served_at: string | null;
           completed_at: string | null;
           cancelled_at: string | null;
           cancellation_reason: string | null;
@@ -511,13 +459,12 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          restaurant_id: string;
           table_session_id: string;
           table_id?: string | null;
           table_number_snapshot?: string | null;
           order_number: string;
           public_token?: string;
-          status?: "pending" | "accepted" | "preparing" | "ready" | "served" | "completed" | "cancelled";
+          status?: "new" | "accepted" | "preparing" | "ready" | "completed" | "cancelled";
           subtotal: number;
           discount?: number;
           tax?: number;
@@ -530,13 +477,13 @@ export interface Database {
           updated_at?: string;
         };
         Update: {
-          status?: "pending" | "accepted" | "preparing" | "ready" | "served" | "completed" | "cancelled";
-          subtotal?: number;
-          discount?: number;
-          tax?: number;
-          service_charge?: number;
-          total?: number;
+          status?: "new" | "accepted" | "preparing" | "ready" | "completed" | "cancelled";
           payment_status?: "unpaid" | "pending" | "paid" | "failed" | "refunded" | "partially_refunded";
+          accepted_at?: string | null;
+          preparing_at?: string | null;
+          ready_at?: string | null;
+          completed_at?: string | null;
+          cancelled_at?: string | null;
           cancellation_reason?: string | null;
           updated_at?: string;
         };
@@ -553,7 +500,6 @@ export interface Database {
       order_items: {
         Row: {
           id: string;
-          restaurant_id: string | null;
           order_id: string;
           product_id: string | null;
           variant_id: string | null;
@@ -571,7 +517,6 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          restaurant_id?: string | null;
           order_id: string;
           product_id?: string | null;
           variant_id?: string | null;
@@ -632,7 +577,6 @@ export interface Database {
       order_status_events: {
         Row: {
           id: string;
-          restaurant_id: string | null;
           order_id: string;
           from_status: string | null;
           to_status: string;
@@ -642,7 +586,6 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          restaurant_id?: string | null;
           order_id: string;
           from_status?: string | null;
           to_status: string;
@@ -666,7 +609,6 @@ export interface Database {
       payments: {
         Row: {
           id: string;
-          restaurant_id: string | null;
           order_id: string;
           amount: number;
           currency: string;
@@ -681,7 +623,6 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          restaurant_id?: string | null;
           order_id: string;
           amount: number;
           currency?: string;
@@ -709,16 +650,17 @@ export interface Database {
       [_ in never]: never;
     };
     Functions: {
-      onboard_restaurant: {
-        Args: {
-          p_name: string;
-          p_slug: string;
-          p_currency?: string;
-          p_timezone?: string;
-          p_phone?: string | null;
-          p_address?: string | null;
-        };
-        Returns: Json;
+      get_current_user_role: {
+        Args: Record<string, never>;
+        Returns: "admin" | "kitchen" | null;
+      };
+      is_admin: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      is_staff: {
+        Args: Record<string, never>;
+        Returns: boolean;
       };
       resolve_table_qr: {
         Args: { p_token_hash: string };
@@ -752,7 +694,7 @@ export interface Database {
       update_order_status_secure: {
         Args: {
           p_order_id: string;
-          p_new_status: "pending" | "accepted" | "preparing" | "ready" | "served" | "completed" | "cancelled";
+          p_new_status: "new" | "accepted" | "preparing" | "ready" | "completed" | "cancelled";
           p_reason?: string | null;
         };
         Returns: Json;
@@ -766,9 +708,9 @@ export interface Database {
       };
     };
     Enums: {
-      user_role: "owner" | "admin" | "kitchen";
+      user_role: "admin" | "kitchen";
       dietary_type: "veg" | "non-veg" | "vegan" | "egg";
-      order_status: "pending" | "accepted" | "preparing" | "ready" | "served" | "completed" | "cancelled";
+      order_status: "new" | "accepted" | "preparing" | "ready" | "completed" | "cancelled";
       order_item_status: "pending" | "preparing" | "ready" | "cancelled";
       payment_status: "unpaid" | "pending" | "paid" | "failed" | "refunded" | "partially_refunded";
       session_status: "open" | "closed";

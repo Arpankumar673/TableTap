@@ -8,7 +8,6 @@ import { OptionGroup, Product, ProductVariant } from "../src/types/menu";
 
 const sampleProduct: Product = {
   id: "prod-1",
-  restaurant_id: "rest-1",
   category_id: "cat-1",
   station_id: "st-pizza",
   name: "Margherita Classica",
@@ -27,7 +26,6 @@ const sampleProduct: Product = {
   option_groups: [
     {
       id: "og-crust",
-      restaurant_id: "rest-1",
       name: "Crust Choice",
       required: true,
       min_select: 1,
@@ -56,7 +54,6 @@ const sampleProduct: Product = {
     },
     {
       id: "og-toppings",
-      restaurant_id: "rest-1",
       name: "Extra Toppings",
       required: false,
       min_select: 0,
@@ -97,7 +94,6 @@ const sampleProduct: Product = {
 
 const largeVariant: ProductVariant = {
   id: "var-large",
-  restaurant_id: "rest-1",
   product_id: "prod-1",
   name: "Large (12\")",
   price: 499,

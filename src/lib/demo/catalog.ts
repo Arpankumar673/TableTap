@@ -311,12 +311,10 @@ export function getIsolatedDemoMenu(): {
   products: Product[];
 } {
   const now = new Date().toISOString();
-  const restaurantId = "demo-restaurant-0001";
 
   const restaurant: RestaurantPublicProfile = {
-    id: restaurantId,
+    id: "single-restaurant",
     name: "Pizza House — Artisan Kitchen",
-    slug: "pizza-house-demo",
     description:
       "Hand-stretched 48-hour sourdough pizzas, gourmet smash burgers, and artisanal shakes crafted fresh to your table.",
     logo_url: null,
@@ -334,12 +332,10 @@ export function getIsolatedDemoMenu(): {
       "Fri – Sun": "11:30 AM – 12:30 AM",
     },
     is_accepting_orders: true,
-    active: true,
   };
 
   const categories: Category[] = SAMPLE_CATEGORIES.map((c, idx) => ({
     id: `demo-cat-${idx + 1}`,
-    restaurant_id: restaurantId,
     name: c.name,
     slug: c.slug,
     description: c.description,
@@ -353,7 +349,6 @@ export function getIsolatedDemoMenu(): {
   const pizzaOptionGroups: OptionGroup[] = [
     {
       id: "demo-og-crust",
-      restaurant_id: restaurantId,
       name: "Crust Choice",
       description: "Select your preferred dough preparation",
       required: true,
@@ -368,7 +363,6 @@ export function getIsolatedDemoMenu(): {
     },
     {
       id: "demo-og-addons",
-      restaurant_id: restaurantId,
       name: "Extra Add-Ons & Toppings",
       description: "Customize with extra cheese or artisan toppings",
       required: false,
@@ -389,7 +383,6 @@ export function getIsolatedDemoMenu(): {
     const prodId = `demo-prod-${idx + 1}`;
     return {
       id: prodId,
-      restaurant_id: restaurantId,
       category_id: cat.id,
       station_id: null,
       station_name: p.stationName,
@@ -408,7 +401,6 @@ export function getIsolatedDemoMenu(): {
       available: true,
       variants: p.variants?.map((v, vIdx) => ({
         id: `${prodId}-var-${vIdx + 1}`,
-        restaurant_id: restaurantId,
         product_id: prodId,
         name: v.name,
         price: v.price,

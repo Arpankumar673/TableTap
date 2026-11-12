@@ -2,14 +2,14 @@ import { OrderItemStatus, OrderStatus } from "@/types/orders";
 import { UserRole } from "@/types/roles";
 
 /**
- * Valid forward and cancellation transitions for orders.
+ * Valid forward and cancellation transitions for single-restaurant orders:
+ * new -> accepted -> preparing -> ready -> completed (+ cancelled where permitted)
  */
 const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  pending: ["accepted", "preparing", "cancelled"],
+  new: ["accepted", "preparing", "cancelled"],
   accepted: ["preparing", "ready", "cancelled"],
   preparing: ["ready", "cancelled"],
-  ready: ["served", "completed", "cancelled"],
-  served: ["completed", "cancelled"],
+  ready: ["completed", "cancelled"],
   completed: [],
   cancelled: [],
 };
@@ -34,11 +34,11 @@ export function canRoleTransitionOrder(
     };
   }
 
-  // Kitchen staff cannot cancel orders that are already actively cooking or ready
+  // Kitchen operators cannot cancel orders once active preparation or readiness has started
   if (
     role === "kitchen" &&
     toStatus === "cancelled" &&
-    !["pending", "accepted"].includes(fromStatus)
+    !["new", "accepted"].includes(fromStatus)
   ) {
     return {
       allowed: false,
@@ -54,16 +54,14 @@ export function getNextOrderAction(
   status: OrderStatus
 ): { nextStatus: OrderStatus; label: string } | null {
   switch (status) {
-    case "pending":
+    case "new":
       return { nextStatus: "accepted", label: "Accept Order" };
     case "accepted":
       return { nextStatus: "preparing", label: "Start Preparing" };
     case "preparing":
       return { nextStatus: "ready", label: "Mark Ready" };
     case "ready":
-      return { nextStatus: "served", label: "Mark Served" };
-    case "served":
-      return { nextStatus: "completed", label: "Complete Order" };
+      return { nextStatus: "completed", label: "Mark Completed" };
     default:
       return null;
   }
@@ -84,7 +82,7 @@ export function getOrderUrgency(
   warningMins: number = 12,
   delayedMins: number = 20
 ): UrgencyLevel {
-  if (["ready", "served", "completed", "cancelled"].includes(status)) {
+  if (["ready", "completed", "cancelled"].includes(status)) {
     return "normal";
   }
   const elapsed = getElapsedMinutes(createdAtIso, nowMs);

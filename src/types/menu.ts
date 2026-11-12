@@ -1,5 +1,5 @@
 /**
- * TableTap Menu Domain Types
+ * TableTap Menu Domain Types (Single-Restaurant Architecture)
  * Matches the editorial culinary presentation requirements and PostgreSQL schema.
  */
 
@@ -7,7 +7,6 @@ export type DietaryType = "veg" | "non-veg" | "vegan" | "egg";
 
 export interface Category {
   id: string;
-  restaurant_id: string;
   name: string;
   slug: string;
   description?: string | null;
@@ -20,7 +19,6 @@ export interface Category {
 
 export interface ProductVariant {
   id: string;
-  restaurant_id: string;
   product_id: string;
   name: string;
   sku?: string | null;
@@ -33,7 +31,6 @@ export interface ProductVariant {
 
 export interface OptionValue {
   id: string;
-  restaurant_id?: string | null;
   option_group_id: string;
   name: string;
   price_delta: number;
@@ -44,7 +41,6 @@ export interface OptionValue {
 
 export interface OptionGroup {
   id: string;
-  restaurant_id: string;
   name: string;
   description?: string | null;
   required: boolean;
@@ -56,7 +52,6 @@ export interface OptionGroup {
 
 export interface Product {
   id: string;
-  restaurant_id: string;
   category_id: string;
   station_id?: string | null;
   station_name?: string | null;
@@ -80,9 +75,8 @@ export interface Product {
 }
 
 export interface RestaurantPublicProfile {
-  id: string;
+  id?: string;
   name: string;
-  slug: string;
   description?: string | null;
   logo_url?: string | null;
   cover_image_url?: string | null;
@@ -95,5 +89,4 @@ export interface RestaurantPublicProfile {
   address?: string | null;
   opening_hours: Record<string, string>;
   is_accepting_orders: boolean;
-  active: boolean;
 }

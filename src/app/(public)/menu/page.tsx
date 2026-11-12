@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getSupabasePublicEnv } from "@/lib/supabase/env";
 import { CustomerMenuView } from "@/components/customer/customer-menu-view";
@@ -13,11 +13,9 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export default async function RestaurantPublicMenuPage({
-  params,
+export default async function PublicMenuPage({
   searchParams,
 }: {
-  params: { slug: string };
   searchParams: { session?: string };
 }) {
   const { isConfigured } = getSupabasePublicEnv();
@@ -27,39 +25,8 @@ export default async function RestaurantPublicMenuPage({
 
   const supabase = await createServerSupabaseClient();
 
-  const { data: restaurantRow, error: restError } = await supabase
-    .from("restaurants")
-    .select("*")
-    .eq("slug", params.slug)
-    .eq("active", true)
-    .maybeSingle();
-
-  if (restError || !restaurantRow) {
-    notFound();
-  }
-
-  const restaurant: RestaurantPublicProfile = {
-    id: restaurantRow.id,
-    name: restaurantRow.name,
-    slug: restaurantRow.slug,
-    description: restaurantRow.description,
-    logo_url: restaurantRow.logo_url,
-    cover_image_url: restaurantRow.cover_image_url,
-    currency: restaurantRow.currency,
-    timezone: restaurantRow.timezone,
-    tax_rate: Number(restaurantRow.tax_rate),
-    service_charge_rate: Number(restaurantRow.service_charge_rate),
-    phone: restaurantRow.phone,
-    email: restaurantRow.email,
-    address: restaurantRow.address,
-    opening_hours:
-      (restaurantRow.opening_hours as Record<string, string> | null) ?? {},
-    is_accepting_orders: restaurantRow.is_accepting_orders,
-    active: restaurantRow.active,
-  };
-
-  // Fetch menu categories, products, variants, and option groups
   const [
+    { data: settingsRow },
     { data: catRows },
     { data: prodRows },
     { data: variantRows },
@@ -67,36 +34,68 @@ export default async function RestaurantPublicMenuPage({
     { data: ovRows },
     { data: pogRows },
   ] = await Promise.all([
+    supabase.from("restaurant_settings").select("*").limit(1).maybeSingle(),
     supabase
       .from("categories")
       .select("*")
-      .eq("restaurant_id", restaurant.id)
       .eq("active", true)
       .order("sort_order", { ascending: true }),
     supabase
       .from("products")
       .select("*")
-      .eq("restaurant_id", restaurant.id)
       .eq("active", true)
       .order("sort_order", { ascending: true }),
     supabase
       .from("product_variants")
       .select("*")
-      .eq("restaurant_id", restaurant.id)
       .eq("active", true)
       .order("sort_order", { ascending: true }),
-    supabase
-      .from("option_groups")
-      .select("*")
-      .eq("restaurant_id", restaurant.id)
-      .eq("active", true),
+    supabase.from("option_groups").select("*").eq("active", true),
     supabase
       .from("option_values")
       .select("*")
       .eq("active", true)
       .order("sort_order", { ascending: true }),
-    supabase.from("product_option_groups").select("*").order("sort_order", { ascending: true }),
+    supabase
+      .from("product_option_groups")
+      .select("*")
+      .order("sort_order", { ascending: true }),
   ]);
+
+  const restaurant: RestaurantPublicProfile = settingsRow
+    ? {
+        id: settingsRow.id,
+        name: settingsRow.name,
+        description: settingsRow.description,
+        logo_url: settingsRow.logo_url,
+        cover_image_url: settingsRow.cover_image_url,
+        currency: settingsRow.currency,
+        timezone: settingsRow.timezone,
+        tax_rate: Number(settingsRow.tax_rate),
+        service_charge_rate: Number(settingsRow.service_charge_rate),
+        phone: settingsRow.phone,
+        email: settingsRow.email,
+        address: settingsRow.address,
+        opening_hours:
+          (settingsRow.opening_hours as Record<string, string> | null) ?? {},
+        is_accepting_orders: settingsRow.is_accepting_orders,
+      }
+    : {
+        id: "single-restaurant",
+        name: "TableTap Kitchen & Bistro",
+        description: "Freshly prepared artisan dining ordered directly from your table.",
+        logo_url: null,
+        cover_image_url: null,
+        currency: "INR",
+        timezone: "Asia/Kolkata",
+        tax_rate: 5,
+        service_charge_rate: 0,
+        phone: null,
+        email: null,
+        address: null,
+        opening_hours: {},
+        is_accepting_orders: true,
+      };
 
   const categories: Category[] = (catRows ?? []) as Category[];
 
@@ -111,7 +110,6 @@ export default async function RestaurantPublicMenuPage({
 
     optionGroupMap.set(og.id, {
       id: og.id,
-      restaurant_id: og.restaurant_id,
       name: og.name,
       description: og.description,
       required: og.required,
@@ -140,7 +138,7 @@ export default async function RestaurantPublicMenuPage({
     } as Product;
   });
 
-  // Resolve table session context if `?session=` token exists
+  // Resolve active table session context purely from cryptographic session token
   let tableContext: {
     tableId: string;
     tableNumber: string;
@@ -156,7 +154,6 @@ export default async function RestaurantPublicMenuPage({
 
     const resolved = sessionData as {
       valid?: boolean;
-      restaurant_id?: string;
       table_id?: string;
       table_number?: string;
       table_label?: string | null;
@@ -165,7 +162,6 @@ export default async function RestaurantPublicMenuPage({
 
     if (
       resolved?.valid &&
-      resolved.restaurant_id === restaurant.id &&
       resolved.table_id &&
       resolved.table_number &&
       resolved.session_id

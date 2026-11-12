@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireRestaurantRole } from "@/lib/auth/session";
+import { requireStaffRole } from "@/lib/auth/session";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSupabaseServerEnv } from "@/lib/supabase/env";
@@ -9,7 +9,6 @@ import { restaurantSettingsSchema, stationSchema } from "@/lib/validation/restau
 
 export async function updateRestaurantSettingsAction(input: {
   name: string;
-  slug: string;
   description?: string | null;
   currency: string;
   timezone: string;
@@ -22,11 +21,8 @@ export async function updateRestaurantSettingsAction(input: {
   logo_url?: string | null;
   cover_image_url?: string | null;
 }) {
-  const ctx = await requireRestaurantRole(["owner", "admin"]);
-  const parsed = restaurantSettingsSchema.safeParse({
-    ...input,
-    active: ctx.restaurant.active,
-  });
+  const ctx = await requireStaffRole(["admin"]);
+  const parsed = restaurantSettingsSchema.safeParse(input);
 
   if (!parsed.success) {
     return { error: parsed.error.errors[0]?.message ?? "Invalid settings." };
@@ -34,10 +30,9 @@ export async function updateRestaurantSettingsAction(input: {
 
   const supabase = await createServerSupabaseClient();
   const { error } = await supabase
-    .from("restaurants")
+    .from("restaurant_settings")
     .update({
       name: parsed.data.name,
-      slug: parsed.data.slug,
       description: parsed.data.description ?? null,
       currency: parsed.data.currency,
       timezone: parsed.data.timezone,
@@ -47,16 +42,16 @@ export async function updateRestaurantSettingsAction(input: {
       email: parsed.data.email || null,
       address: parsed.data.address ?? null,
       is_accepting_orders: parsed.data.is_accepting_orders,
-      logo_url: input.logo_url ?? ctx.restaurant.logo_url,
-      cover_image_url: input.cover_image_url ?? ctx.restaurant.cover_image_url,
+      logo_url: input.logo_url ?? ctx.settings.logo_url,
+      cover_image_url: input.cover_image_url ?? ctx.settings.cover_image_url,
     })
-    .eq("id", ctx.restaurant.id);
+    .eq("id", ctx.settings.id);
 
   if (error) return { error: error.message };
 
   revalidatePath("/admin/settings");
   revalidatePath("/admin");
-  revalidatePath(`/r/${parsed.data.slug}`);
+  revalidatePath("/menu");
   return { success: true };
 }
 
@@ -65,7 +60,7 @@ export async function createStationAction(input: {
   description?: string | null;
   color_hex: string;
 }) {
-  const ctx = await requireRestaurantRole(["owner", "admin"]);
+  await requireStaffRole(["admin"]);
   const parsed = stationSchema.safeParse({ ...input, sort_order: 10, active: true });
   if (!parsed.success) {
     return { error: parsed.error.errors[0]?.message ?? "Invalid station details" };
@@ -73,7 +68,6 @@ export async function createStationAction(input: {
 
   const supabase = await createServerSupabaseClient();
   const { error } = await supabase.from("preparation_stations").insert({
-    restaurant_id: ctx.restaurant.id,
     name: parsed.data.name,
     description: parsed.data.description ?? null,
     color_hex: parsed.data.color_hex,
@@ -93,12 +87,12 @@ export async function provisionKitchenLoginAction(input: {
   email: string;
   password: string;
 }) {
-  const ctx = await requireRestaurantRole(["owner"]);
+  const ctx = await requireStaffRole(["admin"]);
   const serverEnv = getSupabaseServerEnv();
   if (!serverEnv.hasServiceRole) {
     return {
       error:
-        "SUPABASE_SERVICE_ROLE_KEY is required in .env.local to provision kitchen operator accounts directly.",
+        "SUPABASE_SERVICE_ROLE_KEY is required in .env.local to provision kitchen display accounts directly.",
     };
   }
 
@@ -111,8 +105,11 @@ export async function provisionKitchenLoginAction(input: {
     email: input.email.trim(),
     password: input.password,
     email_confirm: true,
+    app_metadata: {
+      role: "kitchen",
+    },
     user_metadata: {
-      full_name: `${ctx.restaurant.name} Kitchen Display`,
+      full_name: `${ctx.settings.name} Kitchen Display`,
     },
   });
 
@@ -120,15 +117,18 @@ export async function provisionKitchenLoginAction(input: {
     return { error: userErr?.message ?? "Failed to create kitchen account." };
   }
 
-  const { error: memErr } = await admin.from("restaurant_memberships").insert({
-    restaurant_id: ctx.restaurant.id,
-    user_id: userCreated.user.id,
-    role: "kitchen",
-    active: true,
-  });
+  const { error: profileErr } = await admin
+    .from("profiles")
+    .upsert({
+      id: userCreated.user.id,
+      email: input.email.trim(),
+      full_name: `${ctx.settings.name} Kitchen Display`,
+      role: "kitchen",
+      active: true,
+    });
 
-  if (memErr) {
-    return { error: memErr.message };
+  if (profileErr) {
+    return { error: profileErr.message };
   }
 
   return { success: true, email: input.email.trim() };

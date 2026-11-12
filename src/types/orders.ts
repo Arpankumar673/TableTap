@@ -1,17 +1,16 @@
 /**
- * TableTap Order Lifecycle Types
+ * TableTap Order Lifecycle Types (Single-Restaurant Architecture)
  * Status transitions:
- * pending -> accepted -> preparing -> ready -> served -> completed
+ * new -> accepted -> preparing -> ready -> completed
  * Any non-completed status can transition to cancelled with a valid reason.
  */
 
 export type OrderStatus =
-  | "pending"     // Submitted by customer, awaiting kitchen acceptance
+  | "new"         // Submitted by customer, awaiting kitchen acceptance
   | "accepted"    // Acknowledged by kitchen
   | "preparing"   // Food preparation actively in progress
-  | "ready"       // Prepared and plated, awaiting delivery to table
-  | "served"      // Delivered to the customer's table
-  | "completed"   // Session finalized and bill settled
+  | "ready"       // Prepared and plated, ready for table delivery
+  | "completed"   // Order fulfilled and finalized
   | "cancelled";  // Cancelled by kitchen or admin
 
 export type OrderItemStatus =
@@ -30,8 +29,9 @@ export type PaymentStatus =
 
 export interface PreparationStation {
   id: string;
-  restaurant_id: string;
-  name: string; // e.g., 'Pizza', 'Grill', 'Bar', 'Desserts'
+  name: string; // e.g., 'Main Kitchen', 'Pizza', 'Grill', 'Beverages', 'Desserts'
+  description?: string | null;
+  color_hex: string;
   sort_order: number;
   active: boolean;
   created_at: string;
@@ -73,7 +73,6 @@ export interface OrderStatusEvent {
 
 export interface Order {
   id: string;
-  restaurant_id: string;
   table_session_id: string;
   table_number: string;
   order_number: string; // e.g. "TT-1042"

@@ -45,11 +45,10 @@ export default async function TableQrEntryPage({
   const result = data as {
     valid: boolean;
     error?: string;
-    restaurant_slug?: string;
     session_token?: string;
   };
 
-  if (!result.valid || !result.restaurant_slug || !result.session_token) {
+  if (!result.valid || !result.session_token) {
     return (
       <QrErrorScreen
         message={
@@ -60,7 +59,7 @@ export default async function TableQrEntryPage({
     );
   }
 
-  redirect(`/r/${result.restaurant_slug}?session=${encodeURIComponent(result.session_token)}`);
+  redirect(`/menu?session=${encodeURIComponent(result.session_token)}`);
 }
 
 function QrErrorScreen({ message }: { message: string }) {

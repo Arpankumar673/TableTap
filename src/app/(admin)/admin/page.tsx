@@ -9,7 +9,7 @@ import {
   ArrowRight,
   Sparkles,
 } from "lucide-react";
-import { requireRestaurantRole } from "@/lib/auth/session";
+import { requireStaffRole } from "@/lib/auth/session";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { formatCurrency } from "@/lib/utils";
 import { OverviewSalesChart } from "@/components/admin/overview-charts";
@@ -24,10 +24,9 @@ export const metadata = {
 };
 
 export default async function AdminOverviewPage() {
-  const ctx = await requireRestaurantRole(["owner", "admin"]);
+  const ctx = await requireStaffRole(["admin"]);
   const supabase = await createServerSupabaseClient();
-  const restaurantId = ctx.restaurant.id;
-  const currency = ctx.restaurant.currency || "INR";
+  const currency = ctx.settings.currency || "INR";
 
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
@@ -46,30 +45,25 @@ export default async function AdminOverviewPage() {
     supabase
       .from("orders")
       .select("id, order_number, table_number_snapshot, status, payment_status, total, created_at")
-      .eq("restaurant_id", restaurantId)
       .gte("created_at", sevenDaysAgo.toISOString())
       .order("created_at", { ascending: false })
       .limit(200),
     supabase
-      .from("restaurant_tables")
+      .from("tables")
       .select("id, active")
-      .eq("restaurant_id", restaurantId)
       .eq("active", true),
     supabase
       .from("table_sessions")
       .select("id, table_id, bill_requested")
-      .eq("restaurant_id", restaurantId)
       .eq("status", "open"),
     supabase
       .from("order_items")
       .select("product_name_snapshot, quantity, total_price_snapshot")
-      .eq("restaurant_id", restaurantId)
       .neq("status", "cancelled")
       .limit(300),
     supabase
       .from("products")
-      .select("id", { count: "exact", head: true })
-      .eq("restaurant_id", restaurantId),
+      .select("id", { count: "exact", head: true }),
   ]);
 
   const orders = ordersData ?? [];
@@ -91,10 +85,10 @@ export default async function AdminOverviewPage() {
     totalOrdersCount > 0 ? grossRevenue7d / totalOrdersCount : 0;
 
   const pendingCount = orders.filter((o) =>
-    ["pending", "accepted", "preparing"].includes(o.status)
+    ["new", "accepted", "preparing", "ready"].includes(o.status)
   ).length;
   const completedCount = orders.filter((o) =>
-    ["served", "completed"].includes(o.status)
+    o.status === "completed"
   ).length;
 
   const totalTables = (tablesData ?? []).length;
@@ -156,7 +150,7 @@ export default async function AdminOverviewPage() {
             Restaurant Overview
           </h1>
           <p className="mt-1 text-sm text-forest-700/80">
-            Live multi-tenant operational metrics for {ctx.restaurant.name}
+            Live kitchen &amp; dining metrics for {ctx.settings.name}
           </p>
         </div>
 
@@ -303,7 +297,7 @@ export default async function AdminOverviewPage() {
               {completedCount}
             </div>
             <div className="mt-1 text-[11px] text-forest-700/75">
-              Served &amp; closed (7d)
+              Completed (7d)
             </div>
           </CardContent>
         </Card>

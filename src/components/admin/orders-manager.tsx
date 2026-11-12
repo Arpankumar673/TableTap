@@ -28,7 +28,6 @@ import {
 
 export interface AdminOrderRow {
   id: string;
-  restaurant_id: string;
   order_number: string;
   public_token: string;
   table_number_snapshot: string | null;
@@ -99,7 +98,7 @@ export function OrdersManager({ currency, initialOrders }: OrdersManagerProps) {
     });
   }, [orders, search, statusFilter, dateFilter]);
 
-  async function refreshOrders(restaurantId: string) {
+  async function refreshOrders() {
     const supabase = createClient();
     const { data } = await supabase
       .from("orders")
@@ -114,7 +113,6 @@ export function OrdersManager({ currency, initialOrders }: OrdersManagerProps) {
         order_status_events ( from_status, to_status, reason, created_at )
       `
       )
-      .eq("restaurant_id", restaurantId)
       .order("created_at", { ascending: false })
       .limit(150);
 
@@ -175,7 +173,7 @@ export function OrdersManager({ currency, initialOrders }: OrdersManagerProps) {
         p_reason: reason ?? null,
       });
       if (rpcErr) throw rpcErr;
-      await refreshOrders(order.restaurant_id);
+      await refreshOrders();
       setCancelReason("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update order status.");
@@ -190,7 +188,6 @@ export function OrdersManager({ currency, initialOrders }: OrdersManagerProps) {
     try {
       const supabase = createClient();
       await supabase.from("payments").insert({
-        restaurant_id: order.restaurant_id,
         order_id: order.id,
         amount: order.total,
         currency,
@@ -204,7 +201,7 @@ export function OrdersManager({ currency, initialOrders }: OrdersManagerProps) {
         .eq("id", order.id);
       if (updErr) throw updErr;
 
-      await refreshOrders(order.restaurant_id);
+      await refreshOrders();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to record payment.");
     } finally {
@@ -242,11 +239,10 @@ export function OrdersManager({ currency, initialOrders }: OrdersManagerProps) {
             className="h-10 rounded-md border border-cream-300 bg-white px-3 text-sm"
           >
             <option value="all">All Statuses</option>
-            <option value="pending">Pending</option>
+            <option value="new">New</option>
             <option value="accepted">Accepted</option>
             <option value="preparing">Preparing</option>
             <option value="ready">Ready</option>
-            <option value="served">Served</option>
             <option value="completed">Completed</option>
             <option value="cancelled">Cancelled</option>
           </select>

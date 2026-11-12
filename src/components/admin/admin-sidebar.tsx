@@ -21,7 +21,6 @@ import { cn } from "@/lib/utils";
 
 interface AdminSidebarProps {
   restaurantName: string;
-  restaurantSlug: string;
   userEmail: string;
   userRole: string;
 }
@@ -37,7 +36,6 @@ const NAV_ITEMS = [
 
 export function AdminSidebar({
   restaurantName,
-  restaurantSlug,
   userEmail,
   userRole,
 }: AdminSidebarProps) {
@@ -112,7 +110,7 @@ export function AdminSidebar({
             <ExternalLink className="h-3.5 w-3.5 text-forest-700/60" />
           </Link>
           <Link
-            href={`/r/${restaurantSlug}`}
+            href="/menu"
             target="_blank"
             className="flex items-center justify-between rounded-xl px-3.5 py-2 text-xs font-semibold text-forest-900 hover:bg-cream-100"
           >
@@ -132,7 +130,7 @@ export function AdminSidebar({
             {userEmail}
           </div>
           <div className="text-[11px] text-forest-700/80">
-            Multi-Tenant RLS Active
+            Single-Restaurant RLS Active
           </div>
         </div>
         <button

@@ -9,33 +9,33 @@ import {
 } from "../src/lib/orders/state-machine";
 
 describe("Order Lifecycle State Machine & Kitchen Urgency", () => {
-  it("allows valid forward workflow transitions", () => {
-    expect(isValidOrderTransition("pending", "accepted")).toBe(true);
+  it("allows valid forward workflow transitions (NEW -> ACCEPTED -> PREPARING -> READY -> COMPLETED)", () => {
+    expect(isValidOrderTransition("new", "accepted")).toBe(true);
     expect(isValidOrderTransition("accepted", "preparing")).toBe(true);
     expect(isValidOrderTransition("preparing", "ready")).toBe(true);
-    expect(isValidOrderTransition("ready", "served")).toBe(true);
-    expect(isValidOrderTransition("served", "completed")).toBe(true);
+    expect(isValidOrderTransition("ready", "completed")).toBe(true);
   });
 
   it("blocks invalid backward or terminal state transitions", () => {
-    expect(isValidOrderTransition("completed", "pending")).toBe(false);
+    expect(isValidOrderTransition("completed", "new")).toBe(false);
     expect(isValidOrderTransition("cancelled", "accepted")).toBe(false);
-    expect(isValidOrderTransition("pending", "completed")).toBe(false);
-    expect(isValidOrderTransition("ready", "pending")).toBe(false);
+    expect(isValidOrderTransition("new", "completed")).toBe(false);
+    expect(isValidOrderTransition("ready", "new")).toBe(false);
   });
 
   it("enforces kitchen vs admin cancellation rules", () => {
-    expect(canRoleTransitionOrder("kitchen", "pending", "cancelled").allowed).toBe(true);
+    expect(canRoleTransitionOrder("kitchen", "new", "cancelled").allowed).toBe(true);
+    expect(canRoleTransitionOrder("kitchen", "accepted", "cancelled").allowed).toBe(true);
     expect(canRoleTransitionOrder("kitchen", "preparing", "cancelled").allowed).toBe(false);
     expect(canRoleTransitionOrder("admin", "preparing", "cancelled").allowed).toBe(true);
-    expect(canRoleTransitionOrder("owner", "ready", "cancelled").allowed).toBe(true);
+    expect(canRoleTransitionOrder("admin", "ready", "cancelled").allowed).toBe(true);
   });
 
   it("returns next primary action button for kitchen cards", () => {
-    expect(getNextOrderAction("pending")?.nextStatus).toBe("accepted");
+    expect(getNextOrderAction("new")?.nextStatus).toBe("accepted");
     expect(getNextOrderAction("accepted")?.nextStatus).toBe("preparing");
     expect(getNextOrderAction("preparing")?.nextStatus).toBe("ready");
-    expect(getNextOrderAction("ready")?.nextStatus).toBe("served");
+    expect(getNextOrderAction("ready")?.nextStatus).toBe("completed");
     expect(getNextOrderAction("completed")).toBeNull();
   });
 

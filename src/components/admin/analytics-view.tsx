@@ -69,7 +69,7 @@ export function AnalyticsView({
     const cancelled = filteredOrders.filter((o) => o.status === "cancelled").length;
     const valid = filteredOrders.filter((o) => o.status !== "cancelled");
     const completed = valid.filter((o) =>
-      ["served", "completed"].includes(o.status)
+      o.status === "completed"
     ).length;
     const paidOrders = valid.filter((o) => o.payment_status === "paid");
 

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireRestaurantRole } from "@/lib/auth/session";
+import { requireStaffRole } from "@/lib/auth/session";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
   SAMPLE_CATEGORIES,
@@ -11,15 +11,13 @@ import {
 import { generateSecureToken, hashToken } from "@/lib/security/tokens";
 
 export async function seedSampleCatalogAction() {
-  const ctx = await requireRestaurantRole(["owner", "admin"]);
+  await requireStaffRole(["admin"]);
   const supabase = await createServerSupabaseClient();
-  const restaurantId = ctx.restaurant.id;
 
   // 1. Ensure sample preparation stations exist
   const { data: existingStations } = await supabase
     .from("preparation_stations")
-    .select("id, name")
-    .eq("restaurant_id", restaurantId);
+    .select("id, name");
 
   const stationMap = new Map<string, string>();
   for (const st of existingStations ?? []) {
@@ -32,7 +30,6 @@ export async function seedSampleCatalogAction() {
       const { data: created } = await supabase
         .from("preparation_stations")
         .insert({
-          restaurant_id: restaurantId,
           name: st.name,
           description: st.description,
           color_hex: st.color_hex,
@@ -48,8 +45,7 @@ export async function seedSampleCatalogAction() {
   // 2. Seed 14 representative categories
   const { data: existingCats } = await supabase
     .from("categories")
-    .select("id, slug")
-    .eq("restaurant_id", restaurantId);
+    .select("id, slug");
 
   const categoryMap = new Map<string, string>();
   for (const c of existingCats ?? []) {
@@ -61,7 +57,6 @@ export async function seedSampleCatalogAction() {
       const { data: created } = await supabase
         .from("categories")
         .insert({
-          restaurant_id: restaurantId,
           name: cat.name,
           slug: cat.slug,
           description: cat.description,
@@ -80,8 +75,7 @@ export async function seedSampleCatalogAction() {
 
   const { data: existingGroups } = await supabase
     .from("option_groups")
-    .select("id, name")
-    .eq("restaurant_id", restaurantId);
+    .select("id, name");
 
   for (const og of existingGroups ?? []) {
     if (og.name === "Crust Choice") crustGroupId = og.id;
@@ -92,7 +86,6 @@ export async function seedSampleCatalogAction() {
     const { data: crustGroup } = await supabase
       .from("option_groups")
       .insert({
-        restaurant_id: restaurantId,
         name: "Crust Choice",
         description: "Select your preferred dough preparation",
         required: true,
@@ -107,7 +100,6 @@ export async function seedSampleCatalogAction() {
       crustGroupId = crustGroup.id;
       await supabase.from("option_values").insert([
         {
-          restaurant_id: restaurantId,
           option_group_id: crustGroupId,
           name: "48h Classic Sourdough",
           price_delta: 0,
@@ -115,7 +107,6 @@ export async function seedSampleCatalogAction() {
           sort_order: 1,
         },
         {
-          restaurant_id: restaurantId,
           option_group_id: crustGroupId,
           name: "Roman Thin & Crisp",
           price_delta: 0,
@@ -123,7 +114,6 @@ export async function seedSampleCatalogAction() {
           sort_order: 2,
         },
         {
-          restaurant_id: restaurantId,
           option_group_id: crustGroupId,
           name: "Cheese Burst Crust",
           price_delta: 89,
@@ -138,7 +128,6 @@ export async function seedSampleCatalogAction() {
     const { data: addonsGroup } = await supabase
       .from("option_groups")
       .insert({
-        restaurant_id: restaurantId,
         name: "Extra Add-Ons & Toppings",
         description: "Customize with extra cheese or artisan toppings",
         required: false,
@@ -153,7 +142,6 @@ export async function seedSampleCatalogAction() {
       addonsGroupId = addonsGroup.id;
       await supabase.from("option_values").insert([
         {
-          restaurant_id: restaurantId,
           option_group_id: addonsGroupId,
           name: "Extra Mozzarella Cheese",
           price_delta: 49,
@@ -161,7 +149,6 @@ export async function seedSampleCatalogAction() {
           sort_order: 1,
         },
         {
-          restaurant_id: restaurantId,
           option_group_id: addonsGroupId,
           name: "Extra Toppings (Olives / Jalapeños)",
           price_delta: 39,
@@ -169,7 +156,6 @@ export async function seedSampleCatalogAction() {
           sort_order: 2,
         },
         {
-          restaurant_id: restaurantId,
           option_group_id: addonsGroupId,
           name: "Roasted Garlic Dip",
           price_delta: 29,
@@ -183,8 +169,7 @@ export async function seedSampleCatalogAction() {
   // 4. Insert products, variants, and option group mappings
   const { data: existingProducts } = await supabase
     .from("products")
-    .select("slug")
-    .eq("restaurant_id", restaurantId);
+    .select("slug");
   const existingProductSlugs = new Set((existingProducts ?? []).map((p) => p.slug));
 
   let createdCount = 0;
@@ -200,7 +185,6 @@ export async function seedSampleCatalogAction() {
     const { data: prod } = await supabase
       .from("products")
       .insert({
-        restaurant_id: restaurantId,
         category_id: categoryId,
         station_id: stationId,
         name: p.name,
@@ -225,7 +209,6 @@ export async function seedSampleCatalogAction() {
       if (p.variants && p.variants.length > 0) {
         await supabase.from("product_variants").insert(
           p.variants.map((v, vIdx) => ({
-            restaurant_id: restaurantId,
             product_id: prod.id,
             name: v.name,
             price: v.price,
@@ -264,20 +247,18 @@ export async function seedSampleCatalogAction() {
     }
   }
 
-  // 5. Ensure at least 4 sample tables exist with QR tokens if none exist yet
+  // 5. Ensure at least 4 sample tables exist with cryptographic QR tokens if none exist yet
   const { data: existingTables } = await supabase
-    .from("restaurant_tables")
+    .from("tables")
     .select("id")
-    .eq("restaurant_id", restaurantId)
     .limit(1);
 
   if (!existingTables || existingTables.length === 0) {
     for (let t = 1; t <= 4; t++) {
       const tableNum = `0${t}`;
       const { data: tableRow } = await supabase
-        .from("restaurant_tables")
+        .from("tables")
         .insert({
-          restaurant_id: restaurantId,
           table_number: tableNum,
           label: t <= 2 ? "Window Booth" : "Main Dining",
           capacity: 4,
@@ -289,7 +270,6 @@ export async function seedSampleCatalogAction() {
       if (tableRow) {
         const rawToken = generateSecureToken(24);
         await supabase.from("table_qr_tokens").insert({
-          restaurant_id: restaurantId,
           table_id: tableRow.id,
           token_hash: hashToken(rawToken),
           token_prefix: rawToken.slice(0, 8),
@@ -303,6 +283,7 @@ export async function seedSampleCatalogAction() {
   revalidatePath("/admin/menu");
   revalidatePath("/admin/tables");
   revalidatePath("/admin");
+  revalidatePath("/menu");
 
   return {
     success: true,

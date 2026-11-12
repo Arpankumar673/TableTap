@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     const admin = createAdminClient();
     const { data: order, error: orderErr } = await admin
       .from("orders")
-      .select("id, restaurant_id, payment_status")
+      .select("id, payment_status")
       .eq("public_token", parsed.data.publicToken)
       .single();
 

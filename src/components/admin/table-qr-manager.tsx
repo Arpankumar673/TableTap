@@ -64,13 +64,11 @@ export interface ManagedTable {
 
 interface TableQrManagerProps {
   restaurantName: string;
-  restaurantSlug: string;
   initialTables: ManagedTable[];
 }
 
 export function TableQrManager({
   restaurantName,
-  restaurantSlug,
   initialTables,
 }: TableQrManagerProps) {
   const router = useRouter();
@@ -236,7 +234,7 @@ export function TableQrManager({
     if (!dataUrl) return;
     const link = document.createElement("a");
     link.href = dataUrl;
-    link.download = `${restaurantSlug}-table-${table.table_number}-qr.png`;
+    link.download = `tabletap-table-${table.table_number}-qr.png`;
     link.click();
   }
 
@@ -252,7 +250,7 @@ export function TableQrManager({
         if (!dataUrl) continue;
         const base64 = dataUrl.split(",")[1];
         if (base64) {
-          zip.file(`${restaurantSlug}-table-${tbl.table_number}.png`, base64, {
+          zip.file(`tabletap-table-${tbl.table_number}.png`, base64, {
             base64: true,
           });
           count++;
@@ -268,7 +266,7 @@ export function TableQrManager({
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${restaurantSlug}-all-table-qrs.zip`;
+      a.download = `tabletap-all-table-qrs.zip`;
       a.click();
       URL.revokeObjectURL(url);
     } finally {

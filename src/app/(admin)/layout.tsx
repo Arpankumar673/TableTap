@@ -1,5 +1,5 @@
 import React from "react";
-import { requireRestaurantRole } from "@/lib/auth/session";
+import { requireStaffRole } from "@/lib/auth/session";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 
 export const dynamic = "force-dynamic";
@@ -9,13 +9,12 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const ctx = await requireRestaurantRole(["owner", "admin"]);
+  const ctx = await requireStaffRole(["admin"]);
 
   return (
     <div className="flex min-h-screen flex-col bg-cream-50/70 lg:flex-row">
       <AdminSidebar
-        restaurantName={ctx.restaurant.name}
-        restaurantSlug={ctx.restaurant.slug}
+        restaurantName={ctx.settings.name}
         userEmail={ctx.user.email}
         userRole={ctx.role}
       />

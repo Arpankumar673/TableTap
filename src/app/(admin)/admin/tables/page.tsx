@@ -1,4 +1,4 @@
-import { requireRestaurantRole } from "@/lib/auth/session";
+import { requireStaffRole } from "@/lib/auth/session";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ManagedTable, TableQrManager } from "@/components/admin/table-qr-manager";
 
@@ -9,16 +9,14 @@ export const metadata = {
 };
 
 export default async function AdminTablesPage() {
-  const ctx = await requireRestaurantRole(["owner", "admin"]);
+  const ctx = await requireStaffRole(["admin"]);
   const supabase = await createServerSupabaseClient();
-  const restaurantId = ctx.restaurant.id;
 
   const [{ data: tableRows }, { data: qrRows }, { data: sessionRows }] =
     await Promise.all([
       supabase
-        .from("restaurant_tables")
+        .from("tables")
         .select("*")
-        .eq("restaurant_id", restaurantId)
         .order("table_number", { ascending: true }),
       supabase
         .from("table_qr_tokens")
@@ -27,7 +25,6 @@ export default async function AdminTablesPage() {
       supabase
         .from("table_sessions")
         .select("id, table_id, bill_requested, opened_at")
-        .eq("restaurant_id", restaurantId)
         .eq("status", "open"),
     ]);
 
@@ -60,8 +57,7 @@ export default async function AdminTablesPage() {
 
   return (
     <TableQrManager
-      restaurantName={ctx.restaurant.name}
-      restaurantSlug={ctx.restaurant.slug}
+      restaurantName={ctx.settings.name}
       initialTables={tables}
     />
   );

@@ -1,28 +1,19 @@
 /**
- * TableTap Role-Based Authorization Types
- * Minimal required roles for multi-tenant SaaS operations:
- * - owner: Full restaurant control, billing, branding, menu, tables, staff credentials
- * - admin: Daily restaurant management, menu, orders, tables, reports
- * - kitchen: Kitchen display operator (station filtering, order preparation lifecycle)
+ * TableTap Role-Based Authorization Types (Single-Restaurant Architecture)
+ * Minimal operational roles:
+ * - admin: Full restaurant configuration, menu, tables, QR codes, orders, analytics, kitchen login provisioning
+ * - kitchen: Kitchen Display System operator (real-time queue, preparation workflow)
  */
 
-export type UserRole = "owner" | "admin" | "kitchen";
-
-export interface RestaurantMembership {
-  id: string;
-  restaurant_id: string;
-  user_id: string;
-  role: UserRole;
-  active: boolean;
-  created_at: string;
-  updated_at: string;
-}
+export type UserRole = "admin" | "kitchen";
 
 export interface UserProfile {
   id: string; // references auth.users.id
   email: string;
-  full_name?: string;
-  avatar_url?: string;
+  full_name?: string | null;
+  avatar_url?: string | null;
+  role: UserRole;
+  active: boolean;
   created_at: string;
   updated_at: string;
 }

@@ -40,7 +40,6 @@ interface TrackedOrder {
   created_at: string;
   updated_at: string;
   restaurant_name: string;
-  restaurant_slug: string;
   currency: string;
   restaurant_phone: string | null;
   items: Array<{
@@ -72,15 +71,14 @@ const TRACKING_STEPS: Array<{
   label: string;
   description: string;
 }> = [
-  { key: "pending", label: "Order Received", description: "Sent to restaurant" },
+  { key: "new", label: "Order Placed", description: "Sent to restaurant" },
   { key: "accepted", label: "Accepted", description: "Kitchen confirmed" },
   { key: "preparing", label: "Preparing", description: "Chef is cooking" },
   { key: "ready", label: "Ready", description: "Plated & hot" },
-  { key: "served", label: "Served", description: "At your table" },
+  { key: "completed", label: "Completed", description: "Served & settled" },
 ];
 
 function getStepIndex(status: OrderStatus): number {
-  if (status === "completed") return 4;
   return TRACKING_STEPS.findIndex((s) => s.key === status);
 }
 
@@ -294,7 +292,7 @@ export default function OrderTrackingPage({
         {/* Top Bar */}
         <div className="flex items-center justify-between">
           <Link
-            href={`/r/${order.restaurant_slug}`}
+            href="/menu"
             className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-800 hover:text-forest-950"
           >
             <ArrowLeft className="h-4 w-4" />
