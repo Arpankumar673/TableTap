@@ -181,7 +181,7 @@ export default async function AdminOverviewPage() {
                   Your digital menu is currently empty
                 </h2>
                 <p className="text-sm text-forest-800/80">
-                  Go to Menu &amp; Items to create your dishes or use our 1-Click Sample 14-Category Pizza &amp; Bistro Seeder to populate categories, variants, add-ons, and starter QR tables immediately.
+                  Go to Menu Management to create your dishes or use our 1-Click Boston &amp; Co. American Eatery Seeder to instantly populate smash burgers, sourdough pizzas, loaded fries, shakes, preparation stations, and starter tables.
                 </p>
               </div>
             </div>

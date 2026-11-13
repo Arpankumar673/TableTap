@@ -29,6 +29,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { BostonLogo } from "@/components/shared/boston-logo";
 
 export interface KitchenOrderItem {
   id: string;
@@ -338,14 +339,15 @@ export function KitchenBoard({
       <header className="sticky top-0 z-30 border-b border-kitchen-border bg-kitchen-dark/95 px-4 py-3 backdrop-blur-md sm:px-6">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-burgundy-950/80 text-burgundy-400 border border-burgundy-700/50">
               <ChefHat className="h-6 w-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold tracking-tight text-white">
-                  {restaurantName} — Kitchen Display
-                </h1>
+                <BostonLogo variant="light" size="sm" className="h-6 w-auto" />
+                <span className="text-xs uppercase tracking-widest font-mono text-zinc-400">
+                  | KDS
+                </span>
                 <span
                   className={cn(
                     "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-mono font-semibold border",

@@ -4,65 +4,65 @@
 
 @layer base {
   :root {
-    --background: 40 33% 98%; /* Warm cream #FCFBF7 */
-    --foreground: 155 35% 10%; /* Deep dark charcoal/forest #111A15 */
+    --background: 40 33% 98%; /* Warm cream #FDFBF7 */
+    --foreground: 20 28% 12%; /* Deep dark espresso #251E19 */
 
     --card: 0 0% 100%;
-    --card-foreground: 155 35% 10%;
+    --card-foreground: 20 28% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 155 35% 10%;
+    --popover-foreground: 20 28% 12%;
 
-    --primary: 151 55% 24%; /* Forest green #1B5E3A */
+    --primary: 0 72% 41%; /* Boston & Co. Crimson #B91C1C */
     --primary-foreground: 40 33% 98%;
 
-    --secondary: 38 45% 92%; /* Warm sand cream #F4EEDF */
-    --secondary-foreground: 151 55% 20%;
+    --secondary: 38 45% 93%; /* Warm linen #F5EFE3 */
+    --secondary-foreground: 20 30% 18%;
 
     --muted: 38 25% 94%;
-    --muted-foreground: 150 10% 40%;
+    --muted-foreground: 20 12% 42%;
 
-    --accent: 38 45% 92%;
-    --accent-foreground: 151 55% 20%;
+    --accent: 38 45% 93%;
+    --accent-foreground: 0 72% 35%;
 
-    --destructive: 6 78% 52%; /* Tomato red #DC3522 */
+    --destructive: 0 72% 41%; /* Burgundy crimson */
     --destructive-foreground: 0 0% 100%;
 
     --border: 38 20% 88%;
     --input: 38 20% 88%;
-    --ring: 151 55% 24%;
+    --ring: 0 72% 41%;
 
     --radius: 0.75rem;
   }
 
   .dark {
-    --background: 160 20% 7%; /* Kitchen/dark surface #0E1411 */
+    --background: 20 20% 6%; /* Smoked timber #120E0C */
     --foreground: 40 30% 96%;
 
-    --card: 160 16% 11%;
+    --card: 20 18% 10%; /* Dark mahogany wood #1D1714 */
     --card-foreground: 40 30% 96%;
 
-    --popover: 160 16% 11%;
+    --popover: 20 18% 10%;
     --popover-foreground: 40 30% 96%;
 
-    --primary: 142 70% 45%; /* Vivid emerald #22C55E */
-    --primary-foreground: 160 20% 7%;
+    --primary: 0 75% 50%; /* Vibrant crimson highlight #DC2626 */
+    --primary-foreground: 40 30% 98%;
 
-    --secondary: 160 14% 18%;
+    --secondary: 20 15% 16%;
     --secondary-foreground: 40 30% 96%;
 
-    --muted: 160 14% 18%;
-    --muted-foreground: 160 10% 65%;
+    --muted: 20 15% 16%;
+    --muted-foreground: 20 10% 65%;
 
-    --accent: 160 14% 18%;
+    --accent: 20 15% 16%;
     --accent-foreground: 40 30% 96%;
 
-    --destructive: 6 78% 52%;
+    --destructive: 0 75% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 160 14% 20%;
-    --input: 160 14% 20%;
-    --ring: 142 70% 45%;
+    --border: 20 15% 18%;
+    --input: 20 15% 18%;
+    --ring: 0 75% 50%;
   }
 }
 
@@ -71,7 +71,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased selection:bg-forest-100 selection:text-forest-900;
+    @apply bg-background text-foreground antialiased selection:bg-burgundy-100 selection:text-burgundy-900;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }

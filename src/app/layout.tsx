@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import { SplashScreen } from "@/components/shared/splash-screen";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -15,9 +16,9 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "TableTap — QR Table Ordering & Restaurant Operations",
+  title: "Boston & Co. — American Eatery | TableTap",
   description:
-    "Digitize your dine-in experience with table-specific QR ordering, real-time kitchen ticket routing, and unified restaurant administration.",
+    "Dine-in table QR ordering, real-time kitchen display, and digital restaurant management for Boston & Co. American Eatery.",
   icons: {
     icon: "/favicon.ico",
   },
@@ -27,7 +28,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#1B472F",
+  themeColor: "#991B1B",
 };
 
 export default function RootLayout({
@@ -40,7 +41,8 @@ export default function RootLayout({
       lang="en"
       className={`${playfair.variable} ${plusJakarta.variable} scroll-smooth`}
     >
-      <body className="min-h-screen bg-cream-50 font-sans text-forest-950 antialiased">
+      <body className="min-h-screen bg-cream-50 font-sans text-espresso-950 antialiased">
+        <SplashScreen />
         {children}
       </body>
     </html>

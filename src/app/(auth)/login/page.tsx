@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { QrCode, Loader2, AlertCircle, ArrowLeft, Lock } from "lucide-react";
+import { Loader2, AlertCircle, ArrowLeft, Lock, ChefHat, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { getSupabasePublicEnv } from "@/lib/supabase/env";
 import { loginSchema } from "@/lib/validation/auth";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BostonLogo } from "@/components/shared/boston-logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -87,38 +88,39 @@ export default function LoginPage() {
         </Link>
       </div>
 
-      <Card className="w-full max-w-md border-cream-200 shadow-xl">
-        <CardHeader className="space-y-2 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-forest-800 text-cream-50 shadow-md">
-            <QrCode className="h-6 w-6" />
+      <Card className="w-full max-w-md border-cream-200 shadow-2xl bg-white">
+        <CardHeader className="space-y-3 text-center pb-4">
+          <div className="mx-auto flex justify-center py-1">
+            <BostonLogo variant="burgundy" size="md" className="h-12 w-auto" />
           </div>
-          <CardTitle className="font-serif text-2xl font-bold text-forest-950">
-            Sign in to TableTap
+          <CardTitle className="font-serif text-2xl font-bold text-espresso-950">
+            Staff Portal Sign In
           </CardTitle>
-          <CardDescription>
-            Access your Restaurant Admin Dashboard or Kitchen Display
+          <CardDescription className="text-xs text-espresso-700">
+            Sign in to access Restaurant Admin Console or Kitchen Display System (KDS)
           </CardDescription>
         </CardHeader>
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="flex items-start gap-2 rounded-lg border border-tomato-200 bg-tomato-50 p-3 text-sm text-tomato-800">
-                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-tomato-600" />
+              <div className="flex items-start gap-2 rounded-lg border border-burgundy-200 bg-burgundy-50 p-3 text-sm text-burgundy-800">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-burgundy-600" />
                 <span>{error}</span>
               </div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email address</Label>
+              <Label htmlFor="email">Staff Email Address</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@restaurant.com"
+                placeholder="admin@bostonandco.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
+                className="bg-cream-50/50"
               />
             </div>
 
@@ -127,7 +129,7 @@ export default function LoginPage() {
                 <Label htmlFor="password">Password</Label>
                 <Link
                   href="/forgot-password"
-                  className="text-xs font-medium text-forest-700 hover:text-forest-950 hover:underline"
+                  className="text-xs font-medium text-burgundy-700 hover:text-burgundy-900 hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -140,10 +142,11 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
+                className="bg-cream-50/50"
               />
             </div>
 
-            <Button type="submit" className="w-full" size="lg" disabled={loading}>
+            <Button type="submit" className="w-full bg-burgundy-800 hover:bg-burgundy-900 text-cream-50 shadow-md" size="lg" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -158,13 +161,30 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 border-t border-cream-200 pt-5 text-center text-sm text-forest-800/80">
-            Looking to dine with us?{" "}
+          {/* Role access guide */}
+          <div className="mt-6 rounded-xl border border-cream-200 bg-cream-50/60 p-3 text-left">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-espresso-600 mb-1.5">
+              Role-Based Automatic Dispatch
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="flex items-center gap-1.5 text-espresso-900">
+                <ShieldCheck className="h-3.5 w-3.5 text-burgundy-700 shrink-0" />
+                <span><strong>Admin:</strong> Full Control</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-espresso-900">
+                <ChefHat className="h-3.5 w-3.5 text-gold-600 shrink-0" />
+                <span><strong>Kitchen:</strong> Live Tickets</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 border-t border-cream-200 pt-4 text-center text-xs text-espresso-800/80">
+            Dine-in Customer?{" "}
             <Link
               href="/menu"
-              className="font-semibold text-forest-800 hover:text-forest-950 underline underline-offset-4"
+              className="font-semibold text-burgundy-700 hover:text-burgundy-900 underline underline-offset-4"
             >
-              Browse Digital Menu
+              Browse Public Menu
             </Link>
           </div>
         </CardContent>

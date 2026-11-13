@@ -45,6 +45,7 @@ import {
 import { cn, formatCurrency } from "@/lib/utils";
 import { roundCurrency } from "@/lib/pricing/calculator";
 import { createClient } from "@/lib/supabase/client";
+import { BostonLogo } from "@/components/shared/boston-logo";
 
 interface SessionOrderItem {
   id: string;
@@ -507,27 +508,16 @@ export function CustomerMenuView({
         <div className="mx-auto max-w-5xl px-4 py-5 sm:px-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex items-start gap-4">
-              <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-cream-200 bg-forest-800 text-cream-50 shadow-md overflow-hidden">
-                {restaurant.logo_url ? (
-                  <Image
-                    src={restaurant.logo_url}
-                    alt={restaurant.name}
-                    fill
-                    unoptimized
-                    sizes="56px"
-                    className="object-cover"
-                  />
-                ) : (
-                  <UtensilsCrossed className="h-7 w-7" />
-                )}
+              <div className="relative flex h-16 w-auto shrink-0 items-center justify-center rounded-2xl border border-cream-200 bg-burgundy-900 px-3 py-2 text-cream-50 shadow-md">
+                <BostonLogo variant="light" size="sm" className="h-8 w-auto" />
               </div>
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="font-serif text-2xl font-bold tracking-tight text-forest-950 sm:text-3xl">
+                  <h1 className="font-serif text-2xl font-bold tracking-tight text-espresso-950 sm:text-3xl">
                     {restaurant.name}
                   </h1>
                   {tableContext ? (
-                    <Badge className="bg-forest-800 text-cream-50 font-semibold">
+                    <Badge className="bg-burgundy-800 text-cream-50 font-semibold px-2.5 py-0.5 text-xs">
                       Table {tableContext.tableNumber}
                     </Badge>
                   ) : isDemoPreview ? (

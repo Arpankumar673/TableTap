@@ -171,7 +171,7 @@ export function MenuManager({
       const res = await seedSampleCatalogAction();
       if (res.success) {
         setStatusMsg(
-          `Sample 14-Category Menu & 4 Starter QR Tables loaded (${res.createdProducts} products added)!`
+          `Boston & Co. American Eatery Menu loaded (${res.createdProducts} products added)!`
         );
         await refreshAll();
       }
@@ -482,7 +482,7 @@ export function MenuManager({
           ) : (
             <>
               <Sparkles className="mr-2 h-4 w-4" />
-              <span>Load Sample 14-Category Menu</span>
+              <span>Load Boston &amp; Co. Menu</span>
             </>
           )}
         </Button>
@@ -536,7 +536,7 @@ export function MenuManager({
               <UtensilsCrossed className="mx-auto h-10 w-10 text-forest-700/40" />
               <h3 className="mt-3 font-serif text-xl font-bold">No menu products yet</h3>
               <p className="mt-1 text-sm text-forest-700">
-                Add products manually or click &ldquo;Load Sample 14-Category Menu&rdquo; above.
+                Add products manually or click &ldquo;Load Boston &amp; Co. Menu&rdquo; above.
               </p>
             </Card>
           ) : (
@@ -726,7 +726,7 @@ export function MenuManager({
               <Input
                 value={catName}
                 onChange={(e) => setCatName(e.target.value)}
-                placeholder="Wood-Fired Pizza"
+                placeholder="Gourmet Burgers"
                 required
               />
             </div>

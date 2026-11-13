@@ -29,6 +29,7 @@ import {
   toggleTableActiveAction,
   updateTableDetailsAction,
 } from "@/app/actions/admin-tables";
+import { BostonLogo } from "@/components/shared/boston-logo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -562,7 +563,8 @@ export function TableQrManager({
                 Printable Table Card — Table {previewTable.table_number}
               </DialogDescription>
             </DialogHeader>
-            <div className="my-2 flex flex-col items-center rounded-2xl border-2 border-forest-800 bg-cream-50 p-6">
+            <div className="my-2 flex flex-col items-center rounded-2xl border-2 border-burgundy-800 bg-cream-50 p-6 shadow-md">
+              <BostonLogo variant="burgundy" size="md" className="h-10 w-auto mb-3" />
               {qrPreviews[previewTable.id] && (
                 <Image
                   src={qrPreviews[previewTable.id]}
@@ -570,14 +572,14 @@ export function TableQrManager({
                   width={224}
                   height={224}
                   unoptimized
-                  className="h-56 w-56 rounded-xl bg-white p-2 shadow"
+                  className="h-56 w-56 rounded-xl bg-white p-2.5 shadow-sm border border-cream-200"
                 />
               )}
-              <div className="mt-4 font-serif text-xl font-bold text-forest-950">
+              <div className="mt-4 font-serif text-2xl font-bold text-espresso-950">
                 Table {previewTable.table_number}
               </div>
-              <p className="mt-1 text-xs text-forest-700">
-                Point your smartphone camera here to view our menu &amp; order directly
+              <p className="mt-1 text-xs text-burgundy-900 font-medium">
+                Scan with your phone camera to view menu &amp; order
               </p>
             </div>
             {previewTable.activeQr?.qr_token_secret && (

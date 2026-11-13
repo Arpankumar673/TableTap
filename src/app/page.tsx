@@ -26,6 +26,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { BostonLogo } from "@/components/shared/boston-logo";
 
 export default function LandingPage() {
   const [activeTab, setActiveTab] = useState<"customer" | "kitchen" | "admin">(
@@ -39,21 +40,11 @@ export default function LandingPage() {
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo & Brand */}
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-forest-800 text-cream-50 shadow-md ring-2 ring-forest-700/20">
-              <QrCode className="h-6 w-6" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-serif text-2xl font-bold tracking-tight text-forest-950">
-                  TableTap
-                </span>
-                <span className="rounded-full bg-forest-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-forest-800">
-                  SaaS v1.0
-                </span>
-              </div>
-              <p className="hidden text-xs text-forest-700/70 sm:block">
-                Premium Dine-In SaaS Platform
-              </p>
+            <BostonLogo variant="burgundy" size="sm" className="h-10 w-auto" />
+            <div className="hidden sm:block border-l border-cream-300 pl-3">
+              <span className="font-serif text-xs font-bold tracking-wider uppercase text-burgundy-800">
+                Operating System
+              </span>
             </div>
           </div>
 
@@ -61,37 +52,37 @@ export default function LandingPage() {
           <nav className="hidden items-center gap-8 md:flex">
             <button
               onClick={() => setActiveTab("customer")}
-              className={`text-sm font-medium transition-colors hover:text-forest-800 ${
+              className={`text-sm font-medium transition-colors hover:text-burgundy-800 ${
                 activeTab === "customer"
-                  ? "font-semibold text-forest-900 underline underline-offset-8 decoration-forest-700"
-                  : "text-forest-700/80"
+                  ? "font-semibold text-burgundy-900 underline underline-offset-8 decoration-burgundy-700"
+                  : "text-espresso-700/80"
               }`}
             >
-              Customer Experience
+              Customer QR Menu
             </button>
             <button
               onClick={() => setActiveTab("kitchen")}
-              className={`text-sm font-medium transition-colors hover:text-forest-800 ${
+              className={`text-sm font-medium transition-colors hover:text-burgundy-800 ${
                 activeTab === "kitchen"
-                  ? "font-semibold text-forest-900 underline underline-offset-8 decoration-forest-700"
-                  : "text-forest-700/80"
+                  ? "font-semibold text-burgundy-900 underline underline-offset-8 decoration-burgundy-700"
+                  : "text-espresso-700/80"
               }`}
             >
-              Kitchen Display
+              Kitchen Display (KDS)
             </button>
             <button
               onClick={() => setActiveTab("admin")}
-              className={`text-sm font-medium transition-colors hover:text-forest-800 ${
+              className={`text-sm font-medium transition-colors hover:text-burgundy-800 ${
                 activeTab === "admin"
-                  ? "font-semibold text-forest-900 underline underline-offset-8 decoration-forest-700"
-                  : "text-forest-700/80"
+                  ? "font-semibold text-burgundy-900 underline underline-offset-8 decoration-burgundy-700"
+                  : "text-espresso-700/80"
               }`}
             >
               Admin Dashboard
             </button>
             <a
               href="#architecture"
-              className="text-sm font-medium text-forest-700/80 transition-colors hover:text-forest-800"
+              className="text-sm font-medium text-espresso-700/80 transition-colors hover:text-burgundy-800"
             >
               Architecture
             </a>
@@ -101,13 +92,13 @@ export default function LandingPage() {
           <div className="flex items-center gap-2.5">
             <Link
               href="/menu"
-              className="hidden sm:inline-flex items-center justify-center rounded-lg border border-cream-300 bg-white px-3.5 py-2 text-xs font-semibold text-forest-900 hover:bg-cream-100 transition-colors"
+              className="hidden sm:inline-flex items-center justify-center rounded-lg border border-cream-300 bg-white px-3.5 py-2 text-xs font-semibold text-espresso-900 hover:bg-cream-100 transition-colors shadow-sm"
             >
               Live Menu
             </Link>
             <Link
               href="/login"
-              className="inline-flex items-center justify-center rounded-lg bg-forest-800 px-4 py-2 text-xs sm:text-sm font-medium text-cream-50 shadow-sm transition-all hover:bg-forest-900 active:scale-[0.98]"
+              className="inline-flex items-center justify-center rounded-lg bg-burgundy-800 px-4 py-2 text-xs sm:text-sm font-medium text-cream-50 shadow-sm transition-all hover:bg-burgundy-900 active:scale-[0.98]"
             >
               <span>Staff Sign In</span>
               <ArrowRight className="ml-1.5 h-4 w-4" />
@@ -118,27 +109,31 @@ export default function LandingPage() {
 
       <main className="flex-1">
         {/* 2. HERO SECTION */}
-        <section className="relative overflow-hidden border-b border-cream-200/80 py-20 sm:py-28 lg:py-32">
+        <section className="relative overflow-hidden border-b border-cream-200/80 py-16 sm:py-24 lg:py-28">
           {/* Subtle Ambient Background Gradients */}
-          <div className="pointer-events-none absolute -top-40 right-0 h-96 w-96 rounded-full bg-forest-100/60 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-20 left-10 h-80 w-80 rounded-full bg-spice-100/50 blur-3xl" />
+          <div className="pointer-events-none absolute -top-40 right-0 h-96 w-96 rounded-full bg-burgundy-100/60 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 left-10 h-80 w-80 rounded-full bg-gold-100/50 blur-3xl" />
 
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-3xl text-center">
-              <div className="inline-flex items-center gap-2 rounded-full border border-forest-700/20 bg-forest-50/80 px-4 py-1.5 text-xs font-semibold text-forest-800 backdrop-blur-sm">
-                <Sparkles className="h-3.5 w-3.5 text-forest-700" />
-                <span>QR Dine-In Restaurant Operating System</span>
+              <div className="inline-flex items-center gap-2 rounded-full border border-burgundy-700/20 bg-burgundy-50/80 px-4 py-1.5 text-xs font-semibold text-burgundy-800 backdrop-blur-sm">
+                <Sparkles className="h-3.5 w-3.5 text-burgundy-700" />
+                <span>Boston &amp; Co. American Eatery • Digital Operating System</span>
               </div>
 
-              <h1 className="mt-6 font-serif text-4xl font-extrabold tracking-tight text-forest-950 sm:text-5xl lg:text-6xl">
-                The Digital Dine-In Experience Your Restaurant Deserves.
+              <div className="mt-8 flex justify-center">
+                <BostonLogo variant="burgundy" size="lg" className="h-16 sm:h-20 w-auto drop-shadow-md" />
+              </div>
+
+              <h1 className="mt-6 font-serif text-3xl font-extrabold tracking-tight text-espresso-950 sm:text-5xl lg:text-6xl">
+                The Premium Dine-In Ordering Experience.
               </h1>
 
-              <p className="mt-6 text-lg leading-relaxed text-forest-800/80 sm:text-xl">
-                TableTap transforms physical tables into instant ordering portals.
-                Guests scan a table QR code, browse a visually stunning digital menu,
-                customize dishes, and transmit orders directly to kitchen preparation
-                stations—with zero app installations required.
+              <p className="mt-6 text-base leading-relaxed text-espresso-800/80 sm:text-lg">
+                Engineered exclusively for Boston &amp; Co. American Eatery. Guests scan
+                their table&apos;s unique QR code to explore handcrafted smash burgers,
+                stone-baked pizzas, loaded fries, and thick shakes—routing orders directly to
+                kitchen preparation stations with real-time ticket tracking.
               </p>
 
               {/* CTAs */}
@@ -146,39 +141,46 @@ export default function LandingPage() {
                 <Button
                   asChild
                   size="lg"
-                  className="bg-forest-800 text-cream-50 hover:bg-forest-900 shadow-md font-semibold"
+                  className="bg-burgundy-800 text-cream-50 hover:bg-burgundy-900 shadow-md font-semibold"
                 >
                   <Link href="/demo">
                     <UtensilsCrossed className="mr-2 h-5 w-5" />
-                    <span>Explore Customer Menu Demo</span>
+                    <span>Explore Digital Menu Demo</span>
                   </Link>
                 </Button>
                 <Link
                   href="/admin"
-                  className="inline-flex h-11 items-center justify-center rounded-lg border border-cream-300 bg-white/80 px-8 text-base font-medium text-forest-900 shadow-sm backdrop-blur-sm hover:bg-cream-100 transition-colors"
+                  className="inline-flex h-11 items-center justify-center rounded-lg border border-cream-300 bg-white/80 px-8 text-base font-medium text-espresso-900 shadow-sm backdrop-blur-sm hover:bg-cream-100 transition-colors"
                 >
-                  <LayoutDashboard className="mr-2 h-5 w-5 text-forest-700" />
-                  <span>Open Admin Dashboard</span>
+                  <LayoutDashboard className="mr-2 h-5 w-5 text-burgundy-700" />
+                  <span>Admin Command Console</span>
+                </Link>
+                <Link
+                  href="/kitchen"
+                  className="inline-flex h-11 items-center justify-center rounded-lg border border-cream-300 bg-espresso-950 px-6 text-base font-medium text-cream-50 shadow-sm hover:bg-espresso-900 transition-colors"
+                >
+                  <ChefHat className="mr-2 h-5 w-5 text-gold-500" />
+                  <span>Kitchen Display (KDS)</span>
                 </Link>
               </div>
 
               {/* Trust Badges */}
               <div className="mt-12 grid grid-cols-2 gap-4 pt-8 border-t border-cream-200/80 sm:grid-cols-4">
                 <div className="flex flex-col items-center">
-                  <span className="font-serif text-2xl font-bold text-forest-900">0%</span>
-                  <span className="text-xs text-forest-700/80">App Install Friction</span>
+                  <span className="font-serif text-2xl font-bold text-burgundy-800">0%</span>
+                  <span className="text-xs text-espresso-700/80">App Download Friction</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="font-serif text-2xl font-bold text-forest-900">&lt; 1 sec</span>
-                  <span className="text-xs text-forest-700/80">Realtime Kitchen Sync</span>
+                  <span className="font-serif text-2xl font-bold text-burgundy-800">&lt; 1 sec</span>
+                  <span className="text-xs text-espresso-700/80">Realtime Ticket Routing</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="font-serif text-2xl font-bold text-forest-900">100%</span>
-                  <span className="text-xs text-forest-700/80">QR Token Verified</span>
+                  <span className="font-serif text-2xl font-bold text-burgundy-800">100%</span>
+                  <span className="text-xs text-espresso-700/80">Table QR Binding</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="font-serif text-2xl font-bold text-forest-900">35%</span>
-                  <span className="text-xs text-forest-700/80">Faster Table Turnover</span>
+                  <span className="font-serif text-2xl font-bold text-burgundy-800">Single</span>
+                  <span className="text-xs text-espresso-700/80">Restaurant RLS Isolation</span>
                 </div>
               </div>
             </div>
@@ -283,28 +285,28 @@ export default function LandingPage() {
                       {/* Mobile Header */}
                       <div className="flex items-center justify-between border-b border-cream-200 pb-3">
                         <div>
-                          <div className="text-[10px] font-semibold uppercase tracking-wider text-forest-700">
-                            The Rustic Truffle • Table 04
+                          <div className="text-[10px] font-semibold uppercase tracking-wider text-burgundy-700">
+                            Boston &amp; Co. • Table 04
                           </div>
-                          <div className="font-serif text-lg font-bold text-forest-950">
-                            Artisan Kitchen
+                          <div className="font-serif text-lg font-bold text-espresso-950">
+                            American Eatery
                           </div>
                         </div>
                         <Badge variant="veg" className="text-[10px]">
-                          Open Session
+                          Dining Session
                         </Badge>
                       </div>
 
                       {/* Category Navigation */}
                       <div className="mt-3 flex gap-2 overflow-x-auto pb-1 text-xs">
-                        <span className="rounded-full bg-forest-800 px-3 py-1 font-semibold text-white">
-                          Wood-Fired Pizza
+                        <span className="rounded-full bg-burgundy-800 px-3 py-1 font-semibold text-white">
+                          Gourmet Burgers
                         </span>
-                        <span className="rounded-full bg-cream-100 px-3 py-1 text-forest-800">
-                          Small Plates
+                        <span className="rounded-full bg-cream-100 px-3 py-1 text-espresso-800">
+                          Stone-Baked Pizzas
                         </span>
-                        <span className="rounded-full bg-cream-100 px-3 py-1 text-forest-800">
-                          Beverages
+                        <span className="rounded-full bg-cream-100 px-3 py-1 text-espresso-800">
+                          Loaded Fries
                         </span>
                       </div>
 
@@ -313,42 +315,42 @@ export default function LandingPage() {
                         <div className="flex justify-between items-start gap-3">
                           <div className="flex-1">
                             <div className="flex items-center gap-1.5">
-                              <span className="badge-veg" title="Vegetarian" />
-                              <span className="font-serif text-sm font-bold text-forest-950">
-                                Wild Truffle & Porcini
+                              <span className="badge-nonveg" title="Non-Vegetarian" />
+                              <span className="font-serif text-sm font-bold text-espresso-950">
+                                Boston Double Smash
                               </span>
                             </div>
-                            <p className="mt-1 text-[11px] text-forest-800/70 leading-snug">
-                              Fior di latte, roasted wild mushrooms, white truffle oil & thyme.
+                            <p className="mt-1 text-[11px] text-espresso-800/70 leading-snug">
+                              Twin smashed patties, American cheese, grilled sweet onions &amp; Boston secret sauce.
                             </p>
-                            <div className="mt-2 text-xs font-bold text-forest-900">
-                              ₹640
+                            <div className="mt-2 text-xs font-bold text-burgundy-800">
+                              ₹389
                             </div>
                           </div>
-                          <div className="h-16 w-16 rounded-lg bg-cream-200 flex items-center justify-center text-forest-700/60 text-xs font-medium">
+                          <div className="h-16 w-16 rounded-lg bg-cream-200 flex items-center justify-center text-espresso-700/60 text-xs font-medium">
                             [Photo]
                           </div>
                         </div>
 
                         {/* Customization Pills */}
                         <div className="mt-3 flex flex-wrap gap-1.5 pt-2 border-t border-cream-200/60">
-                          <span className="rounded-md bg-white px-2 py-0.5 text-[10px] font-medium border border-cream-300 text-forest-800">
-                            Medium (10&quot;)
+                          <span className="rounded-md bg-white px-2 py-0.5 text-[10px] font-medium border border-cream-300 text-espresso-800">
+                            Double Patty
                           </span>
-                          <span className="rounded-md bg-white px-2 py-0.5 text-[10px] font-medium border border-cream-300 text-forest-800">
-                            Sourdough (+₹60)
+                          <span className="rounded-md bg-white px-2 py-0.5 text-[10px] font-medium border border-cream-300 text-espresso-800">
+                            Toasted Brioche
                           </span>
-                          <span className="rounded-md bg-emerald-50 text-emerald-800 border border-emerald-300/60 px-2 py-0.5 text-[10px] font-semibold">
-                            Extra Mozzarella (+₹80)
+                          <span className="rounded-md bg-amber-50 text-amber-800 border border-amber-300/60 px-2 py-0.5 text-[10px] font-semibold">
+                            Extra Cheddar (+₹40)
                           </span>
                         </div>
 
                         <div className="mt-3 flex justify-between items-center">
-                          <span className="text-[11px] text-forest-700/80 font-medium">
+                          <span className="text-[11px] text-espresso-700/80 font-medium">
                             Qty: 1
                           </span>
-                          <button className="rounded-lg bg-forest-800 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-forest-900">
-                            Add to Order • ₹780
+                          <button className="rounded-lg bg-burgundy-800 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-burgundy-900">
+                            Add to Order • ₹429
                           </button>
                         </div>
                       </div>
@@ -586,15 +588,15 @@ export default function LandingPage() {
                       {/* Dashboard Header */}
                       <div className="flex items-center justify-between border-b border-cream-200 pb-4">
                         <div>
-                          <div className="font-serif text-lg font-bold text-forest-950">
-                            The Truffle Bistro • Admin Overview
+                          <div className="font-serif text-lg font-bold text-espresso-950">
+                            Boston &amp; Co. American Eatery • Admin Command
                           </div>
-                          <div className="text-xs text-forest-700/70">
+                          <div className="text-xs text-espresso-700/70">
                             Logged in as Restaurant Administrator
                           </div>
                         </div>
-                        <Badge variant="default" className="text-xs">
-                          Active Restaurant
+                        <Badge variant="default" className="text-xs bg-burgundy-800 text-cream-50">
+                          Single-Restaurant Live
                         </Badge>
                       </div>
 

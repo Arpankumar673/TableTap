@@ -23,6 +23,7 @@ import { formatCurrency } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BostonLogo } from "@/components/shared/boston-logo";
 
 interface TrackedOrder {
   id: string;
@@ -239,7 +240,7 @@ export default function OrderTrackingPage({
         modal: {
           ondismiss: () => setPaying(false),
         },
-        theme: { color: "#1B5E3A" },
+        theme: { color: "#991B1B" },
       });
 
       rzp.open();
@@ -310,15 +311,18 @@ export default function OrderTrackingPage({
         </div>
 
         {/* Status Hero Card */}
-        <Card className="border-cream-200 shadow-lg overflow-hidden">
-          <div className="bg-forest-900 px-6 py-5 text-cream-50 flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <div className="text-xs uppercase tracking-wider text-cream-200/80">
-                {order.restaurant_name} • Table {order.table_number ?? "Dining"}
+        <Card className="border-cream-200 shadow-xl overflow-hidden">
+          <div className="bg-burgundy-950 px-6 py-5 text-cream-50 flex flex-wrap items-center justify-between gap-4 border-b border-burgundy-900">
+            <div className="flex items-center gap-4">
+              <BostonLogo variant="light" size="sm" className="h-9 w-auto" />
+              <div>
+                <div className="text-xs uppercase tracking-wider text-cream-200/80">
+                  {order.restaurant_name} • Table {order.table_number ?? "Dining"}
+                </div>
+                <h1 className="mt-0.5 font-serif text-2xl font-bold">
+                  Order #{order.order_number}
+                </h1>
               </div>
-              <h1 className="mt-1 font-serif text-2xl font-bold">
-                Order #{order.order_number}
-              </h1>
             </div>
 
             <div className="flex items-center gap-2">
