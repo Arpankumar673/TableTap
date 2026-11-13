@@ -112,18 +112,18 @@ export async function requireStaffRole(
   }
 
   if (!user) {
-    redirect("/login");
+    redirect("/");
   }
 
   if (!context) {
-    redirect("/login?error=unauthorized");
+    redirect("/?error=unauthorized");
   }
 
   if (!allowedRoles.includes(context.role)) {
     if (context.role === "kitchen") {
       redirect("/kitchen");
     }
-    redirect("/login?error=unauthorized");
+    redirect("/?error=unauthorized");
   }
 
   return context;

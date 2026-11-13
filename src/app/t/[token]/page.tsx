@@ -67,20 +67,20 @@ function QrErrorScreen({ message }: { message: string }) {
     <div className="flex min-h-screen items-center justify-center bg-cream-50 px-4 py-12">
       <Card className="w-full max-w-md border-cream-200 text-center shadow-xl">
         <CardHeader className="space-y-3">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-tomato-50 text-tomato-600">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-burgundy-50 text-burgundy-700">
             <AlertTriangle className="h-7 w-7" />
           </div>
-          <CardTitle className="font-serif text-2xl text-forest-950">
-            Table QR Unavailable
+          <CardTitle className="font-serif text-2xl text-espresso-950">
+            Table QR Code Notice
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
-          <p className="text-sm leading-relaxed text-forest-800/80">{message}</p>
+          <p className="text-sm leading-relaxed text-espresso-800/80">{message}</p>
           <div className="flex flex-col gap-2">
-            <Button asChild variant="outline">
-              <Link href="/">
+            <Button asChild className="bg-burgundy-800 hover:bg-burgundy-900 text-cream-50">
+              <Link href="/menu">
                 <QrCode className="mr-2 h-4 w-4" />
-                <span>Return to TableTap</span>
+                <span>Browse Menu</span>
               </Link>
             </Button>
           </div>

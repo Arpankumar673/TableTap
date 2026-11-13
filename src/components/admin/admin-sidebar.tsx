@@ -27,16 +27,16 @@ interface AdminSidebarProps {
   userRole: string;
 }
 
-// Exactly 8 requested sections for Boston & Co. Restaurant Admin
+// Exactly 8 operational sections for Boston & Co. Restaurant Admin
 const NAV_ITEMS = [
-  { href: "/admin", label: "1. Overview", icon: LayoutDashboard },
-  { href: "/admin/menu", label: "2. Menu Management", icon: UtensilsCrossed },
-  { href: "/admin/tables", label: "3. Table Management", icon: SquareDashedBottomCode },
-  { href: "/admin/qr", label: "4. QR Management", icon: QrCode },
-  { href: "/admin/orders", label: "5. Orders", icon: ClipboardList },
-  { href: "/kitchen", label: "6. Kitchen (KDS)", icon: ChefHat, external: false },
-  { href: "/admin/analytics", label: "7. Analytics", icon: BarChart3 },
-  { href: "/admin/settings", label: "8. Restaurant Settings", icon: Settings },
+  { href: "/admin", label: "Overview", icon: LayoutDashboard },
+  { href: "/admin/menu", label: "Menu Management", icon: UtensilsCrossed },
+  { href: "/admin/tables", label: "Table Management", icon: SquareDashedBottomCode },
+  { href: "/admin/qr", label: "QR Management", icon: QrCode },
+  { href: "/admin/orders", label: "Order Management", icon: ClipboardList },
+  { href: "/kitchen", label: "Kitchen Display (KDS)", icon: ChefHat },
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/admin/settings", label: "Restaurant Settings", icon: Settings },
 ];
 
 export function AdminSidebar({
@@ -50,7 +50,7 @@ export function AdminSidebar({
   async function handleSignOut() {
     const supabase = createClient();
     await supabase.auth.signOut();
-    window.location.href = "/login";
+    window.location.href = "/";
   }
 
   const navContent = (

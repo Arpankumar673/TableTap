@@ -49,6 +49,7 @@ export async function createTableWithQrAction(input: {
   }
 
   revalidatePath("/admin/tables");
+  revalidatePath("/admin/qr");
   return { success: true, table, rawToken };
 }
 
@@ -88,6 +89,7 @@ export async function regenerateTableQrAction(tableId: string) {
   }
 
   revalidatePath("/admin/tables");
+  revalidatePath("/admin/qr");
   return { success: true, rawToken };
 }
 
@@ -114,6 +116,7 @@ export async function revokeTableQrAction(tableId: string) {
   if (error) return { error: error.message };
 
   revalidatePath("/admin/tables");
+  revalidatePath("/admin/qr");
   return { success: true };
 }
 
@@ -129,6 +132,7 @@ export async function toggleTableActiveAction(tableId: string, active: boolean) 
   if (error) return { error: error.message };
 
   revalidatePath("/admin/tables");
+  revalidatePath("/admin/qr");
   return { success: true };
 }
 
@@ -153,6 +157,7 @@ export async function updateTableDetailsAction(
   if (error) return { error: error.message };
 
   revalidatePath("/admin/tables");
+  revalidatePath("/admin/qr");
   return { success: true };
 }
 

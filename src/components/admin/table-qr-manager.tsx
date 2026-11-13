@@ -118,7 +118,7 @@ export function TableQrManager({
           nextMap[tbl.id] = await QRCode.toDataURL(url, {
             width: 512,
             margin: 2,
-            color: { dark: "#143725", light: "#FFFFFF" },
+            color: { dark: "#16110E", light: "#FFFFFF" },
           });
         } catch {
           // Ignore individual QR rendering error

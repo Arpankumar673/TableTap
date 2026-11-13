@@ -84,11 +84,12 @@ export default async function AdminOverviewPage() {
   const averageOrderValue =
     totalOrdersCount > 0 ? grossRevenue7d / totalOrdersCount : 0;
 
-  const pendingCount = orders.filter((o) =>
-    ["new", "accepted", "preparing", "ready"].includes(o.status)
+  const pendingCount = orders.filter((o) => o.status === "new").length;
+  const preparingCount = orders.filter((o) =>
+    ["accepted", "preparing"].includes(o.status)
   ).length;
   const completedCount = orders.filter((o) =>
-    o.status === "completed"
+    ["ready", "completed"].includes(o.status)
   ).length;
 
   const totalTables = (tablesData ?? []).length;
@@ -146,25 +147,25 @@ export default async function AdminOverviewPage() {
       {/* Page Title */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-3xl font-bold text-forest-950">
+          <h1 className="font-serif text-3xl font-bold text-espresso-950">
             Restaurant Overview
           </h1>
-          <p className="mt-1 text-sm text-forest-700/80">
-            Live kitchen &amp; dining metrics for {ctx.settings.name}
+          <p className="mt-1 text-sm text-espresso-700/80">
+            Live operations, table occupancy, and sales for {ctx.settings.name}
           </p>
         </div>
 
         <div className="flex items-center gap-2.5">
-          <Button asChild variant="outline" size="sm">
-            <Link href="/admin/tables">
-              <QrCode className="mr-1.5 h-4 w-4" />
-              <span>Manage QR Codes</span>
+          <Button asChild variant="outline" size="sm" className="border-cream-300">
+            <Link href="/admin/qr">
+              <QrCode className="mr-1.5 h-4 w-4 text-burgundy-700" />
+              <span>Table QR Manager</span>
             </Link>
           </Button>
-          <Button asChild size="sm">
+          <Button asChild size="sm" className="bg-burgundy-800 hover:bg-burgundy-900 text-cream-50">
             <Link href="/admin/menu">
               <UtensilsCrossed className="mr-1.5 h-4 w-4" />
-              <span>Edit Menu</span>
+              <span>Menu Management</span>
             </Link>
           </Button>
         </div>
@@ -210,94 +211,100 @@ export default async function AdminOverviewPage() {
         </div>
       )}
 
-      {/* Primary KPI Grid */}
+      {/* Primary KPI Grid: 6 Specified Metrics */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <Card>
+        {/* 1. Today's Orders */}
+        <Card className="border-cream-200/90 shadow-sm bg-white">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between text-xs font-medium text-forest-700">
-              <span>Today&apos;s Revenue</span>
-              <DollarSign className="h-4 w-4 text-forest-700" />
+            <div className="flex items-center justify-between text-xs font-semibold text-espresso-700">
+              <span>Today&apos;s Orders</span>
+              <UtensilsCrossed className="h-4 w-4 text-burgundy-700" />
             </div>
-            <div className="mt-2 font-serif text-2xl font-bold text-forest-950">
+            <div className="mt-2 font-serif text-2xl font-bold text-espresso-950">
+              {todayOrders.length}
+            </div>
+            <div className="mt-1 text-[11px] text-espresso-600/80">
+              Placed since midnight
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 2. Today's Revenue */}
+        <Card className="border-cream-200/90 shadow-sm bg-white">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between text-xs font-semibold text-espresso-700">
+              <span>Today&apos;s Revenue</span>
+              <DollarSign className="h-4 w-4 text-burgundy-700" />
+            </div>
+            <div className="mt-2 font-serif text-2xl font-bold text-burgundy-800">
               {formatCurrency(todaysRevenue, currency)}
             </div>
-            <div className="mt-1 text-[11px] text-forest-700/75">
-              {todayOrders.length} orders today
+            <div className="mt-1 text-[11px] text-espresso-600/80">
+              Gross sales today
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* 3. Pending Orders */}
+        <Card className="border-cream-200/90 shadow-sm bg-white">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between text-xs font-medium text-forest-700">
-              <span>7-Day Orders</span>
-              <UtensilsCrossed className="h-4 w-4 text-forest-700" />
+            <div className="flex items-center justify-between text-xs font-semibold text-espresso-700">
+              <span>Pending Orders</span>
+              <Clock className="h-4 w-4 text-gold-600" />
             </div>
-            <div className="mt-2 font-serif text-2xl font-bold text-forest-950">
-              {totalOrdersCount}
-            </div>
-            <div className="mt-1 text-[11px] text-forest-700/75">
-              Active non-cancelled
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between text-xs font-medium text-forest-700">
-              <span>Avg Order Value</span>
-              <TrendingUp className="h-4 w-4 text-forest-700" />
-            </div>
-            <div className="mt-2 font-serif text-2xl font-bold text-forest-950">
-              {formatCurrency(averageOrderValue, currency)}
-            </div>
-            <div className="mt-1 text-[11px] text-forest-700/75">
-              7-day rolling AOV
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between text-xs font-medium text-forest-700">
-              <span>Active Tables</span>
-              <QrCode className="h-4 w-4 text-forest-700" />
-            </div>
-            <div className="mt-2 font-serif text-2xl font-bold text-forest-950">
-              {activeTablesCount} / {totalTables}
-            </div>
-            <div className="mt-1 text-[11px] text-forest-700/75">
-              Open dining sessions
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between text-xs font-medium text-forest-700">
-              <span>Pending Kitchen</span>
-              <Clock className="h-4 w-4 text-spice-600" />
-            </div>
-            <div className="mt-2 font-serif text-2xl font-bold text-forest-950">
+            <div className="mt-2 font-serif text-2xl font-bold text-espresso-950">
               {pendingCount}
             </div>
-            <div className="mt-1 text-[11px] text-forest-700/75">
-              Awaiting completion
+            <div className="mt-1 text-[11px] text-gold-700 font-medium">
+              New tickets to accept
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* 4. Preparing Orders */}
+        <Card className="border-cream-200/90 shadow-sm bg-white">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between text-xs font-medium text-forest-700">
-              <span>Completed</span>
+            <div className="flex items-center justify-between text-xs font-semibold text-espresso-700">
+              <span>Preparing Orders</span>
+              <Sparkles className="h-4 w-4 text-blue-600" />
+            </div>
+            <div className="mt-2 font-serif text-2xl font-bold text-espresso-950">
+              {preparingCount}
+            </div>
+            <div className="mt-1 text-[11px] text-blue-700 font-medium">
+              Active in kitchen stations
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 5. Completed Orders */}
+        <Card className="border-cream-200/90 shadow-sm bg-white">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between text-xs font-semibold text-espresso-700">
+              <span>Completed Orders</span>
               <CheckCircle2 className="h-4 w-4 text-emerald-600" />
             </div>
-            <div className="mt-2 font-serif text-2xl font-bold text-forest-950">
+            <div className="mt-2 font-serif text-2xl font-bold text-espresso-950">
               {completedCount}
             </div>
-            <div className="mt-1 text-[11px] text-forest-700/75">
-              Completed (7d)
+            <div className="mt-1 text-[11px] text-emerald-700 font-medium">
+              Served &amp; completed
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 6. Active Tables */}
+        <Card className="border-cream-200/90 shadow-sm bg-white">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between text-xs font-semibold text-espresso-700">
+              <span>Active Tables</span>
+              <QrCode className="h-4 w-4 text-burgundy-700" />
+            </div>
+            <div className="mt-2 font-serif text-2xl font-bold text-espresso-950">
+              {activeTablesCount} / {totalTables}
+            </div>
+            <div className="mt-1 text-[11px] text-espresso-600/80">
+              Open dining sessions
             </div>
           </CardContent>
         </Card>
