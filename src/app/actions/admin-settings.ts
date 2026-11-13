@@ -1,10 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { createClient as createSupabaseJsClient } from "@supabase/supabase-js";
 import { requireStaffRole } from "@/lib/auth/session";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getSupabaseServerEnv } from "@/lib/supabase/env";
+import { getSupabasePublicEnv, getSupabaseServerEnv } from "@/lib/supabase/env";
 import { restaurantSettingsSchema, stationSchema } from "@/lib/validation/restaurant";
 
 export async function updateRestaurantSettingsAction(input: {
@@ -132,4 +133,78 @@ export async function provisionKitchenLoginAction(input: {
   }
 
   return { success: true, email: input.email.trim() };
+}
+
+export async function changeAdminPasswordAction(input: {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}) {
+  const ctx = await requireStaffRole(["admin"]);
+  const email = ctx.user.email;
+
+  if (!email) {
+    return { error: "Unable to identify administrator email from active session." };
+  }
+
+  const currentPassword = input.currentPassword?.trim();
+  const newPassword = input.newPassword?.trim();
+  const confirmPassword = input.confirmPassword?.trim();
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    return { error: "Current password, new password, and confirmation are required." };
+  }
+
+  if (newPassword.length < 8) {
+    return { error: "New password must be at least 8 characters long." };
+  }
+
+  if (newPassword !== confirmPassword) {
+    return { error: "New password and confirmation password do not match." };
+  }
+
+  if (currentPassword === newPassword) {
+    return { error: "New password must be different from your current password." };
+  }
+
+  // 1. Verify current password by re-authenticating with Supabase
+  const { supabaseUrl, supabaseAnonKey } = getSupabasePublicEnv();
+  const verifyClient = createSupabaseJsClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+
+  const { error: verifyError } = await verifyClient.auth.signInWithPassword({
+    email,
+    password: currentPassword,
+  });
+
+  if (verifyError) {
+    return { error: "Current password is incorrect. Please verify and try again." };
+  }
+
+  // 2. Update password in Supabase Auth securely without storing plaintext
+  const serverEnv = getSupabaseServerEnv();
+  if (serverEnv.hasServiceRole && serverEnv.serviceRoleKey) {
+    const admin = createAdminClient();
+    const { error: updateError } = await admin.auth.admin.updateUserById(ctx.user.id, {
+      password: newPassword,
+    });
+    if (updateError) {
+      return { error: updateError.message };
+    }
+  } else {
+    const supabase = await createServerSupabaseClient();
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+    if (updateError) {
+      return { error: updateError.message };
+    }
+  }
+
+  revalidatePath("/admin/settings");
+  return { success: true };
 }

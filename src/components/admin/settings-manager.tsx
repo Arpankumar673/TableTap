@@ -11,11 +11,14 @@ import {
   Plus,
   KeyRound,
   Upload,
+  Lock,
+  ShieldCheck,
 } from "lucide-react";
 import {
   createStationAction,
   provisionKitchenLoginAction,
   updateRestaurantSettingsAction,
+  changeAdminPasswordAction,
 } from "@/app/actions/admin-settings";
 import { createClient } from "@/lib/supabase/client";
 import { Database } from "@/types/database";
@@ -71,6 +74,14 @@ export function SettingsManager({
   const [kitchenEmail, setKitchenEmail] = useState("");
   const [kitchenPassword, setKitchenPassword] = useState("");
   const [provisioning, setProvisioning] = useState(false);
+
+  // Admin Password Management
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordMsg, setPasswordMsg] = useState<string | null>(null);
+  const [passwordErr, setPasswordErr] = useState<string | null>(null);
 
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -183,6 +194,60 @@ export function SettingsManager({
       setErr(error instanceof Error ? error.message : "Provisioning failed.");
     } finally {
       setProvisioning(false);
+    }
+  }
+
+  async function handleChangePassword(e: React.FormEvent) {
+    e.preventDefault();
+    setPasswordSaving(true);
+    setPasswordMsg(null);
+    setPasswordErr(null);
+
+    if (!currentPassword) {
+      setPasswordErr("Please enter your current administrator password.");
+      setPasswordSaving(false);
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setPasswordErr("New password must contain at least 8 characters.");
+      setPasswordSaving(false);
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordErr("New password and confirm password do not match.");
+      setPasswordSaving(false);
+      return;
+    }
+
+    if (currentPassword === newPassword) {
+      setPasswordErr("New password must be different from your current password.");
+      setPasswordSaving(false);
+      return;
+    }
+
+    try {
+      const res = await changeAdminPasswordAction({
+        currentPassword,
+        newPassword,
+        confirmPassword,
+      });
+
+      if (res.error) {
+        setPasswordErr(res.error);
+      } else {
+        setPasswordMsg("Administrator password updated successfully.");
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      }
+    } catch (error) {
+      setPasswordErr(
+        error instanceof Error ? error.message : "Failed to update password."
+      );
+    } finally {
+      setPasswordSaving(false);
     }
   }
 
@@ -464,6 +529,99 @@ export function SettingsManager({
           </Card>
         )}
       </div>
+
+      {/* Security & Password Management */}
+      {userRole === "admin" && (
+        <Card className="border-cream-200">
+          <CardHeader>
+            <CardTitle className="font-serif text-xl flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-burgundy-700" />
+              <span>Security &amp; Change Password</span>
+            </CardTitle>
+            <CardDescription>
+              Update your administrator login password. Requires verification of your current password.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {passwordMsg && (
+              <div className="mb-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 text-sm font-medium text-emerald-900">
+                <CheckCircle2 className="h-5 w-5 text-emerald-700 shrink-0" />
+                <span>{passwordMsg}</span>
+              </div>
+            )}
+
+            {passwordErr && (
+              <div className="mb-4 flex items-center gap-2 rounded-xl border border-tomato-200 bg-tomato-50 p-3.5 text-sm font-medium text-tomato-900">
+                <AlertCircle className="h-5 w-5 text-tomato-600 shrink-0" />
+                <span>{passwordErr}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleChangePassword} className="space-y-4 max-w-lg">
+              <div className="space-y-1.5">
+                <Label htmlFor="current-password">Current Password</Label>
+                <Input
+                  id="current-password"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="Enter current password"
+                  required
+                  autoComplete="current-password"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="new-password">New Password</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Min. 8 characters"
+                    minLength={8}
+                    required
+                    autoComplete="new-password"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="confirm-password">Confirm New Password</Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Re-type new password"
+                    minLength={8}
+                    required
+                    autoComplete="new-password"
+                  />
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                className="bg-burgundy-800 text-cream-50 hover:bg-burgundy-900"
+                disabled={passwordSaving}
+              >
+                {passwordSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <span>Verifying &amp; Updating...</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="mr-2 h-4 w-4" />
+                    <span>Update Administrator Password</span>
+                  </>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

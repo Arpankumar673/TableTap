@@ -17,11 +17,7 @@ export const metadata = {
  * Strictly zero marketing or promotional landing content.
  */
 export default async function RootPage() {
-  const { isConfigured, context } = await getOptionalStaffContext();
-
-  if (!isConfigured) {
-    redirect("/setup-required");
-  }
+  const { context } = await getOptionalStaffContext();
 
   // Authenticated administrator -> Redirect directly to Admin Dashboard
   if (context?.role === "admin") {

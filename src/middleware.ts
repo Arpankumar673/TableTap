@@ -10,13 +10,19 @@ export async function middleware(request: NextRequest) {
   const { supabaseUrl, supabaseAnonKey, isConfigured } = getSupabasePublicEnv();
 
   const pathname = request.nextUrl.pathname;
+  if (pathname === "/setup-required") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    return NextResponse.redirect(url);
+  }
+
   const isProtectedRoute =
     pathname.startsWith("/admin") || pathname.startsWith("/kitchen");
 
   if (!isConfigured) {
     if (isProtectedRoute) {
       const url = request.nextUrl.clone();
-      url.pathname = "/setup-required";
+      url.pathname = "/login";
       return NextResponse.redirect(url);
     }
     return supabaseResponse;

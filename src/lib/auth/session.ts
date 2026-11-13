@@ -105,11 +105,7 @@ export async function getOptionalStaffContext(): Promise<{
 export async function requireStaffRole(
   allowedRoles: UserRole[]
 ): Promise<AuthenticatedStaffContext> {
-  const { isConfigured, user, context } = await getOptionalStaffContext();
-
-  if (!isConfigured) {
-    redirect("/setup-required");
-  }
+  const { user, context } = await getOptionalStaffContext();
 
   if (!user) {
     redirect("/");

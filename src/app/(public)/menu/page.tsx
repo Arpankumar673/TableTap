@@ -18,11 +18,6 @@ export default async function PublicMenuPage({
 }: {
   searchParams: { session?: string };
 }) {
-  const { isConfigured } = getSupabasePublicEnv();
-  if (!isConfigured) {
-    redirect("/setup-required");
-  }
-
   const supabase = await createServerSupabaseClient();
 
   const [

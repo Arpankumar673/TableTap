@@ -14,11 +14,6 @@ export default async function TableQrEntryPage({
 }: {
   params: { token: string };
 }) {
-  const { isConfigured } = getSupabasePublicEnv();
-  if (!isConfigured) {
-    redirect("/setup-required");
-  }
-
   const rawToken = params.token;
   if (!rawToken || rawToken.length < 8) {
     return <QrErrorScreen message="This QR code link appears incomplete or malformed." />;

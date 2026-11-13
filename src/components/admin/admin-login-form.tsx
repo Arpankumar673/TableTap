@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Lock, Loader2, AlertCircle, ChefHat, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -19,6 +20,16 @@ export function AdminLoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const urlErr = params.get("error");
+      if (urlErr) {
+        setError(urlErr);
+      }
+    }
+  }, []);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -31,7 +42,7 @@ export function AdminLoginForm() {
 
     const { isConfigured } = getSupabasePublicEnv();
     if (!isConfigured) {
-      router.push("/setup-required");
+      setError("Database connection is not configured. Please check server settings.");
       return;
     }
 
@@ -121,9 +132,17 @@ export function AdminLoginForm() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="admin-password" className="text-xs font-semibold text-espresso-900">
-                  Password
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="admin-password" className="text-xs font-semibold text-espresso-900">
+                    Password
+                  </Label>
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs font-medium text-burgundy-700 hover:text-burgundy-900 hover:underline transition-colors"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
                 <Input
                   id="admin-password"
                   type="password"

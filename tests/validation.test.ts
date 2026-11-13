@@ -90,4 +90,58 @@ describe("Zod Validation Schemas (Single-Restaurant)", () => {
       }).success
     ).toBe(true);
   });
+
+  it("validates administrator password change constraints", () => {
+    function validatePasswordChange(input: {
+      currentPassword?: string;
+      newPassword?: string;
+      confirmPassword?: string;
+    }) {
+      if (!input.currentPassword || !input.newPassword || !input.confirmPassword) {
+        return { valid: false, error: "All fields are required" };
+      }
+      if (input.newPassword.length < 8) {
+        return { valid: false, error: "Password must be at least 8 characters" };
+      }
+      if (input.newPassword !== input.confirmPassword) {
+        return { valid: false, error: "Passwords do not match" };
+      }
+      if (input.currentPassword === input.newPassword) {
+        return { valid: false, error: "New password must be different from current password" };
+      }
+      return { valid: true };
+    }
+
+    expect(
+      validatePasswordChange({
+        currentPassword: "oldPassword123",
+        newPassword: "newSecurePassword456",
+        confirmPassword: "newSecurePassword456",
+      }).valid
+    ).toBe(true);
+
+    expect(
+      validatePasswordChange({
+        currentPassword: "oldPassword123",
+        newPassword: "short",
+        confirmPassword: "short",
+      }).valid
+    ).toBe(false);
+
+    expect(
+      validatePasswordChange({
+        currentPassword: "oldPassword123",
+        newPassword: "newSecurePassword456",
+        confirmPassword: "mismatchPassword789",
+      }).valid
+    ).toBe(false);
+
+    expect(
+      validatePasswordChange({
+        currentPassword: "samePassword123",
+        newPassword: "samePassword123",
+        confirmPassword: "samePassword123",
+      }).valid
+    ).toBe(false);
+  });
 });

@@ -10,11 +10,7 @@ export const metadata = {
 };
 
 export default async function LoginPage() {
-  const { isConfigured, context } = await getOptionalStaffContext();
-
-  if (!isConfigured) {
-    redirect("/setup-required");
-  }
+  const { context } = await getOptionalStaffContext();
 
   if (context?.role === "admin") {
     redirect("/admin");
