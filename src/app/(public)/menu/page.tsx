@@ -1,6 +1,4 @@
-import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getSupabasePublicEnv } from "@/lib/supabase/env";
 import { CustomerMenuView } from "@/components/customer/customer-menu-view";
 import {
   Category,

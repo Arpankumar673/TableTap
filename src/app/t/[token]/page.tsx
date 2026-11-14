@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AlertTriangle, QrCode } from "lucide-react";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getSupabasePublicEnv } from "@/lib/supabase/env";
 import { hashToken } from "@/lib/security/tokens";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

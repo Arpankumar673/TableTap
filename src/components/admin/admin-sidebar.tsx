@@ -124,8 +124,8 @@ export function AdminSidebar({
           <div className="truncate text-xs font-semibold text-espresso-950">
             {userEmail}
           </div>
-          <div className="text-[11px] text-burgundy-700 font-medium">
-            Single-Restaurant Security Active
+          <div className="text-[11px] text-burgundy-700 font-medium capitalize">
+            {userRole} • Security Active
           </div>
         </div>
         <button

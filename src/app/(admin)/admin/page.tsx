@@ -2,7 +2,6 @@ import Link from "next/link";
 import {
   DollarSign,
   UtensilsCrossed,
-  TrendingUp,
   QrCode,
   Clock,
   CheckCircle2,
@@ -76,13 +75,6 @@ export default async function AdminOverviewPage() {
     (sum, o) => sum + Number(o.total),
     0
   );
-  const totalOrdersCount = nonCancelled.length;
-  const grossRevenue7d = nonCancelled.reduce(
-    (sum, o) => sum + Number(o.total),
-    0
-  );
-  const averageOrderValue =
-    totalOrdersCount > 0 ? grossRevenue7d / totalOrdersCount : 0;
 
   const pendingCount = orders.filter((o) => o.status === "new").length;
   const preparingCount = orders.filter((o) =>

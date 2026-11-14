@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   ChefHat,
   Clock,
-  Flame,
   Volume2,
   VolumeX,
   RefreshCw,
@@ -367,7 +366,7 @@ export function KitchenBoard({
                 </span>
               </div>
               <p className="text-xs text-zinc-400">
-                Tap order actions or individual station items to update live status
+                {restaurantName} • Tap order actions or individual station items to update live status
               </p>
             </div>
           </div>

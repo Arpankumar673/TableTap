@@ -12,7 +12,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Download, Calendar, TrendingUp, DollarSign, ShoppingBag, Ban } from "lucide-react";
+import { Download, TrendingUp, DollarSign, ShoppingBag, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";

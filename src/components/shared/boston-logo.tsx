@@ -21,14 +21,14 @@ export function BostonLogo({
 }: BostonLogoProps) {
   // Dimension sizing presets
   const sizeMap = {
-    sm: { width: 140, height: 56, text1: 22, text2: 7.5, stroke: 3.5, rx: 16 },
-    md: { width: 200, height: 80, text1: 30, text2: 10, stroke: 4.5, rx: 22 },
-    lg: { width: 260, height: 104, text1: 40, text2: 13, stroke: 5.5, rx: 28 },
-    xl: { width: 340, height: 136, text1: 52, text2: 17, stroke: 7, rx: 36 },
-    hero: { width: 440, height: 176, text1: 68, text2: 22, stroke: 9, rx: 46 },
+    sm: { width: 140, height: 56 },
+    md: { width: 200, height: 80 },
+    lg: { width: 260, height: 104 },
+    xl: { width: 340, height: 136 },
+    hero: { width: 440, height: 176 },
   };
 
-  const { width, height, text1, text2, stroke, rx } = sizeMap[size];
+  const { width, height } = sizeMap[size];
 
   // Palette variants
   const colorMap = {
