@@ -8,13 +8,28 @@ import {
   ArrowRight,
   Sparkles,
 } from "lucide-react";
+import dynamicImport from "next/dynamic";
 import { requireStaffRole } from "@/lib/auth/session";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { formatCurrency } from "@/lib/utils";
-import { OverviewSalesChart } from "@/components/admin/overview-charts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+
+const OverviewSalesChart = dynamicImport(
+  () =>
+    import("@/components/admin/overview-charts").then(
+      (m) => m.OverviewSalesChart
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-64 w-full items-center justify-center rounded-xl border border-cream-200 bg-cream-50/50">
+        <div className="h-4 w-32 animate-pulse rounded bg-cream-200" />
+      </div>
+    ),
+  }
+);
 
 export const dynamic = "force-dynamic";
 

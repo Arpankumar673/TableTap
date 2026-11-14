@@ -1,6 +1,28 @@
+import dynamicImport from "next/dynamic";
 import { requireStaffRole } from "@/lib/auth/session";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { AnalyticsOrderData, AnalyticsView } from "@/components/admin/analytics-view";
+import { type AnalyticsOrderData } from "@/components/admin/analytics-view";
+
+const AnalyticsView = dynamicImport(
+  () =>
+    import("@/components/admin/analytics-view").then((m) => m.AnalyticsView),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="space-y-6 animate-pulse">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {[...Array(4)].map((_, i) => (
+            <div
+              key={i}
+              className="h-28 rounded-2xl border border-cream-200 bg-white"
+            />
+          ))}
+        </div>
+        <div className="h-80 rounded-2xl border border-cream-200 bg-white" />
+      </div>
+    ),
+  }
+);
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +46,7 @@ export default async function AdminAnalyticsPage() {
         `
         )
         .order("created_at", { ascending: false })
-        .limit(500),
+        .limit(250),
       supabase
         .from("products")
         .select("id, category_id"),

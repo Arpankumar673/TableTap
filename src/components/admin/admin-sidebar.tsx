@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -16,6 +16,7 @@ import {
   LogOut,
   Menu,
   X,
+  Loader2,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -44,13 +45,21 @@ export function AdminSidebar({
   userEmail,
   userRole,
 }: AdminSidebarProps) {
+  const router = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+
+  // Clear pending state whenever the destination pathname changes
+  useEffect(() => {
+    setPendingHref(null);
+  }, [pathname]);
 
   async function handleSignOut() {
     const supabase = createClient();
     await supabase.auth.signOut();
-    window.location.href = "/";
+    router.push("/");
+    router.refresh();
   }
 
   const navContent = (
@@ -79,21 +88,34 @@ export function AdminSidebar({
               item.href === "/admin"
                 ? pathname === "/admin"
                 : pathname === item.href || (item.href !== "/kitchen" && pathname.startsWith(item.href));
+            const isPending = pendingHref === item.href && !isActive;
 
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => setMobileOpen(false)}
+                prefetch={true}
+                onClick={() => {
+                  setMobileOpen(false);
+                  if (!isActive) {
+                    setPendingHref(item.href);
+                  }
+                }}
                 className={cn(
-                  "flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-medium transition-all",
+                  "flex items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-medium transition-all",
                   isActive
                     ? "bg-burgundy-800 text-cream-50 shadow-sm font-semibold"
-                    : "text-espresso-800 hover:bg-cream-100 hover:text-espresso-950"
+                    : "text-espresso-800 hover:bg-cream-100 hover:text-espresso-950",
+                  isPending && "bg-cream-100 text-burgundy-800 animate-pulse"
                 )}
               >
-                <Icon className="h-4 w-4 shrink-0" />
-                <span>{item.label}</span>
+                <div className="flex items-center gap-3">
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span>{item.label}</span>
+                </div>
+                {isPending && (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-burgundy-700" />
+                )}
               </Link>
             );
           })}

@@ -3,13 +3,8 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { getSupabasePublicEnv } from "@/lib/supabase/env";
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
-
-  const { supabaseUrl, supabaseAnonKey, isConfigured } = getSupabasePublicEnv();
-
   const pathname = request.nextUrl.pathname;
+
   if (pathname === "/setup-required") {
     const url = request.nextUrl.clone();
     url.pathname = "/";
@@ -19,14 +14,36 @@ export async function middleware(request: NextRequest) {
   const isProtectedRoute =
     pathname.startsWith("/admin") || pathname.startsWith("/kitchen");
 
-  if (!isConfigured) {
-    if (isProtectedRoute) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/login";
-      return NextResponse.redirect(url);
-    }
-    return supabaseResponse;
+  // Fast-path: For non-protected routes, avoid blocking network calls in middleware
+  if (!isProtectedRoute) {
+    return NextResponse.next({
+      request,
+    });
   }
+
+  const { supabaseUrl, supabaseAnonKey, isConfigured } = getSupabasePublicEnv();
+
+  if (!isConfigured) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
+  // Fast-path: If user has no Supabase auth token cookies, redirect to login without network delay
+  const hasAuthCookie = request.cookies
+    .getAll()
+    .some((c) => c.name.startsWith("sb-") && c.name.includes("-auth-token"));
+
+  if (!hasAuthCookie) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.searchParams.set("redirectTo", pathname);
+    return NextResponse.redirect(url);
+  }
+
+  let supabaseResponse = NextResponse.next({
+    request,
+  });
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
@@ -53,7 +70,7 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (isProtectedRoute && !user) {
+  if (!user) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("redirectTo", pathname);

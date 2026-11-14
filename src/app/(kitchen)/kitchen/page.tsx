@@ -13,6 +13,9 @@ export default async function KitchenPage() {
   const ctx = await requireStaffRole(["admin", "kitchen"]);
   const supabase = await createServerSupabaseClient();
 
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
   const [{ data: stationRows }, { data: orderRows }] = await Promise.all([
     supabase
       .from("preparation_stations")
@@ -31,8 +34,9 @@ export default async function KitchenPage() {
         )
       `
       )
+      .or(`status.in.(new,accepted,preparing,ready),created_at.gte.${todayStart.toISOString()}`)
       .order("created_at", { ascending: true })
-      .limit(100),
+      .limit(60),
   ]);
 
   const initialOrders: KitchenOrder[] = (orderRows ?? []).map((row) => ({

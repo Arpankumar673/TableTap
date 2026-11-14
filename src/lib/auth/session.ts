@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getSupabasePublicEnv } from "@/lib/supabase/env";
@@ -39,16 +40,19 @@ const FALLBACK_SETTINGS: RestaurantSettingsRow = {
 
 /**
  * Fetches the authenticated staff profile (admin or kitchen) and singleton restaurant settings.
+ * Wrapped in React `cache()` for request-scoped deduplication, preventing duplicate network
+ * roundtrips across layouts and child server components within the same navigation request.
  */
-export async function getOptionalStaffContext(): Promise<{
-  isConfigured: boolean;
-  user: { id: string; email: string; fullName: string | null } | null;
-  context: AuthenticatedStaffContext | null;
-}> {
-  const { isConfigured } = getSupabasePublicEnv();
-  if (!isConfigured) {
-    return { isConfigured: false, user: null, context: null };
-  }
+export const getOptionalStaffContext = cache(
+  async function getOptionalStaffContext(): Promise<{
+    isConfigured: boolean;
+    user: { id: string; email: string; fullName: string | null } | null;
+    context: AuthenticatedStaffContext | null;
+  }> {
+    const { isConfigured } = getSupabasePublicEnv();
+    if (!isConfigured) {
+      return { isConfigured: false, user: null, context: null };
+    }
 
   const supabase = await createServerSupabaseClient();
   const {
@@ -96,7 +100,7 @@ export async function getOptionalStaffContext(): Promise<{
       settings: (settingsData as RestaurantSettingsRow | null) ?? FALLBACK_SETTINGS,
     },
   };
-}
+});
 
 /**
  * Enforces authentication and role-based authorization ('admin' or 'kitchen')

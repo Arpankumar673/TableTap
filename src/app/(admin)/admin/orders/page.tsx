@@ -26,7 +26,7 @@ export default async function AdminOrdersPage() {
     `
     )
     .order("created_at", { ascending: false })
-    .limit(150);
+    .limit(60);
 
   const orders: AdminOrderRow[] = (data ?? []).map((row) => ({
     ...row,
