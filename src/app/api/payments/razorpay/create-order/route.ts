@@ -24,6 +24,19 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Feature Flag: Online payment is temporarily disabled. TableTap operates in offline 'Pay at Restaurant' mode.
+  const ONLINE_PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_ENABLE_ONLINE_PAYMENTS === "true";
+  if (!ONLINE_PAYMENTS_ENABLED) {
+    return NextResponse.json(
+      {
+        error:
+          "Online payments are temporarily disabled. Please settle your bill directly at the restaurant (Cash, UPI, or Card).",
+        offlineOnly: true,
+      },
+      { status: 400 }
+    );
+  }
+
   const { isConfigured } = getSupabasePublicEnv();
   if (!isConfigured) {
     return NextResponse.json(

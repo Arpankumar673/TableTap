@@ -21,6 +21,7 @@ import {
   QrCode,
   UtensilsCrossed,
   X,
+  Banknote,
 } from "lucide-react";
 import {
   Category,
@@ -1240,6 +1241,17 @@ export function CustomerMenuView({
               <div className="flex justify-between border-t border-cream-200 pt-2 text-sm sm:text-base font-bold text-forest-950">
                 <span>Total Amount</span>
                 <span>{formatCurrency(cartSummary.total, currency)}</span>
+              </div>
+            </div>
+
+            {/* Offline Payment Information */}
+            <div className="flex items-start gap-2.5 rounded-xl border border-cream-200/90 bg-cream-100/70 p-3 text-xs text-forest-900">
+              <Banknote className="mt-0.5 h-4 w-4 text-burgundy-700 shrink-0" />
+              <div>
+                <div className="font-semibold text-espresso-950">Pay at the restaurant</div>
+                <div className="text-[11px] sm:text-xs text-espresso-700/80 mt-0.5">
+                  No online payment required now. Settle your bill via Cash, UPI, or Card at your table or counter after dining.
+                </div>
               </div>
             </div>
           </div>

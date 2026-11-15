@@ -1,0 +1,639 @@
+"use client";
+
+import { useState, useCallback, useTransition } from "react";
+import Link from "next/link";
+import {
+  DollarSign,
+  UtensilsCrossed,
+  QrCode,
+  Clock,
+  CheckCircle2,
+  ArrowRight,
+  Sparkles,
+  RefreshCw,
+  Check,
+  AlertCircle,
+  Banknote,
+} from "lucide-react";
+import dynamicImport from "next/dynamic";
+import { createClient } from "@/lib/supabase/client";
+import { formatCurrency } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
+const OverviewSalesChart = dynamicImport(
+  () =>
+    import("@/components/admin/overview-charts").then(
+      (m) => m.OverviewSalesChart
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-64 w-full items-center justify-center rounded-xl border border-cream-200 bg-cream-50/50">
+        <div className="h-4 w-32 animate-pulse rounded bg-cream-200" />
+      </div>
+    ),
+  }
+);
+
+export interface OverviewOrder {
+  id: string;
+  order_number: string;
+  table_number_snapshot: string | null;
+  status: string;
+  payment_status: string;
+  total: number;
+  created_at: string;
+}
+
+export interface SalesTrendPoint {
+  date: string;
+  revenue: number;
+  orders: number;
+}
+
+export interface PopularProduct {
+  name: string;
+  qty: number;
+  revenue: number;
+}
+
+export interface AdminOverviewInitialData {
+  restaurantName: string;
+  currency: string;
+  todayOrdersCount: number;
+  todaysRevenue: number;
+  pendingCount: number;
+  preparingCount: number;
+  completedCount: number;
+  activeTablesCount: number;
+  totalTables: number;
+  billRequestsCount: number;
+  productsCount: number;
+  salesTrend: SalesTrendPoint[];
+  topProducts: PopularProduct[];
+  recentOrders: OverviewOrder[];
+}
+
+export function AdminOverviewView({
+  initialData,
+}: {
+  initialData: AdminOverviewInitialData;
+}) {
+  const [data, setData] = useState<AdminOverviewInitialData>(initialData);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [, startTransition] = useTransition();
+  const [lastUpdated, setLastUpdated] = useState<Date>(() => new Date());
+  const [notification, setNotification] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+
+  const formatLastUpdatedTime = (d: Date) => {
+    return d.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  };
+
+  const handleRefresh = useCallback(async () => {
+    // Concurrency guard: prevent duplicate simultaneous refresh requests
+    if (isRefreshing) return;
+
+    setIsRefreshing(true);
+    setNotification(null);
+
+    try {
+      const supabase = createClient();
+
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+      sevenDaysAgo.setHours(0, 0, 0, 0);
+
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+
+      const [
+        { data: ordersData, error: ordersErr },
+        { data: tablesData, error: tablesErr },
+        { data: activeSessionsData, error: sessionsErr },
+        { data: popularItemsData, error: itemsErr },
+        { count: productsCount, error: productsErr },
+      ] = await Promise.all([
+        supabase
+          .from("orders")
+          .select("id, order_number, table_number_snapshot, status, payment_status, total, created_at")
+          .gte("created_at", sevenDaysAgo.toISOString())
+          .order("created_at", { ascending: false })
+          .limit(200),
+        supabase
+          .from("tables")
+          .select("id, active")
+          .eq("active", true),
+        supabase
+          .from("table_sessions")
+          .select("id, table_id, bill_requested")
+          .eq("status", "open"),
+        supabase
+          .from("order_items")
+          .select("product_name_snapshot, quantity, total_price_snapshot")
+          .neq("status", "cancelled")
+          .limit(300),
+        supabase
+          .from("products")
+          .select("id", { count: "exact", head: true }),
+      ]);
+
+      if (ordersErr || tablesErr || sessionsErr || itemsErr || productsErr) {
+        throw new Error(
+          ordersErr?.message ||
+            tablesErr?.message ||
+            sessionsErr?.message ||
+            itemsErr?.message ||
+            productsErr?.message ||
+            "Failed to load fresh data from database."
+        );
+      }
+
+      const orders = ordersData ?? [];
+      const nonCancelled = orders.filter((o) => o.status !== "cancelled");
+
+      const todayOrders = nonCancelled.filter(
+        (o) => new Date(o.created_at) >= todayStart
+      );
+      const todaysRevenue = todayOrders.reduce(
+        (sum, o) => sum + Number(o.total),
+        0
+      );
+
+      const pendingCount = orders.filter((o) => o.status === "new").length;
+      const preparingCount = orders.filter((o) =>
+        ["accepted", "preparing"].includes(o.status)
+      ).length;
+      const completedCount = orders.filter((o) =>
+        ["ready", "completed"].includes(o.status)
+      ).length;
+
+      const totalTables = (tablesData ?? []).length;
+      const activeTablesCount = new Set(
+        (activeSessionsData ?? []).map((s) => s.table_id)
+      ).size;
+      const billRequestsCount = (activeSessionsData ?? []).filter(
+        (s) => s.bill_requested
+      ).length;
+
+      // 7-day daily trend buckets
+      const dayBuckets = new Map<string, { revenue: number; orders: number }>();
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const label = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        dayBuckets.set(label, { revenue: 0, orders: 0 });
+      }
+      for (const o of nonCancelled) {
+        const label = new Date(o.created_at).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+        const bucket = dayBuckets.get(label);
+        if (bucket) {
+          bucket.revenue += Number(o.total);
+          bucket.orders += 1;
+        }
+      }
+      const salesTrend: SalesTrendPoint[] = Array.from(dayBuckets.entries()).map(([date, val]) => ({
+        date,
+        revenue: Math.round(val.revenue),
+        orders: val.orders,
+      }));
+
+      // Top popular products
+      const prodTally = new Map<string, { qty: number; revenue: number }>();
+      for (const item of popularItemsData ?? []) {
+        const prev = prodTally.get(item.product_name_snapshot) ?? {
+          qty: 0,
+          revenue: 0,
+        };
+        prev.qty += item.quantity;
+        prev.revenue += Number(item.total_price_snapshot);
+        prodTally.set(item.product_name_snapshot, prev);
+      }
+      const topProducts: PopularProduct[] = Array.from(prodTally.entries())
+        .sort((a, b) => b[1].qty - a[1].qty)
+        .slice(0, 5)
+        .map(([name, info]) => ({
+          name,
+          qty: info.qty,
+          revenue: info.revenue,
+        }));
+
+      const recentOrders: OverviewOrder[] = orders.slice(0, 8).map((ord) => ({
+        id: ord.id,
+        order_number: ord.order_number,
+        table_number_snapshot: ord.table_number_snapshot,
+        status: ord.status,
+        payment_status: ord.payment_status,
+        total: Number(ord.total),
+        created_at: ord.created_at,
+      }));
+
+      startTransition(() => {
+        setData((prev) => ({
+          ...prev,
+          todayOrdersCount: todayOrders.length,
+          todaysRevenue,
+          pendingCount,
+          preparingCount,
+          completedCount,
+          totalTables,
+          activeTablesCount,
+          billRequestsCount,
+          productsCount: productsCount ?? 0,
+          salesTrend,
+          topProducts,
+          recentOrders,
+        }));
+        setLastUpdated(new Date());
+        setNotification({
+          type: "success",
+          message: "Dashboard refreshed with latest data.",
+        });
+      });
+
+      // Auto-hide success notification after 3.5 seconds
+      setTimeout(() => {
+        setNotification((current) => (current?.type === "success" ? null : current));
+      }, 3500);
+    } catch (err) {
+      setNotification({
+        type: "error",
+        message: err instanceof Error ? err.message : "Failed to refresh dashboard.",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [isRefreshing]);
+
+  return (
+    <div className="space-y-5 sm:space-y-6">
+      {/* Page Title & Operational Controls */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-espresso-950">
+              Restaurant Overview
+            </h1>
+          </div>
+          <div className="mt-0.5 sm:mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs sm:text-sm text-espresso-700/80">
+            <span>Live operations, table occupancy, and sales for {data.restaurantName}</span>
+            <span className="hidden sm:inline text-cream-400">•</span>
+            <span className="text-[11px] sm:text-xs text-espresso-600 font-medium">
+              Last updated: {formatLastUpdatedTime(lastUpdated)}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
+          {/* Refresh Button */}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="border-cream-300 bg-white hover:bg-cream-100/80 text-espresso-900 text-xs font-semibold shadow-xs flex-initial transition-all active:scale-95 disabled:opacity-60"
+            title="Fetch latest revenue, orders, and table analytics from database"
+            aria-label="Refresh dashboard data"
+          >
+            <RefreshCw
+              className={`h-3.5 w-3.5 sm:mr-1.5 shrink-0 ${
+                isRefreshing ? "animate-spin text-burgundy-700" : "text-espresso-700"
+              }`}
+            />
+            <span className="hidden sm:inline">
+              {isRefreshing ? "Refreshing..." : "Refresh"}
+            </span>
+          </Button>
+
+          <Button asChild variant="outline" size="sm" className="border-cream-300 text-xs flex-1 sm:flex-initial">
+            <Link href="/admin/qr">
+              <QrCode className="mr-1.5 h-3.5 w-3.5 text-burgundy-700" />
+              <span>Table QR Manager</span>
+            </Link>
+          </Button>
+          <Button asChild size="sm" className="bg-burgundy-800 hover:bg-burgundy-900 text-cream-50 text-xs flex-1 sm:flex-initial">
+            <Link href="/admin/menu">
+              <UtensilsCrossed className="mr-1.5 h-3.5 w-3.5" />
+              <span>Menu Management</span>
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      {/* Dynamic Refresh Notification Banner */}
+      {notification && (
+        <div
+          role="status"
+          className={`flex items-center justify-between rounded-xl border px-3.5 py-2.5 text-xs font-medium transition-all ${
+            notification.type === "success"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-950"
+              : "border-red-200 bg-red-50 text-red-950"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {notification.type === "success" ? (
+              <Check className="h-4 w-4 text-emerald-600 shrink-0" />
+            ) : (
+              <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
+            )}
+            <span>{notification.message}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setNotification(null)}
+            className="text-[11px] underline opacity-80 hover:opacity-100"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {/* Quick Setup Banner if Menu is Empty */}
+      {data.productsCount === 0 && (
+        <Card className="border-spice-300 bg-spice-50/70">
+          <CardContent className="flex flex-wrap items-center justify-between gap-4 p-4 sm:p-5">
+            <div className="flex items-start gap-3">
+              <Sparkles className="mt-0.5 h-5 w-5 sm:h-6 sm:w-6 text-spice-600 shrink-0" />
+              <div>
+                <h2 className="font-serif text-base sm:text-lg font-bold text-forest-950">
+                  Your digital menu is currently empty
+                </h2>
+                <p className="text-xs sm:text-sm text-forest-800/80 mt-0.5">
+                  Go to Menu Management to create your dishes or use our 1-Click Boston &amp; Co. American Eatery Seeder to instantly populate smash burgers, sourdough pizzas, loaded fries, shakes, preparation stations, and starter tables.
+                </p>
+              </div>
+            </div>
+            <Button asChild variant="spice" size="sm" className="w-full sm:w-auto font-semibold">
+              <Link href="/admin/menu">
+                <span>Setup Menu &amp; Sample Data</span>
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Bill Requests Alert */}
+      {data.billRequestsCount > 0 && (
+        <div className="flex items-center justify-between rounded-xl border border-spice-300 bg-spice-50 px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-spice-950">
+          <span className="font-semibold">
+            {data.billRequestsCount} active table(s) have requested their bill!
+          </span>
+          <Link
+            href="/admin/tables"
+            className="text-xs font-bold underline underline-offset-4"
+          >
+            View Tables →
+          </Link>
+        </div>
+      )}
+
+      {/* Primary KPI Grid: 6 Specified Metrics */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-6">
+        {/* 1. Today's Orders */}
+        <Card className="border-cream-200/90 shadow-sm bg-white">
+          <CardContent className="p-3.5 sm:p-4">
+            <div className="flex items-center justify-between text-xs font-semibold text-espresso-700">
+              <span className="truncate">Today&apos;s Orders</span>
+              <UtensilsCrossed className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-burgundy-700 shrink-0" />
+            </div>
+            <div className="mt-1.5 sm:mt-2 font-serif text-xl sm:text-2xl font-bold text-espresso-950">
+              {data.todayOrdersCount}
+            </div>
+            <div className="mt-1 text-[10px] sm:text-[11px] text-espresso-600/80 truncate">
+              Placed since midnight
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 2. Today's Revenue */}
+        <Card className="border-cream-200/90 shadow-sm bg-white">
+          <CardContent className="p-3.5 sm:p-4">
+            <div className="flex items-center justify-between text-xs font-semibold text-espresso-700">
+              <span className="truncate">Today&apos;s Revenue</span>
+              <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-burgundy-700 shrink-0" />
+            </div>
+            <div className="mt-1.5 sm:mt-2 font-serif text-xl sm:text-2xl font-bold text-burgundy-800">
+              {formatCurrency(data.todaysRevenue, data.currency)}
+            </div>
+            <div className="mt-1 text-[10px] sm:text-[11px] text-espresso-600/80 truncate">
+              Gross sales today
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 3. Pending Orders */}
+        <Card className="border-cream-200/90 shadow-sm bg-white">
+          <CardContent className="p-3.5 sm:p-4">
+            <div className="flex items-center justify-between text-xs font-semibold text-espresso-700">
+              <span className="truncate">Pending Orders</span>
+              <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gold-600 shrink-0" />
+            </div>
+            <div className="mt-1.5 sm:mt-2 font-serif text-xl sm:text-2xl font-bold text-espresso-950">
+              {data.pendingCount}
+            </div>
+            <div className="mt-1 text-[10px] sm:text-[11px] text-gold-700 font-medium truncate">
+              New tickets to accept
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 4. Preparing Orders */}
+        <Card className="border-cream-200/90 shadow-sm bg-white">
+          <CardContent className="p-3.5 sm:p-4">
+            <div className="flex items-center justify-between text-xs font-semibold text-espresso-700">
+              <span className="truncate">Preparing Orders</span>
+              <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600 shrink-0" />
+            </div>
+            <div className="mt-1.5 sm:mt-2 font-serif text-xl sm:text-2xl font-bold text-espresso-950">
+              {data.preparingCount}
+            </div>
+            <div className="mt-1 text-[10px] sm:text-[11px] text-blue-700 font-medium truncate">
+              Active in kitchen
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 5. Completed Orders */}
+        <Card className="border-cream-200/90 shadow-sm bg-white">
+          <CardContent className="p-3.5 sm:p-4">
+            <div className="flex items-center justify-between text-xs font-semibold text-espresso-700">
+              <span className="truncate">Completed Orders</span>
+              <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600 shrink-0" />
+            </div>
+            <div className="mt-1.5 sm:mt-2 font-serif text-xl sm:text-2xl font-bold text-espresso-950">
+              {data.completedCount}
+            </div>
+            <div className="mt-1 text-[10px] sm:text-[11px] text-emerald-700 font-medium truncate">
+              Served &amp; completed
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 6. Active Tables */}
+        <Card className="border-cream-200/90 shadow-sm bg-white">
+          <CardContent className="p-3.5 sm:p-4">
+            <div className="flex items-center justify-between text-xs font-semibold text-espresso-700">
+              <span className="truncate">Active Tables</span>
+              <QrCode className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-burgundy-700 shrink-0" />
+            </div>
+            <div className="mt-1.5 sm:mt-2 font-serif text-xl sm:text-2xl font-bold text-espresso-950">
+              {data.activeTablesCount} / {data.totalTables}
+            </div>
+            <div className="mt-1 text-[10px] sm:text-[11px] text-espresso-600/80 truncate">
+              Open dining sessions
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Chart + Popular Products */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+        <Card className="lg:col-span-8 min-w-0">
+          <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
+            <CardTitle className="font-serif text-lg sm:text-xl">
+              7-Day Sales Trend
+            </CardTitle>
+            <CardDescription className="text-xs sm:text-sm">
+              Canonical order totals recorded in PostgreSQL
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-6 pt-0">
+            <OverviewSalesChart data={data.salesTrend} currency={data.currency} />
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-4 min-w-0">
+          <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
+            <CardTitle className="font-serif text-lg sm:text-xl">
+              Popular Dishes
+            </CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Top ordered items by quantity</CardDescription>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-6 pt-0">
+            {data.topProducts.length === 0 ? (
+              <p className="py-10 text-center text-xs text-forest-700/70">
+                No ordered items recorded yet.
+              </p>
+            ) : (
+              <div className="space-y-2.5 sm:space-y-3">
+                {data.topProducts.map((info, idx) => (
+                  <div
+                    key={info.name}
+                    className="flex items-center justify-between rounded-xl border border-cream-200 bg-cream-50/40 px-3 py-2 sm:px-3.5 sm:py-2.5"
+                  >
+                    <div className="min-w-0 pr-2">
+                      <div className="truncate text-xs sm:text-sm font-semibold text-forest-950">
+                        {idx + 1}. {info.name}
+                      </div>
+                      <div className="text-[11px] sm:text-xs text-forest-700">
+                        {info.qty} ordered
+                      </div>
+                    </div>
+                    <div className="text-xs sm:text-sm font-bold text-forest-900 shrink-0">
+                      {formatCurrency(info.revenue, data.currency)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Orders Table */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between p-4 sm:p-6 pb-3 sm:pb-4">
+          <div>
+            <CardTitle className="font-serif text-lg sm:text-xl">Recent Orders</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">
+              Latest table submissions (Offline settlement at counter / table)
+            </CardDescription>
+          </div>
+          <Button asChild variant="ghost" size="sm" className="text-xs h-8">
+            <Link href="/admin/orders">View All →</Link>
+          </Button>
+        </CardHeader>
+        <CardContent className="p-0 sm:p-6 sm:pt-0">
+          {data.recentOrders.length === 0 ? (
+            <div className="py-8 text-center text-sm text-forest-700/75">
+              No orders placed yet. Scan a table QR code to place your first test order!
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[580px] text-left text-sm">
+                <thead>
+                  <tr className="border-b border-cream-200 bg-cream-50/50 sm:bg-transparent text-xs uppercase text-forest-700">
+                    <th className="py-2.5 px-3 sm:px-0 sm:pr-4">Order #</th>
+                    <th className="py-2.5 px-3 sm:px-0 sm:pr-4">Table</th>
+                    <th className="py-2.5 px-3 sm:px-0 sm:pr-4">Status</th>
+                    <th className="py-2.5 px-3 sm:px-0 sm:pr-4">Payment Method</th>
+                    <th className="py-2.5 px-3 sm:px-0 sm:pr-4">Payment Status</th>
+                    <th className="py-2.5 px-3 sm:px-0 sm:pr-4">Total</th>
+                    <th className="py-2.5 px-3 sm:px-0">Time</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-cream-100">
+                  {data.recentOrders.map((ord) => (
+                    <tr key={ord.id} className="hover:bg-cream-50/50">
+                      <td className="py-3 px-3 sm:px-0 sm:pr-4 font-mono font-bold text-forest-950">
+                        {ord.order_number}
+                      </td>
+                      <td className="py-3 px-3 sm:px-0 sm:pr-4">
+                        Table {ord.table_number_snapshot ?? "-"}
+                      </td>
+                      <td className="py-3 px-3 sm:px-0 sm:pr-4">
+                        <Badge variant="secondary" className="capitalize text-xs">
+                          {ord.status}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-3 sm:px-0 sm:pr-4">
+                        <span className="inline-flex items-center gap-1 text-xs text-forest-800 font-medium">
+                          <Banknote className="h-3 w-3 text-burgundy-700" />
+                          Pay at Restaurant
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 sm:px-0 sm:pr-4">
+                        <Badge
+                          variant={ord.payment_status === "paid" ? "veg" : "outline"}
+                          className={`capitalize text-xs ${
+                            ord.payment_status !== "paid"
+                              ? "border-amber-300 bg-amber-50 text-amber-800"
+                              : ""
+                          }`}
+                        >
+                          {ord.payment_status === "paid" ? "Paid" : "Pending"}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-3 sm:px-0 sm:pr-4 font-semibold text-xs sm:text-sm">
+                        {formatCurrency(Number(ord.total), data.currency)}
+                      </td>
+                      <td className="py-3 px-3 sm:px-0 text-xs text-forest-700">
+                        {new Date(ord.created_at).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

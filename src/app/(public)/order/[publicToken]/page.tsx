@@ -6,7 +6,7 @@ import {
   CheckCircle2,
   ChefHat,
   Clock,
-  CreditCard,
+  Banknote,
   Loader2,
   PackageCheck,
   Receipt,
@@ -83,14 +83,6 @@ function getStepIndex(status: OrderStatus): number {
   return TRACKING_STEPS.findIndex((s) => s.key === status);
 }
 
-declare global {
-  interface Window {
-    Razorpay?: new (options: Record<string, unknown>) => {
-      open: () => void;
-    };
-  }
-}
-
 export default function OrderTrackingPage({
   params,
 }: {
@@ -99,8 +91,6 @@ export default function OrderTrackingPage({
   const [order, setOrder] = useState<TrackedOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [paying, setPaying] = useState(false);
-  const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
 
   const fetchOrder = useCallback(async () => {
     const { isConfigured } = getSupabasePublicEnv();
@@ -163,94 +153,6 @@ export default function OrderTrackingPage({
       clearInterval(interval);
     };
   }, [fetchOrder, params.publicToken]);
-
-  async function handleRazorpayPayment() {
-    if (!order) return;
-    setPaying(true);
-    setPaymentMessage(null);
-
-    try {
-      const res = await fetch("/api/payments/razorpay/create-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ publicToken: order.public_token }),
-      });
-
-      const data = (await res.json()) as {
-        razorpayOrderId?: string;
-        amount?: number;
-        currency?: string;
-        keyId?: string;
-        error?: string;
-      };
-
-      if (!res.ok || !data.razorpayOrderId || !data.keyId) {
-        setPaymentMessage(
-          data.error ?? "Online payment unavailable. You can settle at the counter."
-        );
-        setPaying(false);
-        return;
-      }
-
-      // Dynamically load Razorpay Checkout JS SDK
-      if (!window.Razorpay) {
-        await new Promise<void>((resolve, reject) => {
-          const script = document.createElement("script");
-          script.src = "https://checkout.razorpay.com/v1/checkout.js";
-          script.onload = () => resolve();
-          script.onerror = () => reject(new Error("Failed to load Razorpay SDK"));
-          document.body.appendChild(script);
-        });
-      }
-
-      if (!window.Razorpay) {
-        throw new Error("Razorpay checkout unavailable.");
-      }
-
-      const rzp = new window.Razorpay({
-        key: data.keyId,
-        amount: data.amount,
-        currency: data.currency,
-        name: order.restaurant_name,
-        description: `Order ${order.order_number} • Table ${order.table_number ?? ""}`,
-        order_id: data.razorpayOrderId,
-        handler: async (response: {
-          razorpay_order_id: string;
-          razorpay_payment_id: string;
-          razorpay_signature: string;
-        }) => {
-          const verifyRes = await fetch("/api/payments/razorpay/verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              publicToken: order.public_token,
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature,
-            }),
-          });
-          if (verifyRes.ok) {
-            setPaymentMessage("Payment verified and confirmed!");
-            fetchOrder();
-          } else {
-            setPaymentMessage("Payment verification pending.");
-          }
-          setPaying(false);
-        },
-        modal: {
-          ondismiss: () => setPaying(false),
-        },
-        theme: { color: "#991B1B" },
-      });
-
-      rzp.open();
-    } catch (err) {
-      setPaymentMessage(
-        err instanceof Error ? err.message : "Unable to initiate online payment."
-      );
-      setPaying(false);
-    }
-  }
 
   if (loading) {
     return (
@@ -482,36 +384,46 @@ export default function OrderTrackingPage({
               </div>
             </div>
 
-            {/* Payment Trigger */}
-            {!isCancelled && order.payment_status !== "paid" && (
-              <div className="border-t border-cream-200 pt-4 space-y-2">
-                {paymentMessage && (
-                  <div className="rounded-lg bg-cream-100 p-3 text-xs text-forest-900">
-                    {paymentMessage}
+            {/* Payment Details & Offline Settlement */}
+            {!isCancelled && (
+              <div className="border-t border-cream-200 pt-4 space-y-3">
+                <div className="rounded-xl border border-cream-200 bg-cream-50/70 p-3.5 sm:p-4 text-xs sm:text-sm">
+                  <div className="flex items-center justify-between pb-2 border-b border-cream-200">
+                    <span className="font-semibold text-forest-950 flex items-center gap-1.5">
+                      <Banknote className="h-4 w-4 text-burgundy-700 shrink-0" />
+                      Payment Method
+                    </span>
+                    <Badge
+                      variant={order.payment_status === "paid" ? "veg" : "outline"}
+                      className={`capitalize text-xs font-semibold ${
+                        order.payment_status !== "paid"
+                          ? "border-amber-300 bg-amber-50 text-amber-800"
+                          : ""
+                      }`}
+                    >
+                      {order.payment_status === "paid" ? "Paid" : "Payment Pending"}
+                    </Badge>
                   </div>
-                )}
-                <Button
-                  className="w-full font-semibold"
-                  onClick={handleRazorpayPayment}
-                  disabled={paying}
-                >
-                  {paying ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      <span>Preparing Checkout...</span>
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="mr-2 h-4 w-4" />
-                      <span>
-                        Pay Now Online ({formatCurrency(order.total, order.currency)})
-                      </span>
-                    </>
-                  )}
-                </Button>
-                <p className="text-center text-[11px] text-forest-700/75">
-                  Or settle via cash/card directly at the restaurant counter when finished.
-                </p>
+
+                  <div className="pt-2.5 text-xs text-forest-800 space-y-1">
+                    {order.payment_status === "paid" ? (
+                      <p className="text-emerald-800 font-medium flex items-center gap-1.5">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                        Payment of {formatCurrency(order.total, order.currency)} has been collected and verified at the restaurant.
+                      </p>
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between font-semibold text-espresso-950">
+                          <span>Pay at the restaurant</span>
+                          <span>{formatCurrency(order.total, order.currency)}</span>
+                        </div>
+                        <p className="text-[11px] sm:text-xs text-forest-700/80">
+                          Please settle your bill directly at your table or counter when finished dining. We accept Cash, UPI, and Cards.
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
           </CardContent>

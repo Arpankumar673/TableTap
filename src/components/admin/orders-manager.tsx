@@ -183,23 +183,36 @@ export function OrdersManager({ currency, initialOrders }: OrdersManagerProps) {
   }
 
   async function handleMarkCounterPaid(order: AdminOrderRow) {
+    if (busy || order.payment_status === "paid") return;
     setBusy(true);
     setError(null);
     try {
       const supabase = createClient();
+      const collectionTimestamp = new Date().toISOString();
+
       await supabase.from("payments").insert({
         order_id: order.id,
         amount: order.total,
         currency,
-        provider: "counter",
+        provider: "pay_at_restaurant",
         status: "successful",
+        created_at: collectionTimestamp,
       });
 
       const { error: updErr } = await supabase
         .from("orders")
-        .update({ payment_status: "paid" })
+        .update({
+          payment_status: "paid",
+          updated_at: collectionTimestamp,
+        })
         .eq("id", order.id);
       if (updErr) throw updErr;
+
+      setSelectedOrder((prev) =>
+        prev && prev.id === order.id
+          ? { ...prev, payment_status: "paid" }
+          : prev
+      );
 
       await refreshOrders();
     } catch (err) {
@@ -279,7 +292,8 @@ export function OrdersManager({ currency, initialOrders }: OrdersManagerProps) {
                   <th className="px-4 py-3">Table</th>
                   <th className="px-4 py-3">Items</th>
                   <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Payment</th>
+                  <th className="px-4 py-3">Payment Method</th>
+                  <th className="px-4 py-3">Payment Status</th>
                   <th className="px-4 py-3">Total</th>
                   <th className="px-4 py-3">Created</th>
                   <th className="px-4 py-3 text-right">Details</th>
@@ -312,11 +326,21 @@ export function OrdersManager({ currency, initialOrders }: OrdersManagerProps) {
                       </Badge>
                     </td>
                     <td className="px-4 py-3.5">
+                      <span className="inline-flex items-center gap-1 text-xs text-forest-800 font-medium">
+                        <Banknote className="h-3.5 w-3.5 text-burgundy-700" />
+                        Pay at Restaurant
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5">
                       <Badge
                         variant={ord.payment_status === "paid" ? "veg" : "outline"}
-                        className="capitalize"
+                        className={`capitalize ${
+                          ord.payment_status !== "paid"
+                            ? "border-amber-300 bg-amber-50 text-amber-800"
+                            : ""
+                        }`}
                       >
-                        {ord.payment_status}
+                        {ord.payment_status === "paid" ? "Paid" : "Pending"}
                       </Badge>
                     </td>
                     <td className="px-4 py-3.5 font-bold">
@@ -416,7 +440,7 @@ export function OrdersManager({ currency, initialOrders }: OrdersManagerProps) {
             </div>
 
             {/* Totals Breakdown */}
-            <div className="rounded-xl border border-cream-200 bg-cream-50 p-3.5 text-xs space-y-1">
+            <div className="rounded-xl border border-cream-200 bg-cream-50 p-3.5 text-xs space-y-1.5">
               <div className="flex justify-between">
                 <span>Subtotal</span>
                 <span>{formatCurrency(selectedOrder.subtotal, currency)}</span>
@@ -434,8 +458,28 @@ export function OrdersManager({ currency, initialOrders }: OrdersManagerProps) {
                 </div>
               )}
               <div className="flex justify-between border-t border-cream-200 pt-1.5 text-sm font-bold text-forest-950">
-                <span>Total ({selectedOrder.payment_status})</span>
+                <span>Total Amount</span>
                 <span>{formatCurrency(selectedOrder.total, currency)}</span>
+              </div>
+              <div className="flex items-center justify-between border-t border-cream-200 pt-1.5 text-xs">
+                <span className="text-forest-700">Payment Method:</span>
+                <span className="inline-flex items-center gap-1 font-semibold text-forest-900">
+                  <Banknote className="h-3.5 w-3.5 text-burgundy-700" />
+                  Pay at Restaurant
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-forest-700">Payment Status:</span>
+                <Badge
+                  variant={selectedOrder.payment_status === "paid" ? "veg" : "outline"}
+                  className={`capitalize text-[11px] font-semibold ${
+                    selectedOrder.payment_status !== "paid"
+                      ? "border-amber-300 bg-amber-50 text-amber-800"
+                      : ""
+                  }`}
+                >
+                  {selectedOrder.payment_status === "paid" ? "Paid" : "Pending"}
+                </Badge>
               </div>
             </div>
 
@@ -466,18 +510,25 @@ export function OrdersManager({ currency, initialOrders }: OrdersManagerProps) {
             )}
 
             {/* Admin Actions */}
-            <div className="flex flex-wrap gap-2 border-t border-cream-200 pt-3">
+            <div className="flex flex-wrap items-center gap-2 border-t border-cream-200 pt-3">
               {selectedOrder.payment_status !== "paid" &&
-                selectedOrder.status !== "cancelled" && (
+                selectedOrder.status !== "cancelled" ? (
                   <Button
                     variant="default"
                     size="sm"
                     disabled={busy}
                     onClick={() => handleMarkCounterPaid(selectedOrder)}
+                    className="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs"
                   >
-                    <Banknote className="mr-1.5 h-4 w-4" /> Mark Counter Paid
+                    <Banknote className="mr-1.5 h-4 w-4" />
+                    {busy ? "Recording Payment..." : "Mark as Paid"}
                   </Button>
-                )}
+                ) : selectedOrder.payment_status === "paid" ? (
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg px-2.5 py-1.5">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    <span>Payment Collected</span>
+                  </div>
+                ) : null}
 
               {selectedOrder.status !== "completed" &&
                 selectedOrder.status !== "cancelled" && (
