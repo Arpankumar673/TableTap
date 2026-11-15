@@ -492,7 +492,7 @@ export function CustomerMenuView({
       {/* Restaurant Editorial Hero Header */}
       <header className="relative border-b border-cream-200 bg-white">
         {restaurant.cover_image_url && (
-          <div className="relative h-44 w-full overflow-hidden sm:h-56">
+          <div className="relative h-36 w-full overflow-hidden sm:h-56">
             <Image
               src={restaurant.cover_image_url}
               alt={restaurant.name}
@@ -505,15 +505,15 @@ export function CustomerMenuView({
           </div>
         )}
 
-        <div className="mx-auto max-w-5xl px-4 py-5 sm:px-6">
+        <div className="mx-auto max-w-5xl px-3.5 py-4 sm:px-6 sm:py-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div className="flex items-start gap-4">
-              <div className="relative flex h-16 w-auto shrink-0 items-center justify-center rounded-2xl border border-cream-200 bg-burgundy-900 px-3 py-2 text-cream-50 shadow-md">
-                <BostonLogo variant="light" size="sm" className="h-8 w-auto" />
+            <div className="flex flex-col min-[420px]:flex-row items-start gap-3 min-[420px]:gap-4">
+              <div className="relative flex h-14 w-auto min-[420px]:h-16 shrink-0 items-center justify-center rounded-2xl border border-cream-200 bg-burgundy-900 px-3 py-2 text-cream-50 shadow-md">
+                <BostonLogo variant="light" size="sm" className="h-7 min-[420px]:h-8 w-auto" />
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="font-serif text-2xl font-bold tracking-tight text-espresso-950 sm:text-3xl">
+                  <h1 className="font-serif text-xl min-[420px]:text-2xl font-bold tracking-tight text-espresso-950 sm:text-3xl">
                     {restaurant.name}
                   </h1>
                   {tableContext ? (
@@ -527,15 +527,15 @@ export function CustomerMenuView({
                   )}
                 </div>
                 {restaurant.description && (
-                  <p className="mt-1.5 max-w-2xl text-sm text-forest-800/80">
+                  <p className="mt-1 max-w-2xl text-xs sm:text-sm text-forest-800/80 line-clamp-2 sm:line-clamp-none">
                     {restaurant.description}
                   </p>
                 )}
-                <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-forest-700">
+                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-forest-700">
                   {restaurant.address && (
                     <span className="inline-flex items-center gap-1">
                       <MapPin className="h-3.5 w-3.5" />
-                      {restaurant.address}
+                      <span className="truncate max-w-[240px] sm:max-w-none">{restaurant.address}</span>
                     </span>
                   )}
                   {restaurant.phone && (
@@ -553,7 +553,7 @@ export function CustomerMenuView({
                 variant="outline"
                 size="sm"
                 onClick={openSessionSummary}
-                className="self-start sm:self-end border-forest-700/30 text-forest-900"
+                className="w-full min-[420px]:w-auto self-start sm:self-end border-forest-700/30 text-forest-900 h-9"
               >
                 <Receipt className="mr-1.5 h-4 w-4 text-forest-700" />
                 <span>Table Bill &amp; Orders</span>
@@ -587,23 +587,23 @@ export function CustomerMenuView({
 
       {/* Sticky Search, Dietary Filters & Category Strip */}
       <div className="sticky top-0 z-30 border-b border-cream-200/90 bg-cream-50/95 backdrop-blur-md">
-        <div className="mx-auto max-w-5xl px-4 py-3 sm:px-6">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-auto max-w-5xl px-3.5 py-2.5 sm:px-6 sm:py-3">
+          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-forest-700/60" />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search pizzas, burgers, pasta, shakes..."
-                className="pl-9 bg-white"
+                placeholder="Search pizzas, burgers, pasta..."
+                className="pl-9 h-9 sm:h-10 text-xs sm:text-sm bg-white"
               />
             </div>
 
-            <div className="flex items-center gap-2 overflow-x-auto pb-0.5">
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-0.5 scrollbar-none touch-pan-x">
               <button
                 onClick={() => setDietFilter("all")}
                 className={cn(
-                  "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors",
+                  "shrink-0 rounded-full px-3 sm:px-3.5 py-1 sm:py-1.5 text-xs font-semibold transition-colors",
                   dietFilter === "all"
                     ? "bg-forest-800 text-white"
                     : "bg-white border border-cream-300 text-forest-800 hover:bg-cream-100"
@@ -614,7 +614,7 @@ export function CustomerMenuView({
               <button
                 onClick={() => setDietFilter("veg")}
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors",
+                  "shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 sm:px-3.5 py-1 sm:py-1.5 text-xs font-semibold transition-colors",
                   dietFilter === "veg"
                     ? "bg-emerald-700 text-white"
                     : "bg-white border border-cream-300 text-forest-800 hover:bg-emerald-50"
@@ -626,7 +626,7 @@ export function CustomerMenuView({
               <button
                 onClick={() => setDietFilter("non-veg")}
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors",
+                  "shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 sm:px-3.5 py-1 sm:py-1.5 text-xs font-semibold transition-colors",
                   dietFilter === "non-veg"
                     ? "bg-tomato-600 text-white"
                     : "bg-white border border-cream-300 text-forest-800 hover:bg-tomato-50"
@@ -639,7 +639,7 @@ export function CustomerMenuView({
           </div>
 
           {/* Horizontal Category Pills */}
-          <div className="mt-3 flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <div className="mt-2.5 flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-none touch-pan-x scroll-smooth">
             {categories.map((cat) => {
               const hasItems = productsByCategory.has(cat.id);
               if (!hasItems) return null;
@@ -648,7 +648,7 @@ export function CustomerMenuView({
                   key={cat.id}
                   onClick={() => scrollToCategory(cat.id)}
                   className={cn(
-                    "shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all",
+                    "shrink-0 rounded-lg px-2.5 sm:px-3 py-1.5 text-xs font-semibold transition-all",
                     activeCategoryId === cat.id
                       ? "bg-forest-900 text-cream-50 shadow-sm"
                       : "bg-cream-200/70 text-forest-900 hover:bg-cream-200"
@@ -751,7 +751,7 @@ export function CustomerMenuView({
                 )}
               </div>
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
                 {catProducts.map((product) => {
                   const hasCustomizations =
                     (product.variants && product.variants.length > 0) ||
@@ -762,15 +762,15 @@ export function CustomerMenuView({
                       key={product.id}
                       onClick={() => product.available && openProductModal(product)}
                       className={cn(
-                        "flex gap-4 rounded-2xl border border-cream-200/90 bg-white p-4 shadow-sm transition-all",
+                        "flex gap-3 sm:gap-4 rounded-2xl border border-cream-200/90 bg-white p-3 sm:p-4 shadow-sm transition-all",
                         product.available
                           ? "cursor-pointer hover:border-forest-700/30 hover:shadow-md"
                           : "opacity-65 cursor-not-allowed"
                       )}
                     >
-                      <div className="flex flex-1 flex-col justify-between">
+                      <div className="flex flex-1 flex-col justify-between min-w-0">
                         <div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5 sm:gap-2">
                             <DietaryBadge type={product.dietary_type} />
                             {product.is_popular && (
                               <span className="rounded bg-spice-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-spice-800">
@@ -783,23 +783,23 @@ export function CustomerMenuView({
                               </span>
                             )}
                           </div>
-                          <h3 className="mt-1.5 font-serif text-lg font-bold text-forest-950">
+                          <h3 className="mt-1 font-serif text-sm min-[380px]:text-base sm:text-lg font-bold text-forest-950 line-clamp-1 min-[420px]:line-clamp-2">
                             {product.name}
                           </h3>
                           {product.description && (
-                            <p className="mt-1 text-xs leading-relaxed text-forest-800/75 line-clamp-2">
+                            <p className="mt-0.5 text-xs leading-relaxed text-forest-800/75 line-clamp-2">
                               {product.description}
                             </p>
                           )}
                         </div>
 
-                        <div className="mt-4 flex items-center justify-between">
-                          <div>
-                            <span className="text-base font-bold text-forest-950">
+                        <div className="mt-3 flex items-center justify-between gap-2">
+                          <div className="min-w-0">
+                            <span className="text-sm min-[380px]:text-base font-bold text-forest-950">
                               {formatCurrency(product.base_price, currency)}
                             </span>
                             {product.variants && product.variants.length > 0 && (
-                              <span className="ml-1.5 text-[11px] text-forest-700/70">
+                              <span className="ml-1 text-[10px] min-[380px]:text-[11px] text-forest-700/70">
                                 onwards
                               </span>
                             )}
@@ -813,7 +813,7 @@ export function CustomerMenuView({
                               e.stopPropagation();
                               if (product.available) openProductModal(product);
                             }}
-                            className="h-8 px-3 text-xs"
+                            className="h-8 px-2.5 sm:px-3 text-xs shrink-0 font-semibold"
                           >
                             {!product.available
                               ? "Unavailable"
@@ -824,19 +824,19 @@ export function CustomerMenuView({
                         </div>
                       </div>
 
-                      <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-cream-100">
+                      <div className="relative h-20 w-20 min-[380px]:h-24 min-[380px]:w-24 sm:h-28 sm:w-28 shrink-0 overflow-hidden rounded-xl bg-cream-100">
                         {product.image_url ? (
                           <Image
                             src={product.image_url}
                             alt={product.name}
                             fill
                             unoptimized
-                            sizes="112px"
+                            sizes="(max-width: 640px) 96px, 112px"
                             className="object-cover"
                           />
                         ) : (
                           <div className="flex h-full items-center justify-center text-forest-700/30">
-                            <UtensilsCrossed className="h-7 w-7" />
+                            <UtensilsCrossed className="h-6 w-6 sm:h-7 sm:w-7" />
                           </div>
                         )}
                       </div>
@@ -863,20 +863,20 @@ export function CustomerMenuView({
 
       {/* Sticky Bottom Cart Bar */}
       {cart.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-cream-200 bg-white/95 p-3 shadow-2xl backdrop-blur-md">
-          <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 rounded-xl bg-forest-900 px-4 py-3 text-cream-50 shadow-lg">
-            <div>
-              <div className="flex items-center gap-2 text-xs text-cream-200">
-                <ShoppingBag className="h-3.5 w-3.5" />
-                <span>
+        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-cream-200 bg-white/95 p-2.5 sm:p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-2xl backdrop-blur-md">
+          <div className="mx-auto flex max-w-5xl items-center justify-between gap-2.5 sm:gap-4 rounded-xl bg-forest-900 px-3.5 sm:px-4 py-2.5 sm:py-3 text-cream-50 shadow-lg">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 text-xs text-cream-200">
+                <ShoppingBag className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">
                   {cartSummary.totalItemsCount}{" "}
                   {cartSummary.totalItemsCount === 1 ? "item" : "items"}
-                  {tableContext ? ` • Table ${tableContext.tableNumber}` : ""}
+                  {tableContext ? ` • T-${tableContext.tableNumber}` : ""}
                 </span>
               </div>
-              <div className="text-base font-bold">
+              <div className="text-sm min-[380px]:text-base font-bold truncate">
                 {formatCurrency(cartSummary.total, currency)}{" "}
-                <span className="text-[11px] font-normal text-cream-200/80">
+                <span className="text-[10px] sm:text-[11px] font-normal text-cream-200/80">
                   (incl. taxes)
                 </span>
               </div>
@@ -885,7 +885,7 @@ export function CustomerMenuView({
             <Button
               variant="spice"
               onClick={() => setCartOpen(true)}
-              className="px-5 font-bold"
+              className="px-3.5 sm:px-5 text-xs sm:text-sm font-bold shrink-0 h-9 sm:h-10"
             >
               View Cart &amp; Order
             </Button>
@@ -899,9 +899,9 @@ export function CustomerMenuView({
         onOpenChange={(open) => !open && setSelectedProduct(null)}
       >
         {selectedProduct && (
-          <DialogContent className="max-w-lg p-0 overflow-hidden">
+          <DialogContent className="max-w-lg p-0 overflow-hidden max-h-[90vh] flex flex-col">
             {selectedProduct.image_url && (
-              <div className="relative h-48 w-full bg-cream-100">
+              <div className="relative h-36 sm:h-48 w-full bg-cream-100 shrink-0">
                 <Image
                   src={selectedProduct.image_url}
                   alt={selectedProduct.name}
@@ -913,7 +913,7 @@ export function CustomerMenuView({
               </div>
             )}
 
-            <div className="p-6 space-y-5">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-5">
               <DialogHeader>
                 <div className="flex items-center gap-2">
                   <DietaryBadge type={selectedProduct.dietary_type} showLabel />
@@ -922,11 +922,11 @@ export function CustomerMenuView({
                     ~{selectedProduct.prep_time_minutes} mins
                   </span>
                 </div>
-                <DialogTitle className="text-2xl mt-1">
+                <DialogTitle className="text-xl sm:text-2xl mt-1">
                   {selectedProduct.name}
                 </DialogTitle>
                 {selectedProduct.description && (
-                  <DialogDescription>
+                  <DialogDescription className="text-xs sm:text-sm">
                     {selectedProduct.description}
                   </DialogDescription>
                 )}
@@ -1065,40 +1065,40 @@ export function CustomerMenuView({
                   className="min-h-[60px]"
                 />
               </div>
+            </div>
 
-              {/* Quantity & Add Action */}
-              <div className="flex items-center justify-between gap-4 border-t border-cream-200 pt-4">
-                <div className="flex items-center rounded-xl border border-cream-300 bg-cream-50">
-                  <button
-                    type="button"
-                    onClick={() => setItemQuantity((q) => Math.max(1, q - 1))}
-                    className="p-2.5 text-forest-900 hover:bg-cream-200 rounded-l-xl"
-                  >
-                    <Minus className="h-4 w-4" />
-                  </button>
-                  <span className="w-8 text-center text-sm font-bold">
-                    {itemQuantity}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setItemQuantity((q) => Math.min(50, q + 1))}
-                    className="p-2.5 text-forest-900 hover:bg-cream-200 rounded-r-xl"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </button>
-                </div>
-
-                <Button
-                  className="flex-1 h-11 font-bold"
-                  onClick={handleAddToCart}
+            {/* Sticky Bottom Quantity & Add Action */}
+            <div className="sticky bottom-0 border-t border-cream-200 bg-white/95 p-3.5 sm:p-5 backdrop-blur-sm shrink-0 flex items-center justify-between gap-3">
+              <div className="flex items-center rounded-xl border border-cream-300 bg-cream-50">
+                <button
+                  type="button"
+                  onClick={() => setItemQuantity((q) => Math.max(1, q - 1))}
+                  className="p-2 sm:p-2.5 text-forest-900 hover:bg-cream-200 rounded-l-xl touch-manipulation"
                 >
-                  Add to Cart •{" "}
-                  {formatCurrency(
-                    roundCurrency(currentUnitPrice * itemQuantity),
-                    currency
-                  )}
-                </Button>
+                  <Minus className="h-4 w-4" />
+                </button>
+                <span className="w-7 sm:w-8 text-center text-sm font-bold">
+                  {itemQuantity}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setItemQuantity((q) => Math.min(50, q + 1))}
+                  className="p-2 sm:p-2.5 text-forest-900 hover:bg-cream-200 rounded-r-xl touch-manipulation"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
               </div>
+
+              <Button
+                className="flex-1 h-11 text-xs sm:text-sm font-bold"
+                onClick={handleAddToCart}
+              >
+                Add to Cart •{" "}
+                {formatCurrency(
+                  roundCurrency(currentUnitPrice * itemQuantity),
+                  currency
+                )}
+              </Button>
             </div>
           </DialogContent>
         )}
@@ -1106,12 +1106,12 @@ export function CustomerMenuView({
 
       {/* Cart & Checkout Dialog */}
       <Dialog open={cartOpen} onOpenChange={setCartOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="font-serif text-2xl">
+        <DialogContent className="max-w-lg p-4 sm:p-6 max-h-[90vh] flex flex-col">
+          <DialogHeader className="shrink-0">
+            <DialogTitle className="font-serif text-xl sm:text-2xl">
               Your Table Order
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-xs sm:text-sm">
               {tableContext
                 ? `Ordering directly for Table ${tableContext.tableNumber} at ${restaurant.name}`
                 : isDemoPreview
@@ -1121,14 +1121,14 @@ export function CustomerMenuView({
           </DialogHeader>
 
           {orderError && (
-            <div className="flex items-start gap-2 rounded-lg border border-tomato-200 bg-tomato-50 p-3 text-sm text-tomato-800">
+            <div className="flex items-start gap-2 rounded-lg border border-tomato-200 bg-tomato-50 p-3 text-xs sm:text-sm text-tomato-800 shrink-0">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-tomato-600" />
               <span>{orderError}</span>
             </div>
           )}
 
           {!tableContext && !isDemoPreview && (
-            <div className="flex items-start gap-3 rounded-xl border border-spice-200 bg-spice-50 p-3.5 text-xs text-spice-900">
+            <div className="flex items-start gap-3 rounded-xl border border-spice-200 bg-spice-50 p-3 text-xs text-spice-900 shrink-0">
               <QrCode className="mt-0.5 h-4 w-4 shrink-0 text-spice-600" />
               <span>
                 Table verification required: Please scan the QR code on your physical table so your order routes accurately to your table.
@@ -1136,133 +1136,138 @@ export function CustomerMenuView({
             </div>
           )}
 
-          <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
-            {cart.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-start justify-between gap-3 rounded-xl border border-cream-200 bg-cream-50/40 p-3"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <DietaryBadge type={item.dietaryType} />
-                    <span className="font-semibold text-sm text-forest-950">
-                      {item.name}
-                    </span>
-                  </div>
-                  {item.variantName && (
-                    <div className="mt-0.5 text-xs text-forest-700 font-medium">
-                      Size: {item.variantName}
+          <div className="flex-1 overflow-y-auto pr-1 space-y-3">
+            <div className="space-y-2.5">
+              {cart.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-start justify-between gap-2.5 sm:gap-3 rounded-xl border border-cream-200 bg-cream-50/40 p-3"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <DietaryBadge type={item.dietaryType} />
+                      <span className="font-semibold text-xs sm:text-sm text-forest-950 truncate">
+                        {item.name}
+                      </span>
                     </div>
-                  )}
-                  {item.selectedOptions.length > 0 && (
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      {item.selectedOptions.map((opt) => (
-                        <span
-                          key={opt.optionValueId}
-                          className="rounded bg-white px-1.5 py-0.5 text-[10px] border border-cream-200 text-forest-800"
-                        >
-                          {opt.optionValueName}
-                          {opt.priceDelta > 0
-                            ? ` (+${formatCurrency(opt.priceDelta, currency)})`
-                            : ""}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  {item.notes && (
-                    <p className="mt-1 text-[11px] italic text-forest-700">
-                      Note: &ldquo;{item.notes}&rdquo;
-                    </p>
-                  )}
-                </div>
+                    {item.variantName && (
+                      <div className="mt-0.5 text-xs text-forest-700 font-medium">
+                        Size: {item.variantName}
+                      </div>
+                    )}
+                    {item.selectedOptions.length > 0 && (
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {item.selectedOptions.map((opt) => (
+                          <span
+                            key={opt.optionValueId}
+                            className="rounded bg-white px-1.5 py-0.5 text-[10px] border border-cream-200 text-forest-800"
+                          >
+                            {opt.optionValueName}
+                            {opt.priceDelta > 0
+                              ? ` (+${formatCurrency(opt.priceDelta, currency)})`
+                              : ""}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {item.notes && (
+                      <p className="mt-1 text-[11px] italic text-forest-700">
+                        Note: &ldquo;{item.notes}&rdquo;
+                      </p>
+                    )}
+                  </div>
 
-                <div className="flex flex-col items-end gap-2">
-                  <span className="text-sm font-bold text-forest-950">
-                    {formatCurrency(item.totalPrice, currency)}
-                  </span>
-                  <div className="flex items-center gap-1 rounded-lg border border-cream-300 bg-white">
-                    <button
-                      type="button"
-                      onClick={() => updateCartQuantity(item.id, -1)}
-                      className="p-1 text-forest-800 hover:bg-cream-100 rounded-l-lg"
-                    >
-                      {item.quantity === 1 ? (
-                        <Trash2 className="h-3.5 w-3.5 text-tomato-600" />
-                      ) : (
-                        <Minus className="h-3.5 w-3.5" />
-                      )}
-                    </button>
-                    <span className="w-6 text-center text-xs font-bold">
-                      {item.quantity}
+                  <div className="flex flex-col items-end gap-2 shrink-0">
+                    <span className="text-xs sm:text-sm font-bold text-forest-950">
+                      {formatCurrency(item.totalPrice, currency)}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => updateCartQuantity(item.id, 1)}
-                      className="p-1 text-forest-800 hover:bg-cream-100 rounded-r-lg"
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                    </button>
+                    <div className="flex items-center gap-0.5 rounded-lg border border-cream-300 bg-white">
+                      <button
+                        type="button"
+                        onClick={() => updateCartQuantity(item.id, -1)}
+                        className="p-1 sm:p-1.5 text-forest-800 hover:bg-cream-100 rounded-l-lg touch-manipulation"
+                      >
+                        {item.quantity === 1 ? (
+                          <Trash2 className="h-3.5 w-3.5 text-tomato-600" />
+                        ) : (
+                          <Minus className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                      <span className="w-5 sm:w-6 text-center text-xs font-bold">
+                        {item.quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => updateCartQuantity(item.id, 1)}
+                        className="p-1 sm:p-1.5 text-forest-800 hover:bg-cream-100 rounded-r-lg touch-manipulation"
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-forest-700">
-              Kitchen Order Notes (Optional)
-            </label>
-            <Input
-              value={customerNotes}
-              onChange={(e) => setCustomerNotes(e.target.value)}
-              placeholder="Allergies, cutlery request, or serve all dishes together..."
-            />
-          </div>
-
-          {/* Bill Breakdown */}
-          <div className="space-y-1.5 rounded-xl border border-cream-200 bg-cream-50 p-4 text-sm">
-            <div className="flex justify-between text-forest-800">
-              <span>Item Subtotal</span>
-              <span>{formatCurrency(cartSummary.subtotal, currency)}</span>
+              ))}
             </div>
-            <div className="flex justify-between text-forest-800">
-              <span>Taxes ({restaurant.tax_rate}%)</span>
-              <span>{formatCurrency(cartSummary.tax, currency)}</span>
+
+            <div className="space-y-1.5 pt-1">
+              <label className="text-xs font-semibold text-forest-700">
+                Kitchen Order Notes (Optional)
+              </label>
+              <Input
+                value={customerNotes}
+                onChange={(e) => setCustomerNotes(e.target.value)}
+                placeholder="Allergies, cutlery request, or serve together..."
+                className="text-xs sm:text-sm"
+              />
             </div>
-            {restaurant.service_charge_rate > 0 && (
+
+            {/* Bill Breakdown */}
+            <div className="space-y-1.5 rounded-xl border border-cream-200 bg-cream-50 p-3.5 sm:p-4 text-xs sm:text-sm">
               <div className="flex justify-between text-forest-800">
-                <span>Service Charge ({restaurant.service_charge_rate}%)</span>
-                <span>{formatCurrency(cartSummary.serviceCharge, currency)}</span>
+                <span>Item Subtotal</span>
+                <span>{formatCurrency(cartSummary.subtotal, currency)}</span>
               </div>
-            )}
-            <div className="flex justify-between border-t border-cream-200 pt-2 text-base font-bold text-forest-950">
-              <span>Total Amount</span>
-              <span>{formatCurrency(cartSummary.total, currency)}</span>
+              <div className="flex justify-between text-forest-800">
+                <span>Taxes ({restaurant.tax_rate}%)</span>
+                <span>{formatCurrency(cartSummary.tax, currency)}</span>
+              </div>
+              {restaurant.service_charge_rate > 0 && (
+                <div className="flex justify-between text-forest-800">
+                  <span>Service Charge ({restaurant.service_charge_rate}%)</span>
+                  <span>{formatCurrency(cartSummary.serviceCharge, currency)}</span>
+                </div>
+              )}
+              <div className="flex justify-between border-t border-cream-200 pt-2 text-sm sm:text-base font-bold text-forest-950">
+                <span>Total Amount</span>
+                <span>{formatCurrency(cartSummary.total, currency)}</span>
+              </div>
             </div>
           </div>
 
-          <Button
-            size="lg"
-            className="w-full font-bold"
-            onClick={handleSubmitOrder}
-            disabled={
-              submittingOrder ||
-              cart.length === 0 ||
-              !restaurant.is_accepting_orders ||
-              (!tableContext && !isDemoPreview)
-            }
-          >
-            {submittingOrder ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                <span>Sending to Kitchen...</span>
-              </>
-            ) : (
-              <span>
-                Place Order • {formatCurrency(cartSummary.total, currency)}
-              </span>
-            )}
-          </Button>
+          <div className="shrink-0 pt-3 border-t border-cream-100">
+            <Button
+              size="lg"
+              className="w-full font-bold h-11 sm:h-12 text-sm sm:text-base"
+              onClick={handleSubmitOrder}
+              disabled={
+                submittingOrder ||
+                cart.length === 0 ||
+                !restaurant.is_accepting_orders ||
+                (!tableContext && !isDemoPreview)
+              }
+            >
+              {submittingOrder ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <span>Sending to Kitchen...</span>
+                </>
+              ) : (
+                <span>
+                  Place Order • {formatCurrency(cartSummary.total, currency)}
+                </span>
+              )}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 

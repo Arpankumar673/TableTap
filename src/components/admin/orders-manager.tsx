@@ -210,55 +210,57 @@ export function OrdersManager({ currency, initialOrders }: OrdersManagerProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       <div>
-        <h1 className="font-serif text-3xl font-bold text-forest-950">
+        <h1 className="font-serif text-2xl sm:text-3xl font-bold text-forest-950">
           Order Management
         </h1>
-        <p className="mt-1 text-sm text-forest-700/80">
+        <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-forest-700/80">
           Search dine-in orders, audit status transitions, record counter settlements, and inspect immutable snapshots
         </p>
       </div>
 
       {/* Filters */}
       <Card>
-        <CardContent className="flex flex-wrap items-center gap-3 p-4">
-          <div className="relative flex-1 min-w-[200px]">
+        <CardContent className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 p-3.5 sm:p-4">
+          <div className="relative flex-1 min-w-0">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-forest-700/60" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by Order # or Table #..."
-              className="pl-9"
+              className="pl-9 h-9 sm:h-10 text-xs sm:text-sm"
             />
           </div>
 
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-10 rounded-md border border-cream-300 bg-white px-3 text-sm"
-          >
-            <option value="all">All Statuses</option>
-            <option value="new">New</option>
-            <option value="accepted">Accepted</option>
-            <option value="preparing">Preparing</option>
-            <option value="ready">Ready</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="h-9 sm:h-10 flex-1 sm:flex-initial rounded-md border border-cream-300 bg-white px-3 text-xs sm:text-sm"
+            >
+              <option value="all">All Statuses</option>
+              <option value="new">New</option>
+              <option value="accepted">Accepted</option>
+              <option value="preparing">Preparing</option>
+              <option value="ready">Ready</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
 
-          <Input
-            type="date"
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="w-auto"
-          />
+            <Input
+              type="date"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="h-9 sm:h-10 w-auto text-xs sm:text-sm"
+            />
 
-          {dateFilter && (
-            <Button variant="ghost" size="sm" onClick={() => setDateFilter("")}>
-              Clear Date
-            </Button>
-          )}
+            {dateFilter && (
+              <Button variant="ghost" size="sm" onClick={() => setDateFilter("")} className="h-9 text-xs">
+                Clear
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
 
@@ -270,7 +272,7 @@ export function OrdersManager({ currency, initialOrders }: OrdersManagerProps) {
               No orders match your current filters.
             </div>
           ) : (
-            <table className="w-full text-left text-sm">
+            <table className="w-full min-w-[620px] text-left text-sm">
               <thead>
                 <tr className="border-b border-cream-200 bg-cream-50/70 text-xs uppercase text-forest-700">
                   <th className="px-4 py-3">Order #</th>
@@ -349,13 +351,13 @@ export function OrdersManager({ currency, initialOrders }: OrdersManagerProps) {
         onOpenChange={(open) => !open && setSelectedOrder(null)}
       >
         {selectedOrder && (
-          <DialogContent className="max-w-xl">
+          <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto p-4 sm:p-6">
             <DialogHeader>
-              <DialogTitle className="flex items-center justify-between pr-6">
+              <DialogTitle className="flex items-center justify-between pr-6 text-lg sm:text-xl">
                 <span>Order {selectedOrder.order_number}</span>
-                <Badge className="capitalize">{selectedOrder.status}</Badge>
+                <Badge className="capitalize text-xs">{selectedOrder.status}</Badge>
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-xs sm:text-sm">
                 Table {selectedOrder.table_number_snapshot ?? "-"} •{" "}
                 {new Date(selectedOrder.created_at).toLocaleString()}
               </DialogDescription>

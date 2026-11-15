@@ -457,13 +457,13 @@ export function MenuManager({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="space-y-5 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="font-serif text-3xl font-bold text-forest-950">
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-forest-950">
             Menu &amp; Catalog Management
           </h1>
-          <p className="mt-1 text-sm text-forest-700/80">
+          <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-forest-700/80">
             Configure categories, dishes, pricing variants, add-ons, and kitchen station routing
           </p>
         </div>
@@ -473,6 +473,7 @@ export function MenuManager({
           onClick={handleSeedSample}
           disabled={seeding}
           size="sm"
+          className="w-full sm:w-auto font-semibold"
         >
           {seeding ? (
             <>
@@ -489,22 +490,22 @@ export function MenuManager({
       </div>
 
       {statusMsg && (
-        <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 text-sm font-medium text-emerald-900">
-          <CheckCircle2 className="h-5 w-5 text-emerald-700" />
+        <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 text-xs sm:text-sm font-medium text-emerald-900">
+          <CheckCircle2 className="h-5 w-5 text-emerald-700 shrink-0" />
           <span>{statusMsg}</span>
         </div>
       )}
 
       {errorMsg && (
-        <div className="flex items-center gap-2 rounded-xl border border-tomato-200 bg-tomato-50 p-3.5 text-sm font-medium text-tomato-900">
-          <AlertCircle className="h-5 w-5 text-tomato-600" />
+        <div className="flex items-center gap-2 rounded-xl border border-tomato-200 bg-tomato-50 p-3.5 text-xs sm:text-sm font-medium text-tomato-900">
+          <AlertCircle className="h-5 w-5 text-tomato-600 shrink-0" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       <Tabs defaultValue="products">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <TabsList>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+          <TabsList className="w-full sm:w-auto overflow-x-auto justify-start scrollbar-none touch-pan-x">
             <TabsTrigger value="products">
               Products ({products.filter((p) => p.active).length})
             </TabsTrigger>
@@ -516,21 +517,21 @@ export function MenuManager({
             </TabsTrigger>
           </TabsList>
 
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => openCategoryModal()}>
-              <Plus className="mr-1.5 h-4 w-4" /> Category
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+            <Button variant="outline" size="sm" onClick={() => openCategoryModal()} className="flex-1 sm:flex-initial text-xs">
+              <Plus className="mr-1.5 h-3.5 w-3.5" /> Category
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setOgOpen(true)}>
-              <Plus className="mr-1.5 h-4 w-4" /> Option Group
+            <Button variant="outline" size="sm" onClick={() => setOgOpen(true)} className="flex-1 sm:flex-initial text-xs">
+              <Plus className="mr-1.5 h-3.5 w-3.5" /> Option Group
             </Button>
-            <Button size="sm" onClick={() => openProductModal()}>
-              <Plus className="mr-1.5 h-4 w-4" /> Add Product
+            <Button size="sm" onClick={() => openProductModal()} className="w-full min-[420px]:w-auto flex-1 sm:flex-initial text-xs">
+              <Plus className="mr-1.5 h-3.5 w-3.5" /> Add Product
             </Button>
           </div>
         </div>
 
         {/* PRODUCTS TAB */}
-        <TabsContent value="products" className="mt-5">
+        <TabsContent value="products" className="mt-4 sm:mt-5">
           {products.filter((p) => p.active).length === 0 ? (
             <Card className="py-16 text-center">
               <UtensilsCrossed className="mx-auto h-10 w-10 text-forest-700/40" />
@@ -540,7 +541,7 @@ export function MenuManager({
               </p>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
               {products
                 .filter((p) => p.active)
                 .map((prod) => {
@@ -551,15 +552,15 @@ export function MenuManager({
 
                   return (
                     <Card key={prod.id} className="overflow-hidden">
-                      <CardContent className="flex gap-4 p-4">
-                        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-cream-100">
+                      <CardContent className="flex gap-3 sm:gap-4 p-3.5 sm:p-4">
+                        <div className="relative h-20 w-20 min-[380px]:h-24 min-[380px]:w-24 sm:h-24 sm:w-24 shrink-0 overflow-hidden rounded-xl bg-cream-100">
                           {prod.image_url ? (
                             <Image
                               src={prod.image_url}
                               alt={prod.name}
                               fill
                               unoptimized
-                              sizes="96px"
+                              sizes="(max-width: 640px) 96px, 96px"
                               className="object-cover"
                             />
                           ) : (
@@ -572,18 +573,18 @@ export function MenuManager({
                         <div className="flex flex-1 flex-col justify-between min-w-0">
                           <div>
                             <div className="flex items-start justify-between gap-2">
-                              <div className="flex items-center gap-2 min-w-0">
+                              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                                 <DietaryBadge type={prod.dietary_type} />
-                                <h3 className="truncate font-serif text-base font-bold text-forest-950">
+                                <h3 className="truncate font-serif text-sm sm:text-base font-bold text-forest-950">
                                   {prod.name}
                                 </h3>
                               </div>
-                              <span className="font-bold text-sm text-forest-950 shrink-0">
+                              <span className="font-bold text-xs sm:text-sm text-forest-950 shrink-0">
                                 {formatCurrency(prod.base_price, currency)}
                               </span>
                             </div>
 
-                            <div className="mt-1 flex flex-wrap gap-1.5 text-[11px]">
+                            <div className="mt-1 flex flex-wrap gap-1 sm:gap-1.5 text-[10px] sm:text-[11px]">
                               <Badge variant="secondary">{catName}</Badge>
                               <Badge variant="outline">{stationName}</Badge>
                               {prod.variants && prod.variants.length > 0 && (
@@ -594,7 +595,7 @@ export function MenuManager({
                             </div>
                           </div>
 
-                          <div className="mt-3 flex items-center justify-between pt-2 border-t border-cream-100">
+                          <div className="mt-2.5 sm:mt-3 flex items-center justify-between pt-2 border-t border-cream-100">
                             <div className="flex items-center gap-2">
                               <Switch
                                 checked={prod.available}
@@ -610,6 +611,7 @@ export function MenuManager({
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => openProductModal(prod)}
+                                className="h-8 w-8 p-0"
                               >
                                 <Edit3 className="h-3.5 w-3.5" />
                               </Button>
@@ -617,6 +619,7 @@ export function MenuManager({
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => deleteProduct(prod.id)}
+                                className="h-8 w-8 p-0"
                               >
                                 <Trash2 className="h-3.5 w-3.5 text-tomato-600" />
                               </Button>
@@ -755,12 +758,12 @@ export function MenuManager({
 
       {/* PRODUCT MODAL */}
       <Dialog open={prodOpen} onOpenChange={setProdOpen}>
-        <DialogContent className="max-w-xl">
+        <DialogContent className="max-w-xl max-h-[88vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-lg sm:text-xl">
               {editingProd ? `Edit ${editingProd.name}` : "Add Menu Product"}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-xs sm:text-sm">
               Configure pricing, dietary indicator, station routing, and variants
             </DialogDescription>
           </DialogHeader>

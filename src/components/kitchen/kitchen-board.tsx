@@ -335,21 +335,21 @@ export function KitchenBoard({
   return (
     <div className="min-h-screen bg-kitchen-dark text-zinc-100">
       {/* Top Operational Bar */}
-      <header className="sticky top-0 z-30 border-b border-kitchen-border bg-kitchen-dark/95 px-4 py-3 backdrop-blur-md sm:px-6">
-        <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-4">
+      <header className="sticky top-0 z-30 border-b border-kitchen-border bg-kitchen-dark/95 px-3.5 py-2.5 backdrop-blur-md sm:px-6 sm:py-3">
+        <div className="mx-auto flex max-w-[1600px] flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-burgundy-950/80 text-burgundy-400 border border-burgundy-700/50">
-              <ChefHat className="h-6 w-6" />
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-burgundy-950/80 text-burgundy-400 border border-burgundy-700/50 shrink-0">
+              <ChefHat className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <BostonLogo variant="light" size="sm" className="h-6 w-auto" />
-                <span className="text-xs uppercase tracking-widest font-mono text-zinc-400">
+                <BostonLogo variant="light" size="sm" className="h-5 sm:h-6 w-auto" />
+                <span className="text-[11px] sm:text-xs uppercase tracking-widest font-mono text-zinc-400">
                   | KDS
                 </span>
                 <span
                   className={cn(
-                    "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-mono font-semibold border",
+                    "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] sm:text-[11px] font-mono font-semibold border",
                     realtimeStatus === "connected"
                       ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
                       : "bg-amber-500/15 text-amber-400 border-amber-500/30"
@@ -365,13 +365,13 @@ export function KitchenBoard({
                   </span>
                 </span>
               </div>
-              <p className="text-xs text-zinc-400">
+              <p className="text-[11px] sm:text-xs text-zinc-400 line-clamp-1 sm:line-clamp-none">
                 {restaurantName} • Tap order actions or individual station items to update live status
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5 w-full sm:w-auto">
             {/* Sound Mute Control */}
             <button
               onClick={() => {
@@ -380,7 +380,7 @@ export function KitchenBoard({
                 if (!nextMuted) playNotificationChime();
               }}
               className={cn(
-                "inline-flex items-center gap-2 rounded-lg border px-3.5 py-2 text-xs font-bold transition-colors",
+                "inline-flex items-center gap-1.5 sm:gap-2 rounded-lg border px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs font-bold transition-colors flex-1 sm:flex-initial justify-center",
                 muted
                   ? "border-zinc-700 bg-zinc-800/80 text-zinc-400"
                   : "border-emerald-500/40 bg-emerald-950/60 text-emerald-300"
@@ -388,12 +388,12 @@ export function KitchenBoard({
             >
               {muted ? (
                 <>
-                  <VolumeX className="h-4 w-4" />
-                  <span>Audio Muted</span>
+                  <VolumeX className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span>Muted</span>
                 </>
               ) : (
                 <>
-                  <Volume2 className="h-4 w-4" />
+                  <Volume2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   <span>Sound ON</span>
                 </>
               )}
@@ -401,7 +401,7 @@ export function KitchenBoard({
 
             <button
               onClick={fetchLatestOrders}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-kitchen-border bg-kitchen-card px-3 py-2 text-xs font-semibold text-zinc-200 hover:bg-zinc-800"
+              className="inline-flex items-center gap-1 rounded-lg border border-kitchen-border bg-kitchen-card px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-semibold text-zinc-200 hover:bg-zinc-800"
             >
               <RefreshCw className="h-3.5 w-3.5" />
               <span>Sync</span>
@@ -410,7 +410,7 @@ export function KitchenBoard({
             {userRole === "admin" && (
               <Link
                 href="/admin"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-kitchen-border bg-kitchen-card px-3 py-2 text-xs font-semibold text-zinc-200 hover:bg-zinc-800"
+                className="inline-flex items-center gap-1 rounded-lg border border-kitchen-border bg-kitchen-card px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-semibold text-zinc-200 hover:bg-zinc-800"
               >
                 <LayoutDashboard className="h-3.5 w-3.5" />
                 <span>Admin</span>
@@ -419,7 +419,7 @@ export function KitchenBoard({
 
             <button
               onClick={handleSignOut}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/30 bg-rose-950/40 px-3 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-900/50"
+              className="inline-flex items-center gap-1 rounded-lg border border-rose-500/30 bg-rose-950/40 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-semibold text-rose-300 hover:bg-rose-900/50"
             >
               <LogOut className="h-3.5 w-3.5" />
               <span>Sign Out</span>
@@ -428,12 +428,12 @@ export function KitchenBoard({
         </div>
 
         {/* Status Summary & Station Filters */}
-        <div className="mx-auto mt-3 flex max-w-[1600px] flex-wrap items-center justify-between gap-3 pt-3 border-t border-kitchen-border/70">
+        <div className="mx-auto mt-2.5 sm:mt-3 flex max-w-[1600px] flex-col lg:flex-row lg:items-center justify-between gap-2.5 sm:gap-3 pt-2.5 sm:pt-3 border-t border-kitchen-border/70">
           {/* Status Queue Tabs */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-none touch-pan-x w-full lg:w-auto">
             {(
               [
-                { key: "active", label: "Active Queue", count: stats.pending + stats.preparing + stats.ready },
+                { key: "active", label: "Active", count: stats.pending + stats.preparing + stats.ready },
                 { key: "pending", label: "New", count: stats.pending },
                 { key: "preparing", label: "Preparing", count: stats.preparing },
                 { key: "ready", label: "Ready", count: stats.ready },
@@ -444,33 +444,33 @@ export function KitchenBoard({
                 key={tab.key}
                 onClick={() => setStatusFilter(tab.key)}
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-bold transition-all",
+                  "shrink-0 inline-flex items-center gap-1.5 sm:gap-2 rounded-lg px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs font-bold transition-all",
                   statusFilter === tab.key
                     ? "bg-emerald-600 text-white shadow"
                     : "bg-kitchen-card text-zinc-300 border border-kitchen-border hover:bg-zinc-800"
                 )}
               >
                 <span>{tab.label}</span>
-                <span className="rounded-md bg-black/30 px-1.5 py-0.5 font-mono text-[11px]">
+                <span className="rounded-md bg-black/30 px-1.5 py-0.5 font-mono text-[10px] sm:text-[11px]">
                   {tab.count}
                 </span>
               </button>
             ))}
 
             {stats.delayed > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-rose-600/20 border border-rose-500/50 px-3 py-2 text-xs font-bold text-rose-300">
-                <AlertTriangle className="h-4 w-4 text-rose-400" />
+              <span className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-rose-600/20 border border-rose-500/50 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold text-rose-300">
+                <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-rose-400" />
                 <span>{stats.delayed} Delayed (&gt;20m)</span>
               </span>
             )}
           </div>
 
           {/* Station Filter Pills */}
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none touch-pan-x w-full lg:w-auto">
             <button
               onClick={() => setSelectedStation("all")}
               className={cn(
-                "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
+                "shrink-0 rounded-lg px-2.5 sm:px-3 py-1.5 text-xs font-semibold transition-colors",
                 selectedStation === "all"
                   ? "bg-white text-kitchen-dark font-bold"
                   : "bg-kitchen-card text-zinc-300 border border-kitchen-border hover:bg-zinc-800"
@@ -483,7 +483,7 @@ export function KitchenBoard({
                 key={st.id}
                 onClick={() => setSelectedStation(st.name)}
                 className={cn(
-                  "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
+                  "shrink-0 rounded-lg px-2.5 sm:px-3 py-1.5 text-xs font-semibold transition-colors",
                   selectedStation.toLowerCase() === st.name.toLowerCase()
                     ? "bg-white text-kitchen-dark font-bold"
                     : "bg-kitchen-card text-zinc-300 border border-kitchen-border hover:bg-zinc-800"
@@ -497,7 +497,7 @@ export function KitchenBoard({
       </header>
 
       {/* Order Cards Grid */}
-      <main className="mx-auto max-w-[1600px] p-4 sm:p-6">
+      <main className="mx-auto max-w-[1600px] p-3.5 sm:p-6">
         {visibleOrders.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-kitchen-border bg-kitchen-card/50 py-24 text-center">
             <CheckCircle2 className="h-12 w-12 text-emerald-500/40" />

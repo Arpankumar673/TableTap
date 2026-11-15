@@ -63,7 +63,7 @@ export function AdminSidebar({
   }
 
   const navContent = (
-    <div className="flex h-full flex-col justify-between bg-white border-r border-cream-200 p-4">
+    <div className="flex h-full flex-col justify-between bg-white border-r border-cream-200 p-3.5 sm:p-4 overflow-y-auto pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div>
         {/* Brand */}
         <div className="flex flex-col gap-2 px-2 py-3 border-b border-cream-200">
@@ -102,7 +102,7 @@ export function AdminSidebar({
                   }
                 }}
                 className={cn(
-                  "flex items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-medium transition-all",
+                  "flex items-center justify-between rounded-xl px-3.5 py-2.5 min-h-[40px] text-xs font-medium transition-all",
                   isActive
                     ? "bg-burgundy-800 text-cream-50 shadow-sm font-semibold"
                     : "text-espresso-800 hover:bg-cream-100 hover:text-espresso-950",
@@ -164,7 +164,7 @@ export function AdminSidebar({
   return (
     <>
       {/* Mobile Header */}
-      <div className="sticky top-0 z-40 flex items-center justify-between border-b border-cream-200 bg-white px-4 py-3 lg:hidden">
+      <div className="sticky top-0 z-40 flex items-center justify-between border-b border-cream-200 bg-white px-3.5 py-2.5 sm:px-4 sm:py-3 lg:hidden">
         <div className="flex items-center gap-2.5">
           <BostonLogo variant="burgundy" size="sm" className="h-7 w-auto" />
           <span className="font-serif font-bold text-xs text-espresso-950">
@@ -186,7 +186,7 @@ export function AdminSidebar({
             className="fixed inset-0 bg-forest-950/40"
             onClick={() => setMobileOpen(false)}
           />
-          <div className="relative z-10 w-72 h-full">{navContent}</div>
+          <div className="relative z-10 w-[84vw] max-w-72 h-full shadow-2xl">{navContent}</div>
         </div>
       )}
 

@@ -198,19 +198,19 @@ export function AnalyticsView({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="space-y-5 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="font-serif text-3xl font-bold text-forest-950">
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-forest-950">
             Analytics &amp; Business Reports
           </h1>
-          <p className="mt-1 text-sm text-forest-700/80">
+          <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-forest-700/80">
             Canonical order revenue, peak dining hours, and product performance
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex rounded-xl border border-cream-200 bg-white p-1">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <div className="inline-flex rounded-xl border border-cream-200 bg-white p-1 overflow-x-auto scrollbar-none max-w-full">
             {(
               [
                 { key: "today", label: "Today" },
@@ -222,7 +222,7 @@ export function AnalyticsView({
               <button
                 key={opt.key}
                 onClick={() => setRange(opt.key)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                className={`rounded-lg px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs font-semibold transition-colors shrink-0 ${
                   range === opt.key
                     ? "bg-forest-800 text-white"
                     : "text-forest-800 hover:bg-cream-100"
@@ -233,84 +233,84 @@ export function AnalyticsView({
             ))}
           </div>
 
-          <Button variant="outline" size="sm" onClick={exportCsv}>
-            <Download className="mr-1.5 h-4 w-4" />
+          <Button variant="outline" size="sm" onClick={exportCsv} className="text-xs h-9">
+            <Download className="mr-1.5 h-3.5 w-3.5" />
             <span>Export CSV</span>
           </Button>
         </div>
       </div>
 
       {/* Summary KPIs */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <Card>
-          <CardContent className="p-5">
+          <CardContent className="p-3.5 sm:p-5">
             <div className="flex items-center justify-between text-xs font-medium text-forest-700">
-              <span>Gross Sales (Excl. Cancelled)</span>
-              <DollarSign className="h-4 w-4 text-forest-700" />
+              <span className="truncate">Gross Sales</span>
+              <DollarSign className="h-4 w-4 text-forest-700 shrink-0" />
             </div>
-            <div className="mt-2 font-serif text-2xl font-bold text-forest-950">
+            <div className="mt-1.5 sm:mt-2 font-serif text-xl sm:text-2xl font-bold text-forest-950">
               {formatCurrency(metrics.grossSales, currency)}
             </div>
-            <div className="mt-1 text-xs text-emerald-700 font-medium">
+            <div className="mt-1 text-[11px] sm:text-xs text-emerald-700 font-medium truncate">
               Paid: {formatCurrency(metrics.paidSales, currency)}
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-5">
+          <CardContent className="p-3.5 sm:p-5">
             <div className="flex items-center justify-between text-xs font-medium text-forest-700">
-              <span>Order Volume</span>
-              <ShoppingBag className="h-4 w-4 text-forest-700" />
+              <span className="truncate">Order Volume</span>
+              <ShoppingBag className="h-4 w-4 text-forest-700 shrink-0" />
             </div>
-            <div className="mt-2 font-serif text-2xl font-bold text-forest-950">
+            <div className="mt-1.5 sm:mt-2 font-serif text-xl sm:text-2xl font-bold text-forest-950">
               {metrics.placed}
             </div>
-            <div className="mt-1 text-xs text-forest-700">
+            <div className="mt-1 text-[11px] sm:text-xs text-forest-700 truncate">
               Completed: {metrics.completed}
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-5">
+          <CardContent className="p-3.5 sm:p-5">
             <div className="flex items-center justify-between text-xs font-medium text-forest-700">
-              <span>Average Order Value</span>
-              <TrendingUp className="h-4 w-4 text-forest-700" />
+              <span className="truncate">Avg Order Value</span>
+              <TrendingUp className="h-4 w-4 text-forest-700 shrink-0" />
             </div>
-            <div className="mt-2 font-serif text-2xl font-bold text-forest-950">
+            <div className="mt-1.5 sm:mt-2 font-serif text-xl sm:text-2xl font-bold text-forest-950">
               {formatCurrency(metrics.aov, currency)}
             </div>
-            <div className="mt-1 text-xs text-forest-700">
+            <div className="mt-1 text-[11px] sm:text-xs text-forest-700 truncate">
               Table utilization: {metrics.tableUtilPct}%
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-5">
+          <CardContent className="p-3.5 sm:p-5">
             <div className="flex items-center justify-between text-xs font-medium text-forest-700">
-              <span>Cancelled Orders</span>
-              <Ban className="h-4 w-4 text-tomato-600" />
+              <span className="truncate">Cancelled Orders</span>
+              <Ban className="h-4 w-4 text-tomato-600 shrink-0" />
             </div>
-            <div className="mt-2 font-serif text-2xl font-bold text-forest-950">
+            <div className="mt-1.5 sm:mt-2 font-serif text-xl sm:text-2xl font-bold text-forest-950">
               {metrics.cancelled}
             </div>
-            <div className="mt-1 text-xs text-forest-700">
-              Excluded from gross sales
+            <div className="mt-1 text-[11px] sm:text-xs text-forest-700 truncate">
+              Excluded from sales
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-serif text-lg">Revenue Over Time</CardTitle>
-            <CardDescription>Daily sales performance</CardDescription>
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <Card className="min-w-0">
+          <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
+            <CardTitle className="font-serif text-base sm:text-lg">Revenue Over Time</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Daily sales performance</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6 pt-0">
             {metrics.dailyTrend.length === 0 ? (
               <div className="flex h-64 items-center justify-center text-xs text-forest-700/70">
                 No order data in selected date range.
@@ -342,12 +342,12 @@ export function AnalyticsView({
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-serif text-lg">Peak Ordering Hours</CardTitle>
-            <CardDescription>Orders grouped by hour of day</CardDescription>
+        <Card className="min-w-0">
+          <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
+            <CardTitle className="font-serif text-base sm:text-lg">Peak Ordering Hours</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Orders grouped by hour of day</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6 pt-0">
             {metrics.peakHours.length === 0 ? (
               <div className="flex h-64 items-center justify-center text-xs text-forest-700/70">
                 No hourly order volume recorded yet.
@@ -370,13 +370,13 @@ export function AnalyticsView({
       </div>
 
       {/* Category & Product Performance */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-serif text-lg">Category Performance</CardTitle>
-            <CardDescription>Revenue contribution per menu category</CardDescription>
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <Card className="min-w-0">
+          <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
+            <CardTitle className="font-serif text-base sm:text-lg">Category Performance</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Revenue contribution per menu category</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6 pt-0">
             {metrics.categoryPerf.length === 0 ? (
               <div className="py-12 text-center text-xs text-forest-700/70">
                 No category data yet.

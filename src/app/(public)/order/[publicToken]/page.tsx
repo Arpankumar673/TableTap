@@ -288,22 +288,22 @@ export default function OrderTrackingPage({
   const isCancelled = order.status === "cancelled";
 
   return (
-    <div className="min-h-screen bg-cream-50 py-8 px-4 sm:px-6">
-      <div className="mx-auto max-w-2xl space-y-6">
+    <div className="min-h-screen bg-cream-50 py-5 sm:py-8 px-3 sm:px-6">
+      <div className="mx-auto max-w-2xl space-y-4 sm:space-y-6">
         {/* Top Bar */}
         <div className="flex items-center justify-between">
           <Link
             href="/menu"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-forest-800 hover:text-forest-950"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-forest-800 hover:text-forest-950"
           >
             <ArrowLeft className="h-4 w-4" />
-            <span>Back to {order.restaurant_name} Menu</span>
+            <span className="truncate max-w-[200px] sm:max-w-none">Back to {order.restaurant_name} Menu</span>
           </Link>
           <Button
             variant="ghost"
             size="sm"
             onClick={fetchOrder}
-            className="text-xs text-forest-700"
+            className="text-xs text-forest-700 h-8 px-2.5 sm:px-3"
           >
             <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
             <span>Refresh</span>
@@ -312,36 +312,36 @@ export default function OrderTrackingPage({
 
         {/* Status Hero Card */}
         <Card className="border-cream-200 shadow-xl overflow-hidden">
-          <div className="bg-burgundy-950 px-6 py-5 text-cream-50 flex flex-wrap items-center justify-between gap-4 border-b border-burgundy-900">
-            <div className="flex items-center gap-4">
-              <BostonLogo variant="light" size="sm" className="h-9 w-auto" />
+          <div className="bg-burgundy-950 px-4 py-4 sm:px-6 sm:py-5 text-cream-50 flex flex-wrap items-center justify-between gap-3 sm:gap-4 border-b border-burgundy-900">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <BostonLogo variant="light" size="sm" className="h-7 sm:h-9 w-auto" />
               <div>
-                <div className="text-xs uppercase tracking-wider text-cream-200/80">
+                <div className="text-[10px] sm:text-xs uppercase tracking-wider text-cream-200/80">
                   {order.restaurant_name} • Table {order.table_number ?? "Dining"}
                 </div>
-                <h1 className="mt-0.5 font-serif text-2xl font-bold">
+                <h1 className="mt-0.5 font-serif text-xl sm:text-2xl font-bold">
                   Order #{order.order_number}
                 </h1>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <Badge
                 variant={isCancelled ? "destructive" : "spice"}
-                className="uppercase tracking-wider text-xs px-3 py-1"
+                className="uppercase tracking-wider text-[10px] sm:text-xs px-2.5 sm:px-3 py-0.5 sm:py-1"
               >
                 {order.status}
               </Badge>
               <Badge
                 variant={order.payment_status === "paid" ? "veg" : "secondary"}
-                className="uppercase text-xs"
+                className="uppercase text-[10px] sm:text-xs"
               >
                 {order.payment_status}
               </Badge>
             </div>
           </div>
 
-          <CardContent className="p-6">
+          <CardContent className="p-3.5 sm:p-6">
             {isCancelled ? (
               <div className="flex items-center gap-3 rounded-xl border border-tomato-200 bg-tomato-50 p-4 text-tomato-900">
                 <XCircle className="h-6 w-6 shrink-0 text-tomato-600" />
@@ -354,27 +354,27 @@ export default function OrderTrackingPage({
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="grid grid-cols-5 gap-2">
+                <div className="grid grid-cols-5 gap-1 sm:gap-2">
                   {TRACKING_STEPS.map((step, idx) => {
                     const reached = idx <= activeStepIdx;
                     const current = idx === activeStepIdx;
                     return (
                       <div key={step.key} className="flex flex-col items-center text-center">
                         <div
-                          className={`flex h-9 w-9 items-center justify-center rounded-full border-2 transition-all ${
+                          className={`flex h-7 w-7 min-[380px]:h-8 min-[380px]:w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border-2 transition-all ${
                             reached
                               ? "border-forest-700 bg-forest-700 text-white"
                               : "border-cream-300 bg-white text-cream-400"
-                          } ${current ? "ring-4 ring-forest-100" : ""}`}
+                          } ${current ? "ring-2 sm:ring-4 ring-forest-100" : ""}`}
                         >
-                          {idx === 0 && <Receipt className="h-4 w-4" />}
-                          {idx === 1 && <CheckCircle2 className="h-4 w-4" />}
-                          {idx === 2 && <ChefHat className="h-4 w-4" />}
-                          {idx === 3 && <PackageCheck className="h-4 w-4" />}
-                          {idx === 4 && <UtensilsCrossed className="h-4 w-4" />}
+                          {idx === 0 && <Receipt className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                          {idx === 1 && <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                          {idx === 2 && <ChefHat className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                          {idx === 3 && <PackageCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                          {idx === 4 && <UtensilsCrossed className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
                         </div>
                         <span
-                          className={`mt-2 text-[11px] font-bold leading-tight ${
+                          className={`mt-1.5 text-[9px] min-[380px]:text-[10px] sm:text-[11px] font-bold leading-tight ${
                             reached ? "text-forest-950" : "text-forest-700/50"
                           }`}
                         >
@@ -394,8 +394,8 @@ export default function OrderTrackingPage({
 
         {/* Itemized Receipt Snapshot */}
         <Card className="border-cream-200 shadow-sm">
-          <CardHeader className="border-b border-cream-200 pb-3">
-            <CardTitle className="font-serif text-lg flex items-center justify-between">
+          <CardHeader className="border-b border-cream-200 p-4 sm:p-5 pb-3 sm:pb-3">
+            <CardTitle className="font-serif text-base sm:text-lg flex items-center justify-between">
               <span>Order Items</span>
               <span className="text-xs font-sans font-normal text-forest-700 flex items-center gap-1">
                 <Clock className="h-3.5 w-3.5" />
@@ -406,7 +406,7 @@ export default function OrderTrackingPage({
               </span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-5 space-y-4">
+          <CardContent className="p-4 sm:p-5 space-y-4">
             <div className="space-y-3">
               {order.items.map((item) => (
                 <div

@@ -150,28 +150,28 @@ export default async function AdminOverviewPage() {
   const recentOrders = orders.slice(0, 8);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       {/* Page Title */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="font-serif text-3xl font-bold text-espresso-950">
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-espresso-950">
             Restaurant Overview
           </h1>
-          <p className="mt-1 text-sm text-espresso-700/80">
+          <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-espresso-700/80">
             Live operations, table occupancy, and sales for {ctx.settings.name}
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <Button asChild variant="outline" size="sm" className="border-cream-300">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
+          <Button asChild variant="outline" size="sm" className="border-cream-300 text-xs flex-1 sm:flex-initial">
             <Link href="/admin/qr">
-              <QrCode className="mr-1.5 h-4 w-4 text-burgundy-700" />
+              <QrCode className="mr-1.5 h-3.5 w-3.5 text-burgundy-700" />
               <span>Table QR Manager</span>
             </Link>
           </Button>
-          <Button asChild size="sm" className="bg-burgundy-800 hover:bg-burgundy-900 text-cream-50">
+          <Button asChild size="sm" className="bg-burgundy-800 hover:bg-burgundy-900 text-cream-50 text-xs flex-1 sm:flex-initial">
             <Link href="/admin/menu">
-              <UtensilsCrossed className="mr-1.5 h-4 w-4" />
+              <UtensilsCrossed className="mr-1.5 h-3.5 w-3.5" />
               <span>Menu Management</span>
             </Link>
           </Button>
@@ -181,19 +181,19 @@ export default async function AdminOverviewPage() {
       {/* Quick Setup Banner if Menu is Empty */}
       {(productsCount ?? 0) === 0 && (
         <Card className="border-spice-300 bg-spice-50/70">
-          <CardContent className="flex flex-wrap items-center justify-between gap-4 p-5">
+          <CardContent className="flex flex-wrap items-center justify-between gap-4 p-4 sm:p-5">
             <div className="flex items-start gap-3">
-              <Sparkles className="mt-0.5 h-6 w-6 text-spice-600" />
+              <Sparkles className="mt-0.5 h-5 w-5 sm:h-6 sm:w-6 text-spice-600 shrink-0" />
               <div>
-                <h2 className="font-serif text-lg font-bold text-forest-950">
+                <h2 className="font-serif text-base sm:text-lg font-bold text-forest-950">
                   Your digital menu is currently empty
                 </h2>
-                <p className="text-sm text-forest-800/80">
+                <p className="text-xs sm:text-sm text-forest-800/80 mt-0.5">
                   Go to Menu Management to create your dishes or use our 1-Click Boston &amp; Co. American Eatery Seeder to instantly populate smash burgers, sourdough pizzas, loaded fries, shakes, preparation stations, and starter tables.
                 </p>
               </div>
             </div>
-            <Button asChild variant="spice">
+            <Button asChild variant="spice" size="sm" className="w-full sm:w-auto font-semibold">
               <Link href="/admin/menu">
                 <span>Setup Menu &amp; Sample Data</span>
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -205,7 +205,7 @@ export default async function AdminOverviewPage() {
 
       {/* Bill Requests Alert */}
       {billRequestsCount > 0 && (
-        <div className="flex items-center justify-between rounded-xl border border-spice-300 bg-spice-50 px-4 py-3 text-sm text-spice-950">
+        <div className="flex items-center justify-between rounded-xl border border-spice-300 bg-spice-50 px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-spice-950">
           <span className="font-semibold">
             {billRequestsCount} active table(s) have requested their bill!
           </span>
@@ -219,18 +219,18 @@ export default async function AdminOverviewPage() {
       )}
 
       {/* Primary KPI Grid: 6 Specified Metrics */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-6">
         {/* 1. Today's Orders */}
         <Card className="border-cream-200/90 shadow-sm bg-white">
-          <CardContent className="p-4">
+          <CardContent className="p-3.5 sm:p-4">
             <div className="flex items-center justify-between text-xs font-semibold text-espresso-700">
-              <span>Today&apos;s Orders</span>
-              <UtensilsCrossed className="h-4 w-4 text-burgundy-700" />
+              <span className="truncate">Today&apos;s Orders</span>
+              <UtensilsCrossed className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-burgundy-700 shrink-0" />
             </div>
-            <div className="mt-2 font-serif text-2xl font-bold text-espresso-950">
+            <div className="mt-1.5 sm:mt-2 font-serif text-xl sm:text-2xl font-bold text-espresso-950">
               {todayOrders.length}
             </div>
-            <div className="mt-1 text-[11px] text-espresso-600/80">
+            <div className="mt-1 text-[10px] sm:text-[11px] text-espresso-600/80 truncate">
               Placed since midnight
             </div>
           </CardContent>
@@ -238,15 +238,15 @@ export default async function AdminOverviewPage() {
 
         {/* 2. Today's Revenue */}
         <Card className="border-cream-200/90 shadow-sm bg-white">
-          <CardContent className="p-4">
+          <CardContent className="p-3.5 sm:p-4">
             <div className="flex items-center justify-between text-xs font-semibold text-espresso-700">
-              <span>Today&apos;s Revenue</span>
-              <DollarSign className="h-4 w-4 text-burgundy-700" />
+              <span className="truncate">Today&apos;s Revenue</span>
+              <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-burgundy-700 shrink-0" />
             </div>
-            <div className="mt-2 font-serif text-2xl font-bold text-burgundy-800">
+            <div className="mt-1.5 sm:mt-2 font-serif text-xl sm:text-2xl font-bold text-burgundy-800">
               {formatCurrency(todaysRevenue, currency)}
             </div>
-            <div className="mt-1 text-[11px] text-espresso-600/80">
+            <div className="mt-1 text-[10px] sm:text-[11px] text-espresso-600/80 truncate">
               Gross sales today
             </div>
           </CardContent>
@@ -254,15 +254,15 @@ export default async function AdminOverviewPage() {
 
         {/* 3. Pending Orders */}
         <Card className="border-cream-200/90 shadow-sm bg-white">
-          <CardContent className="p-4">
+          <CardContent className="p-3.5 sm:p-4">
             <div className="flex items-center justify-between text-xs font-semibold text-espresso-700">
-              <span>Pending Orders</span>
-              <Clock className="h-4 w-4 text-gold-600" />
+              <span className="truncate">Pending Orders</span>
+              <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gold-600 shrink-0" />
             </div>
-            <div className="mt-2 font-serif text-2xl font-bold text-espresso-950">
+            <div className="mt-1.5 sm:mt-2 font-serif text-xl sm:text-2xl font-bold text-espresso-950">
               {pendingCount}
             </div>
-            <div className="mt-1 text-[11px] text-gold-700 font-medium">
+            <div className="mt-1 text-[10px] sm:text-[11px] text-gold-700 font-medium truncate">
               New tickets to accept
             </div>
           </CardContent>
@@ -270,31 +270,31 @@ export default async function AdminOverviewPage() {
 
         {/* 4. Preparing Orders */}
         <Card className="border-cream-200/90 shadow-sm bg-white">
-          <CardContent className="p-4">
+          <CardContent className="p-3.5 sm:p-4">
             <div className="flex items-center justify-between text-xs font-semibold text-espresso-700">
-              <span>Preparing Orders</span>
-              <Sparkles className="h-4 w-4 text-blue-600" />
+              <span className="truncate">Preparing Orders</span>
+              <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600 shrink-0" />
             </div>
-            <div className="mt-2 font-serif text-2xl font-bold text-espresso-950">
+            <div className="mt-1.5 sm:mt-2 font-serif text-xl sm:text-2xl font-bold text-espresso-950">
               {preparingCount}
             </div>
-            <div className="mt-1 text-[11px] text-blue-700 font-medium">
-              Active in kitchen stations
+            <div className="mt-1 text-[10px] sm:text-[11px] text-blue-700 font-medium truncate">
+              Active in kitchen
             </div>
           </CardContent>
         </Card>
 
         {/* 5. Completed Orders */}
         <Card className="border-cream-200/90 shadow-sm bg-white">
-          <CardContent className="p-4">
+          <CardContent className="p-3.5 sm:p-4">
             <div className="flex items-center justify-between text-xs font-semibold text-espresso-700">
-              <span>Completed Orders</span>
-              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              <span className="truncate">Completed Orders</span>
+              <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600 shrink-0" />
             </div>
-            <div className="mt-2 font-serif text-2xl font-bold text-espresso-950">
+            <div className="mt-1.5 sm:mt-2 font-serif text-xl sm:text-2xl font-bold text-espresso-950">
               {completedCount}
             </div>
-            <div className="mt-1 text-[11px] text-emerald-700 font-medium">
+            <div className="mt-1 text-[10px] sm:text-[11px] text-emerald-700 font-medium truncate">
               Served &amp; completed
             </div>
           </CardContent>
@@ -302,15 +302,15 @@ export default async function AdminOverviewPage() {
 
         {/* 6. Active Tables */}
         <Card className="border-cream-200/90 shadow-sm bg-white">
-          <CardContent className="p-4">
+          <CardContent className="p-3.5 sm:p-4">
             <div className="flex items-center justify-between text-xs font-semibold text-espresso-700">
-              <span>Active Tables</span>
-              <QrCode className="h-4 w-4 text-burgundy-700" />
+              <span className="truncate">Active Tables</span>
+              <QrCode className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-burgundy-700 shrink-0" />
             </div>
-            <div className="mt-2 font-serif text-2xl font-bold text-espresso-950">
+            <div className="mt-1.5 sm:mt-2 font-serif text-xl sm:text-2xl font-bold text-espresso-950">
               {activeTablesCount} / {totalTables}
             </div>
-            <div className="mt-1 text-[11px] text-espresso-600/80">
+            <div className="mt-1 text-[10px] sm:text-[11px] text-espresso-600/80 truncate">
               Open dining sessions
             </div>
           </CardContent>
@@ -318,49 +318,49 @@ export default async function AdminOverviewPage() {
       </div>
 
       {/* Chart + Popular Products */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <Card className="lg:col-span-8">
-          <CardHeader>
-            <CardTitle className="font-serif text-xl">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+        <Card className="lg:col-span-8 min-w-0">
+          <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
+            <CardTitle className="font-serif text-lg sm:text-xl">
               7-Day Sales Trend
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               Canonical order totals recorded in PostgreSQL
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6 pt-0">
             <OverviewSalesChart data={salesTrend} currency={currency} />
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-4">
-          <CardHeader>
-            <CardTitle className="font-serif text-xl">
+        <Card className="lg:col-span-4 min-w-0">
+          <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
+            <CardTitle className="font-serif text-lg sm:text-xl">
               Popular Dishes
             </CardTitle>
-            <CardDescription>Top ordered items by quantity</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">Top ordered items by quantity</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6 pt-0">
             {topProducts.length === 0 ? (
               <p className="py-10 text-center text-xs text-forest-700/70">
                 No ordered items recorded yet.
               </p>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2.5 sm:space-y-3">
                 {topProducts.map(([name, info], idx) => (
                   <div
                     key={name}
-                    className="flex items-center justify-between rounded-xl border border-cream-200 bg-cream-50/40 px-3.5 py-2.5"
+                    className="flex items-center justify-between rounded-xl border border-cream-200 bg-cream-50/40 px-3 py-2 sm:px-3.5 sm:py-2.5"
                   >
                     <div className="min-w-0 pr-2">
-                      <div className="truncate text-sm font-semibold text-forest-950">
+                      <div className="truncate text-xs sm:text-sm font-semibold text-forest-950">
                         {idx + 1}. {name}
                       </div>
-                      <div className="text-xs text-forest-700">
+                      <div className="text-[11px] sm:text-xs text-forest-700">
                         {info.qty} ordered
                       </div>
                     </div>
-                    <div className="text-sm font-bold text-forest-900">
+                    <div className="text-xs sm:text-sm font-bold text-forest-900 shrink-0">
                       {formatCurrency(info.revenue, currency)}
                     </div>
                   </div>
@@ -373,60 +373,63 @@ export default async function AdminOverviewPage() {
 
       {/* Recent Orders Table */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-row items-center justify-between p-4 sm:p-6 pb-3 sm:pb-4">
           <div>
-            <CardTitle className="font-serif text-xl">Recent Orders</CardTitle>
-            <CardDescription>Latest table submissions</CardDescription>
+            <CardTitle className="font-serif text-lg sm:text-xl">Recent Orders</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Latest table submissions</CardDescription>
           </div>
-          <Button asChild variant="ghost" size="sm">
+          <Button asChild variant="ghost" size="sm" className="text-xs h-8">
             <Link href="/admin/orders">View All →</Link>
           </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0 sm:p-6 sm:pt-0">
           {recentOrders.length === 0 ? (
             <div className="py-8 text-center text-sm text-forest-700/75">
               No orders placed yet. Scan a table QR code to place your first test order!
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
+              <table className="w-full min-w-[540px] text-left text-sm">
                 <thead>
-                  <tr className="border-b border-cream-200 text-xs uppercase text-forest-700">
-                    <th className="py-2.5 pr-4">Order #</th>
-                    <th className="py-2.5 pr-4">Table</th>
-                    <th className="py-2.5 pr-4">Status</th>
-                    <th className="py-2.5 pr-4">Payment</th>
-                    <th className="py-2.5 pr-4">Total</th>
-                    <th className="py-2.5">Time</th>
+                  <tr className="border-b border-cream-200 bg-cream-50/50 sm:bg-transparent text-xs uppercase text-forest-700">
+                    <th className="py-2.5 px-3 sm:px-0 sm:pr-4">Order #</th>
+                    <th className="py-2.5 px-3 sm:px-0 sm:pr-4">Table</th>
+                    <th className="py-2.5 px-3 sm:px-0 sm:pr-4">Status</th>
+                    <th className="py-2.5 px-3 sm:px-0 sm:pr-4">Payment</th>
+                    <th className="py-2.5 px-3 sm:px-0 sm:pr-4">Total</th>
+                    <th className="py-2.5 px-3 sm:px-0">Time</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-cream-100">
                   {recentOrders.map((ord) => (
                     <tr key={ord.id} className="hover:bg-cream-50/50">
-                      <td className="py-3 pr-4 font-mono font-bold text-forest-950">
+                      <td className="py-3 px-3 sm:px-0 sm:pr-4 font-mono font-bold text-forest-950">
                         {ord.order_number}
                       </td>
-                      <td className="py-3 pr-4">
+                      <td className="py-3 px-3 sm:px-0 sm:pr-4">
                         Table {ord.table_number_snapshot ?? "-"}
                       </td>
-                      <td className="py-3 pr-4">
-                        <Badge variant="secondary" className="capitalize">
+                      <td className="py-3 px-3 sm:px-0 sm:pr-4">
+                        <Badge variant="secondary" className="capitalize text-xs">
                           {ord.status}
                         </Badge>
                       </td>
-                      <td className="py-3 pr-4">
+                      <td className="py-3 px-3 sm:px-0 sm:pr-4">
                         <Badge
                           variant={ord.payment_status === "paid" ? "veg" : "outline"}
-                          className="capitalize"
+                          className="capitalize text-xs"
                         >
                           {ord.payment_status}
                         </Badge>
                       </td>
-                      <td className="py-3 pr-4 font-semibold">
+                      <td className="py-3 px-3 sm:px-0 sm:pr-4 font-semibold text-xs sm:text-sm">
                         {formatCurrency(Number(ord.total), currency)}
                       </td>
-                      <td className="py-3 text-xs text-forest-700">
-                        {new Date(ord.created_at).toLocaleString()}
+                      <td className="py-3 px-3 sm:px-0 text-xs text-forest-700">
+                        {new Date(ord.created_at).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </td>
                     </tr>
                   ))}

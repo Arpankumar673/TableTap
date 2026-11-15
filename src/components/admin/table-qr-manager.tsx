@@ -277,41 +277,43 @@ export function TableQrManager({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 print:hidden">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 print:hidden">
         <div>
-          <h1 className="font-serif text-3xl font-bold text-forest-950">
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-forest-950">
             Tables &amp; QR Codes
           </h1>
-          <p className="mt-1 text-sm text-forest-700/80">
+          <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-forest-700/80">
             Each table receives a unique, revocable cryptographic QR token linking guests directly to their table session
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2.5">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <Button
             variant="outline"
             size="sm"
             onClick={downloadAllQrZip}
             disabled={zipLoading || Object.keys(qrPreviews).length === 0}
+            className="flex-1 sm:flex-initial text-xs"
           >
             {zipLoading ? (
-              <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
             ) : (
-              <Archive className="mr-1.5 h-4 w-4" />
+              <Archive className="mr-1.5 h-3.5 w-3.5" />
             )}
-            <span>Download All QR (ZIP)</span>
+            <span>Download All ZIP</span>
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => window.print()}
             disabled={Object.keys(qrPreviews).length === 0}
+            className="flex-1 sm:flex-initial text-xs"
           >
-            <Printer className="mr-1.5 h-4 w-4" />
-            <span>Print All Cards</span>
+            <Printer className="mr-1.5 h-3.5 w-3.5" />
+            <span>Print Cards</span>
           </Button>
-          <Button size="sm" onClick={() => openTableForm()}>
-            <Plus className="mr-1.5 h-4 w-4" />
+          <Button size="sm" onClick={() => openTableForm()} className="w-full min-[420px]:w-auto flex-1 sm:flex-initial text-xs">
+            <Plus className="mr-1.5 h-3.5 w-3.5" />
             <span>Add Table</span>
           </Button>
         </div>
@@ -453,12 +455,13 @@ export function TableQrManager({
                   </div>
 
                   {/* Actions */}
-                  <div className="grid grid-cols-2 gap-2 print:hidden">
+                  <div className="grid grid-cols-1 min-[380px]:grid-cols-2 gap-2 print:hidden">
                     <Button
                       variant="outline"
                       size="sm"
                       disabled={!qrImg}
                       onClick={() => downloadSingleQr(table)}
+                      className="text-xs"
                     >
                       <Download className="mr-1.5 h-3.5 w-3.5" /> Download PNG
                     </Button>
@@ -467,6 +470,7 @@ export function TableQrManager({
                       size="sm"
                       disabled={!qrImg}
                       onClick={() => setPreviewTable(table)}
+                      className="text-xs"
                     >
                       <Eye className="mr-1.5 h-3.5 w-3.5" /> Preview / Test
                     </Button>
@@ -475,6 +479,7 @@ export function TableQrManager({
                       size="sm"
                       disabled={isBusy}
                       onClick={() => handleRegenerateQr(table)}
+                      className="text-xs"
                     >
                       <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Regenerate
                     </Button>
@@ -483,7 +488,7 @@ export function TableQrManager({
                       size="sm"
                       disabled={isBusy || !table.activeQr}
                       onClick={() => handleRevokeQr(table)}
-                      className="text-tomato-700 hover:bg-tomato-50 hover:text-tomato-800"
+                      className="text-tomato-700 hover:bg-tomato-50 hover:text-tomato-800 text-xs"
                     >
                       <Ban className="mr-1.5 h-3.5 w-3.5" /> Revoke QR
                     </Button>
@@ -554,17 +559,17 @@ export function TableQrManager({
         onOpenChange={(open) => !open && setPreviewTable(null)}
       >
         {previewTable && (
-          <DialogContent className="max-w-sm text-center">
+          <DialogContent className="max-w-sm max-h-[90vh] overflow-y-auto p-4 sm:p-6 text-center">
             <DialogHeader>
-              <DialogTitle className="text-center font-serif text-2xl">
+              <DialogTitle className="text-center font-serif text-xl sm:text-2xl">
                 {restaurantName}
               </DialogTitle>
-              <DialogDescription className="text-center">
+              <DialogDescription className="text-center text-xs sm:text-sm">
                 Printable Table Card — Table {previewTable.table_number}
               </DialogDescription>
             </DialogHeader>
-            <div className="my-2 flex flex-col items-center rounded-2xl border-2 border-burgundy-800 bg-cream-50 p-6 shadow-md">
-              <BostonLogo variant="burgundy" size="md" className="h-10 w-auto mb-3" />
+            <div className="my-2 flex flex-col items-center rounded-2xl border-2 border-burgundy-800 bg-cream-50 p-4 sm:p-6 shadow-md">
+              <BostonLogo variant="burgundy" size="md" className="h-8 sm:h-10 w-auto mb-3" />
               {qrPreviews[previewTable.id] && (
                 <Image
                   src={qrPreviews[previewTable.id]}
@@ -572,10 +577,10 @@ export function TableQrManager({
                   width={224}
                   height={224}
                   unoptimized
-                  className="h-56 w-56 rounded-xl bg-white p-2.5 shadow-sm border border-cream-200"
+                  className="h-44 w-44 sm:h-56 sm:w-56 rounded-xl bg-white p-2 sm:p-2.5 shadow-sm border border-cream-200"
                 />
               )}
-              <div className="mt-4 font-serif text-2xl font-bold text-espresso-950">
+              <div className="mt-3 sm:mt-4 font-serif text-xl sm:text-2xl font-bold text-espresso-950">
                 Table {previewTable.table_number}
               </div>
               <p className="mt-1 text-xs text-burgundy-900 font-medium">
@@ -584,16 +589,16 @@ export function TableQrManager({
             </div>
             {previewTable.activeQr?.qr_token_secret && (
               <div className="flex gap-2">
-                <Button asChild className="flex-1">
+                <Button asChild className="flex-1 text-xs sm:text-sm">
                   <a
                     href={`/t/${previewTable.activeQr.qr_token_secret}`}
                     target="_blank"
                     rel="noreferrer"
                   >
-                    Simulate Customer Scan →
+                    Simulate Scan →
                   </a>
                 </Button>
-                <Button variant="outline" onClick={() => window.print()}>
+                <Button variant="outline" onClick={() => window.print()} className="shrink-0">
                   <Printer className="h-4 w-4" />
                 </Button>
               </div>

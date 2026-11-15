@@ -70,10 +70,25 @@
   * {
     @apply border-border;
   }
+  html,
+  body {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
   body {
     @apply bg-background text-foreground antialiased selection:bg-burgundy-100 selection:text-burgundy-900;
     font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-tap-highlight-color: transparent;
   }
+}
+
+/* Scrollbar Utility for Smooth Touch Scrolling */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Dietary Indicator Primitives */
