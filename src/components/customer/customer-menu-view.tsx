@@ -47,6 +47,9 @@ import { cn, formatCurrency } from "@/lib/utils";
 import { roundCurrency } from "@/lib/pricing/calculator";
 import { createClient } from "@/lib/supabase/client";
 import { BostonLogo } from "@/components/shared/boston-logo";
+import { motion, AnimatePresence } from "framer-motion";
+import { FloatingHeroDecorations } from "./floating-decorations";
+import { BackToTopButton } from "./back-to-top-button";
 
 interface SessionOrderItem {
   id: string;
@@ -473,10 +476,14 @@ export function CustomerMenuView({
       const y = el.getBoundingClientRect().top + window.scrollY - 140;
       window.scrollTo({ top: y, behavior: "smooth" });
     }
+    const pill = document.getElementById(`cat-pill-${catId}`);
+    if (pill) {
+      pill.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
   }
 
   return (
-    <div className="min-h-screen bg-cream-50 pb-28 text-forest-950">
+    <div className="min-h-screen bg-cream-50 pb-36 text-forest-950">
       {/* Demo / Browse-Only Mode Banner */}
       {isDemoPreview && (
         <div className="bg-spice-500 px-4 py-2 text-center text-xs font-semibold text-white">
@@ -491,7 +498,9 @@ export function CustomerMenuView({
       )}
 
       {/* Restaurant Editorial Hero Header */}
-      <header className="relative border-b border-cream-200 bg-white">
+      <header className="relative overflow-hidden border-b border-cream-200 bg-white">
+        <FloatingHeroDecorations />
+
         {restaurant.cover_image_url && (
           <div className="relative h-36 w-full overflow-hidden sm:h-56">
             <Image
@@ -500,20 +509,30 @@ export function CustomerMenuView({
               fill
               unoptimized
               sizes="100vw"
-              className="object-cover"
+              className="object-cover transition-transform duration-1000 ease-out hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-forest-950/80 via-forest-950/30 to-transparent" />
           </div>
         )}
 
-        <div className="mx-auto max-w-5xl px-3.5 py-4 sm:px-6 sm:py-5">
+        <div className="relative z-10 mx-auto max-w-5xl px-3.5 py-4 sm:px-6 sm:py-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex flex-col min-[420px]:flex-row items-start gap-3 min-[420px]:gap-4">
-              <div className="relative flex h-14 w-auto min-[420px]:h-16 shrink-0 items-center justify-center rounded-2xl border border-cream-200 bg-burgundy-900 px-3 py-2 text-cream-50 shadow-md">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                className="relative flex h-14 w-auto min-[420px]:h-16 shrink-0 items-center justify-center rounded-2xl border border-cream-200 bg-burgundy-900 px-3 py-2 text-cream-50 shadow-md"
+              >
                 <BostonLogo variant="light" size="sm" className="h-7 min-[420px]:h-8 w-auto" />
-              </div>
+              </motion.div>
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+                  className="flex flex-wrap items-center gap-2"
+                >
                   <h1 className="font-serif text-xl min-[420px]:text-2xl font-bold tracking-tight text-espresso-950 sm:text-3xl">
                     {restaurant.name}
                   </h1>
@@ -526,11 +545,16 @@ export function CustomerMenuView({
                   ) : (
                     <Badge variant="secondary">Browse Mode</Badge>
                   )}
-                </div>
+                </motion.div>
                 {restaurant.description && (
-                  <p className="mt-1 max-w-2xl text-xs sm:text-sm text-forest-800/80 line-clamp-2 sm:line-clamp-none">
+                  <motion.p
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
+                    className="mt-1 max-w-2xl text-xs sm:text-sm text-forest-800/80 line-clamp-2 sm:line-clamp-none"
+                  >
                     {restaurant.description}
-                  </p>
+                  </motion.p>
                 )}
                 <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-forest-700">
                   {restaurant.address && (
@@ -554,7 +578,7 @@ export function CustomerMenuView({
                 variant="outline"
                 size="sm"
                 onClick={openSessionSummary}
-                className="w-full min-[420px]:w-auto self-start sm:self-end border-forest-700/30 text-forest-900 h-9"
+                className="w-full min-[420px]:w-auto self-start sm:self-end border-forest-700/30 text-forest-900 h-9 transition-transform active:scale-95"
               >
                 <Receipt className="mr-1.5 h-4 w-4 text-forest-700" />
                 <span>Table Bill &amp; Orders</span>
@@ -644,18 +668,27 @@ export function CustomerMenuView({
             {categories.map((cat) => {
               const hasItems = productsByCategory.has(cat.id);
               if (!hasItems) return null;
+              const isActive = activeCategoryId === cat.id;
               return (
                 <button
                   key={cat.id}
+                  id={`cat-pill-${cat.id}`}
                   onClick={() => scrollToCategory(cat.id)}
                   className={cn(
-                    "shrink-0 rounded-lg px-2.5 sm:px-3 py-1.5 text-xs font-semibold transition-all",
-                    activeCategoryId === cat.id
-                      ? "bg-forest-900 text-cream-50 shadow-sm"
-                      : "bg-cream-200/70 text-forest-900 hover:bg-cream-200"
+                    "relative shrink-0 rounded-lg px-2.5 sm:px-3 py-1.5 text-xs font-semibold transition-colors duration-200 z-10",
+                    isActive
+                      ? "text-cream-50"
+                      : "text-forest-900 bg-cream-200/60 hover:bg-cream-200 hover:text-forest-950"
                   )}
                 >
-                  {cat.name}
+                  {isActive && (
+                    <motion.span
+                      layoutId="activeCategoryIndicator"
+                      className="absolute inset-0 rounded-lg bg-forest-900 shadow-sm -z-10"
+                      transition={{ type: "spring", bounce: 0.15, duration: 0.35 }}
+                    />
+                  )}
+                  <span>{cat.name}</span>
                 </button>
               );
             })}
@@ -675,52 +708,77 @@ export function CustomerMenuView({
               </h2>
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {featuredProducts.slice(0, 4).map((product) => (
-                <div
-                  key={`feat-${product.id}`}
-                  onClick={() => product.available && openProductModal(product)}
-                  className={cn(
-                    "group cursor-pointer overflow-hidden rounded-2xl border border-cream-200 bg-white shadow-sm transition-all hover:shadow-md",
-                    !product.available && "opacity-60 cursor-not-allowed"
-                  )}
-                >
-                  <div className="relative h-36 w-full bg-cream-100 overflow-hidden">
-                    {product.image_url ? (
-                      <Image
-                        src={product.image_url}
-                        alt={product.name}
-                        fill
-                        unoptimized
-                        sizes="(max-width: 640px) 100vw, 320px"
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-forest-700/40">
-                        <UtensilsCrossed className="h-8 w-8" />
-                      </div>
+              {featuredProducts.slice(0, 4).map((product) => {
+                const inCartCount = cart
+                  .filter((i) => i.productId === product.id)
+                  .reduce((acc, i) => acc + i.quantity, 0);
+
+                return (
+                  <motion.div
+                    key={`feat-${product.id}`}
+                    whileHover={
+                      product.available
+                        ? { y: -4, transition: { type: "spring", stiffness: 300, damping: 20 } }
+                        : undefined
+                    }
+                    onClick={() => product.available && openProductModal(product)}
+                    className={cn(
+                      "group relative cursor-pointer overflow-hidden rounded-2xl border border-cream-200 bg-white shadow-sm transition-shadow hover:shadow-md",
+                      !product.available && "opacity-60 cursor-not-allowed"
                     )}
-                    {product.is_chef_special && (
-                      <span className="absolute left-2.5 top-2.5 rounded-full bg-spice-500 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow">
-                        Chef&apos;s Special
-                      </span>
-                    )}
-                  </div>
-                  <div className="p-3.5">
-                    <div className="flex items-start justify-between gap-2">
-                      <DietaryBadge type={product.dietary_type} />
-                      <span className="text-sm font-bold text-forest-950">
-                        {formatCurrency(product.base_price, currency)}
-                      </span>
+                  >
+                    <div className="relative h-36 w-full bg-cream-100 overflow-hidden">
+                      {product.image_url ? (
+                        <Image
+                          src={product.image_url}
+                          alt={product.name}
+                          fill
+                          unoptimized
+                          sizes="(max-width: 640px) 100vw, 320px"
+                          className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-forest-700/40">
+                          <UtensilsCrossed className="h-8 w-8" />
+                        </div>
+                      )}
+                      {product.is_chef_special && (
+                        <span className="absolute left-2.5 top-2.5 rounded-full bg-spice-500 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow">
+                          Chef&apos;s Special
+                        </span>
+                      )}
+                      <AnimatePresence>
+                        {inCartCount > 0 && (
+                          <motion.span
+                            key={`incart-feat-${product.id}-${inCartCount}`}
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0, opacity: 0 }}
+                            transition={{ type: "spring", stiffness: 450, damping: 22 }}
+                            className="absolute right-2.5 top-2.5 flex h-6 min-w-6 items-center justify-center rounded-full bg-burgundy-900 px-1.5 text-[11px] font-bold text-cream-50 shadow-md ring-2 ring-white"
+                          >
+                            {inCartCount}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
                     </div>
-                    <h3 className="mt-1.5 font-serif text-base font-bold text-forest-950 line-clamp-1">
-                      {product.name}
-                    </h3>
-                    <p className="mt-1 text-xs text-forest-700/80 line-clamp-2">
-                      {product.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                    <div className="p-3.5">
+                      <div className="flex items-start justify-between gap-2">
+                        <DietaryBadge type={product.dietary_type} />
+                        <span className="text-sm font-bold text-forest-950">
+                          {formatCurrency(product.base_price, currency)}
+                        </span>
+                      </div>
+                      <h3 className="mt-1.5 font-serif text-base font-bold text-forest-950 line-clamp-1 group-hover:text-burgundy-900 transition-colors">
+                        {product.name}
+                      </h3>
+                      <p className="mt-1 text-xs text-forest-700/80 line-clamp-2">
+                        {product.description}
+                      </p>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           </section>
         )}
@@ -757,13 +815,21 @@ export function CustomerMenuView({
                   const hasCustomizations =
                     (product.variants && product.variants.length > 0) ||
                     (product.option_groups && product.option_groups.length > 0);
+                  const inCartCount = cart
+                    .filter((i) => i.productId === product.id)
+                    .reduce((acc, i) => acc + i.quantity, 0);
 
                   return (
-                    <div
+                    <motion.div
                       key={product.id}
+                      whileHover={
+                        product.available
+                          ? { y: -2, transition: { duration: 0.2 } }
+                          : undefined
+                      }
                       onClick={() => product.available && openProductModal(product)}
                       className={cn(
-                        "flex gap-3 sm:gap-4 rounded-2xl border border-cream-200/90 bg-white p-3 sm:p-4 shadow-sm transition-all",
+                        "group relative flex gap-3 sm:gap-4 rounded-2xl border border-cream-200/90 bg-white p-3 sm:p-4 shadow-sm transition-all",
                         product.available
                           ? "cursor-pointer hover:border-forest-700/30 hover:shadow-md"
                           : "opacity-65 cursor-not-allowed"
@@ -784,7 +850,7 @@ export function CustomerMenuView({
                               </span>
                             )}
                           </div>
-                          <h3 className="mt-1 font-serif text-sm min-[380px]:text-base sm:text-lg font-bold text-forest-950 line-clamp-1 min-[420px]:line-clamp-2">
+                          <h3 className="mt-1 font-serif text-sm min-[380px]:text-base sm:text-lg font-bold text-forest-950 line-clamp-1 min-[420px]:line-clamp-2 group-hover:text-burgundy-900 transition-colors">
                             {product.name}
                           </h3>
                           {product.description && (
@@ -814,7 +880,7 @@ export function CustomerMenuView({
                               e.stopPropagation();
                               if (product.available) openProductModal(product);
                             }}
-                            className="h-8 px-2.5 sm:px-3 text-xs shrink-0 font-semibold"
+                            className="h-8 px-2.5 sm:px-3 text-xs shrink-0 font-semibold transition-transform active:scale-95"
                           >
                             {!product.available
                               ? "Unavailable"
@@ -833,15 +899,29 @@ export function CustomerMenuView({
                             fill
                             unoptimized
                             sizes="(max-width: 640px) 96px, 112px"
-                            className="object-cover"
+                            className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                           />
                         ) : (
                           <div className="flex h-full items-center justify-center text-forest-700/30">
                             <UtensilsCrossed className="h-6 w-6 sm:h-7 sm:w-7" />
                           </div>
                         )}
+                        <AnimatePresence>
+                          {inCartCount > 0 && (
+                            <motion.span
+                              key={`incart-${product.id}-${inCartCount}`}
+                              initial={{ scale: 0, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              exit={{ scale: 0, opacity: 0 }}
+                              transition={{ type: "spring", stiffness: 450, damping: 20 }}
+                              className="absolute top-1.5 right-1.5 flex h-5 min-w-5 sm:h-6 sm:min-w-6 items-center justify-center rounded-full bg-burgundy-900 px-1 text-[10px] sm:text-[11px] font-bold text-cream-50 shadow-md ring-2 ring-white"
+                            >
+                              {inCartCount}
+                            </motion.span>
+                          )}
+                        </AnimatePresence>
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>
@@ -862,37 +942,91 @@ export function CustomerMenuView({
         )}
       </main>
 
-      {/* Sticky Bottom Cart Bar */}
-      {cart.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-cream-200 bg-white/95 p-2.5 sm:p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-2xl backdrop-blur-md">
-          <div className="mx-auto flex max-w-5xl items-center justify-between gap-2.5 sm:gap-4 rounded-xl bg-forest-900 px-3.5 sm:px-4 py-2.5 sm:py-3 text-cream-50 shadow-lg">
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5 text-xs text-cream-200">
-                <ShoppingBag className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">
-                  {cartSummary.totalItemsCount}{" "}
-                  {cartSummary.totalItemsCount === 1 ? "item" : "items"}
-                  {tableContext ? ` • T-${tableContext.tableNumber}` : ""}
-                </span>
-              </div>
-              <div className="text-sm min-[380px]:text-base font-bold truncate">
-                {formatCurrency(cartSummary.total, currency)}{" "}
-                <span className="text-[10px] sm:text-[11px] font-normal text-cream-200/80">
-                  (incl. taxes)
-                </span>
-              </div>
-            </div>
-
-            <Button
-              variant="spice"
+      {/* Desktop Floating Cart Pill (lg screens) */}
+      <AnimatePresence>
+        {cart.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 25, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 25, scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 350, damping: 25 }}
+            className="hidden lg:flex fixed bottom-8 right-8 z-40 items-center pointer-events-auto"
+          >
+            <button
               onClick={() => setCartOpen(true)}
-              className="px-3.5 sm:px-5 text-xs sm:text-sm font-bold shrink-0 h-9 sm:h-10"
+              aria-label="View shopping cart and checkout"
+              className="group flex items-center gap-3.5 rounded-full bg-burgundy-900 text-cream-50 pl-4 pr-5 py-3 shadow-2xl hover:bg-burgundy-950 transition-all hover:scale-105 active:scale-95 border border-burgundy-700/50"
             >
-              View Cart &amp; Order
-            </Button>
-          </div>
-        </div>
-      )}
+              <div className="relative">
+                <ShoppingBag className="h-5 w-5 text-cream-100 group-hover:rotate-6 transition-transform" />
+                <motion.span
+                  key={cartSummary.totalItemsCount}
+                  initial={{ scale: 0.5 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                  className="absolute -top-2.5 -right-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-spice-500 text-[11px] font-extrabold text-white ring-2 ring-burgundy-900 shadow-sm"
+                >
+                  {cartSummary.totalItemsCount}
+                </motion.span>
+              </div>
+              <div className="flex flex-col text-left">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-cream-200">
+                  {tableContext ? `Table ${tableContext.tableNumber}` : "Your Cart"}
+                </span>
+                <span className="text-sm font-bold leading-tight">
+                  {formatCurrency(cartSummary.total, currency)}
+                </span>
+              </div>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Sticky Bottom Cart Bar (Mobile & Tablet) */}
+      <AnimatePresence>
+        {cart.length > 0 && (
+          <motion.div
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 350, damping: 30 }}
+            className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-cream-200 bg-white/95 p-2.5 sm:p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-2xl backdrop-blur-md"
+          >
+            <div className="mx-auto flex max-w-5xl items-center justify-between gap-2.5 sm:gap-4 rounded-xl bg-forest-900 px-3.5 sm:px-4 py-2.5 sm:py-3 text-cream-50 shadow-lg">
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 text-xs text-cream-200">
+                  <ShoppingBag className="h-3.5 w-3.5 shrink-0" />
+                  <motion.span
+                    key={cartSummary.totalItemsCount}
+                    initial={{ scale: 0.85 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 450, damping: 18 }}
+                    className="truncate"
+                  >
+                    {cartSummary.totalItemsCount}{" "}
+                    {cartSummary.totalItemsCount === 1 ? "item" : "items"}
+                    {tableContext ? ` • T-${tableContext.tableNumber}` : ""}
+                  </motion.span>
+                </div>
+                <div className="text-sm min-[380px]:text-base font-bold truncate">
+                  {formatCurrency(cartSummary.total, currency)}{" "}
+                  <span className="text-[10px] sm:text-[11px] font-normal text-cream-200/80">
+                    (incl. taxes)
+                  </span>
+                </div>
+              </div>
+
+              <Button
+                variant="spice"
+                onClick={() => setCartOpen(true)}
+                className="px-3.5 sm:px-5 text-xs sm:text-sm font-bold shrink-0 h-9 sm:h-10 transition-transform active:scale-95 shadow"
+              >
+                View Cart &amp; Order
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Product Customizer Modal */}
       <Dialog
@@ -1359,6 +1493,9 @@ export function CustomerMenuView({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Floating Back To Top Button */}
+      <BackToTopButton />
     </div>
   );
 }

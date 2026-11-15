@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BostonLogo } from "@/components/shared/boston-logo";
+import { motion } from "framer-motion";
 
 interface TrackedOrder {
   id: string;
@@ -213,86 +214,102 @@ export default function OrderTrackingPage({
         </div>
 
         {/* Status Hero Card */}
-        <Card className="border-cream-200 shadow-xl overflow-hidden">
-          <div className="bg-burgundy-950 px-4 py-4 sm:px-6 sm:py-5 text-cream-50 flex flex-wrap items-center justify-between gap-3 sm:gap-4 border-b border-burgundy-900">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <BostonLogo variant="light" size="sm" className="h-7 sm:h-9 w-auto" />
-              <div>
-                <div className="text-[10px] sm:text-xs uppercase tracking-wider text-cream-200/80">
-                  {order.restaurant_name} • Table {order.table_number ?? "Dining"}
-                </div>
-                <h1 className="mt-0.5 font-serif text-xl sm:text-2xl font-bold">
-                  Order #{order.order_number}
-                </h1>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <Badge
-                variant={isCancelled ? "destructive" : "spice"}
-                className="uppercase tracking-wider text-[10px] sm:text-xs px-2.5 sm:px-3 py-0.5 sm:py-1"
-              >
-                {order.status}
-              </Badge>
-              <Badge
-                variant={order.payment_status === "paid" ? "veg" : "secondary"}
-                className="uppercase text-[10px] sm:text-xs"
-              >
-                {order.payment_status}
-              </Badge>
-            </div>
-          </div>
-
-          <CardContent className="p-3.5 sm:p-6">
-            {isCancelled ? (
-              <div className="flex items-center gap-3 rounded-xl border border-tomato-200 bg-tomato-50 p-4 text-tomato-900">
-                <XCircle className="h-6 w-6 shrink-0 text-tomato-600" />
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: "easeOut" }}
+        >
+          <Card className="border-cream-200 shadow-xl overflow-hidden">
+            <div className="bg-burgundy-950 px-4 py-4 sm:px-6 sm:py-5 text-cream-50 flex flex-wrap items-center justify-between gap-3 sm:gap-4 border-b border-burgundy-900">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <BostonLogo variant="light" size="sm" className="h-7 sm:h-9 w-auto" />
                 <div>
-                  <div className="font-bold text-sm">Order Cancelled</div>
-                  <div className="text-xs mt-0.5">
-                    Please speak with our restaurant staff for details or refunds.
+                  <div className="text-[10px] sm:text-xs uppercase tracking-wider text-cream-200/80">
+                    {order.restaurant_name} • Table {order.table_number ?? "Dining"}
+                  </div>
+                  <h1 className="mt-0.5 font-serif text-xl sm:text-2xl font-bold">
+                    Order #{order.order_number}
+                  </h1>
+                </div>
+              </div>
+
+              <motion.div
+                initial={{ scale: 0.85, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                className="flex items-center gap-1.5 sm:gap-2"
+              >
+                <Badge
+                  variant={isCancelled ? "destructive" : "spice"}
+                  className="uppercase tracking-wider text-[10px] sm:text-xs px-2.5 sm:px-3 py-0.5 sm:py-1"
+                >
+                  {order.status}
+                </Badge>
+                <Badge
+                  variant={order.payment_status === "paid" ? "veg" : "secondary"}
+                  className="uppercase text-[10px] sm:text-xs"
+                >
+                  {order.payment_status}
+                </Badge>
+              </motion.div>
+            </div>
+
+            <CardContent className="p-3.5 sm:p-6">
+              {isCancelled ? (
+                <div className="flex items-center gap-3 rounded-xl border border-tomato-200 bg-tomato-50 p-4 text-tomato-900">
+                  <XCircle className="h-6 w-6 shrink-0 text-tomato-600" />
+                  <div>
+                    <div className="font-bold text-sm">Order Cancelled</div>
+                    <div className="text-xs mt-0.5">
+                      Please speak with our restaurant staff for details or refunds.
+                    </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="grid grid-cols-5 gap-1 sm:gap-2">
-                  {TRACKING_STEPS.map((step, idx) => {
-                    const reached = idx <= activeStepIdx;
-                    const current = idx === activeStepIdx;
-                    return (
-                      <div key={step.key} className="flex flex-col items-center text-center">
-                        <div
-                          className={`flex h-7 w-7 min-[380px]:h-8 min-[380px]:w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border-2 transition-all ${
-                            reached
-                              ? "border-forest-700 bg-forest-700 text-white"
-                              : "border-cream-300 bg-white text-cream-400"
-                          } ${current ? "ring-2 sm:ring-4 ring-forest-100" : ""}`}
-                        >
-                          {idx === 0 && <Receipt className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-                          {idx === 1 && <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-                          {idx === 2 && <ChefHat className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-                          {idx === 3 && <PackageCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-                          {idx === 4 && <UtensilsCrossed className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+              ) : (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-5 gap-1 sm:gap-2">
+                    {TRACKING_STEPS.map((step, idx) => {
+                      const reached = idx <= activeStepIdx;
+                      const current = idx === activeStepIdx;
+                      return (
+                        <div key={step.key} className="flex flex-col items-center text-center">
+                          <div className="relative flex items-center justify-center">
+                            {current && (
+                              <span className="absolute -inset-1 sm:-inset-1.5 rounded-full bg-forest-600/30 animate-ping pointer-events-none" />
+                            )}
+                            <div
+                              className={`relative flex h-7 w-7 min-[380px]:h-8 min-[380px]:w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border-2 transition-all ${
+                                reached
+                                  ? "border-forest-700 bg-forest-700 text-white"
+                                  : "border-cream-300 bg-white text-cream-400"
+                              } ${current ? "ring-2 sm:ring-4 ring-forest-200" : ""}`}
+                            >
+                              {idx === 0 && <Receipt className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                              {idx === 1 && <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                              {idx === 2 && <ChefHat className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                              {idx === 3 && <PackageCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                              {idx === 4 && <UtensilsCrossed className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
+                            </div>
+                          </div>
+                          <span
+                            className={`mt-1.5 text-[9px] min-[380px]:text-[10px] sm:text-[11px] font-bold leading-tight ${
+                              reached ? "text-forest-950" : "text-forest-700/50"
+                            }`}
+                          >
+                            {step.label}
+                          </span>
+                          <span className="hidden text-[10px] text-forest-700/70 sm:block">
+                            {step.description}
+                          </span>
                         </div>
-                        <span
-                          className={`mt-1.5 text-[9px] min-[380px]:text-[10px] sm:text-[11px] font-bold leading-tight ${
-                            reached ? "text-forest-950" : "text-forest-700/50"
-                          }`}
-                        >
-                          {step.label}
-                        </span>
-                        <span className="hidden text-[10px] text-forest-700/70 sm:block">
-                          {step.description}
-                        </span>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Itemized Receipt Snapshot */}
         <Card className="border-cream-200 shadow-sm">
